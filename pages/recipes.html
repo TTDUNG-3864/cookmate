@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tất cả Công thức | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/reset.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header" id="siteHeader"></header>
+
+  <main>
+    <section class="section" aria-labelledby="allRecipesHeading">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1 class="page-title" id="allRecipesHeading">
+              <i class="fa-solid fa-book-open" aria-hidden="true"></i>
+              Tất cả Công thức nấu ăn
+            </h1>
+            <p class="page-subtitle">Tổng cộng <strong id="recipeCount">0</strong> công thức</p>
+          </div>
+        </div>
+
+        <!-- Sort Bar -->
+        <div class="sort-bar" role="toolbar" aria-label="Sắp xếp công thức">
+          <span class="sort-label"><i class="fa-solid fa-arrow-down-wide-short" aria-hidden="true"></i> Sắp xếp:</span>
+          <button class="sort-btn active" data-sort="newest" onclick="sortRecipes('newest')" aria-pressed="true">
+            <i class="fa-regular fa-clock" aria-hidden="true"></i> Mới nhất
+          </button>
+          <button class="sort-btn" data-sort="popular" onclick="sortRecipes('popular')" aria-pressed="false">
+            <i class="fa-solid fa-fire" aria-hidden="true"></i> Phổ biến nhất
+          </button>
+          <button class="sort-btn" data-sort="rating" onclick="sortRecipes('rating')" aria-pressed="false">
+            <i class="fa-solid fa-star" aria-hidden="true"></i> Đánh giá cao
+          </button>
+        </div>
+
+        <!-- Recipe Grid -->
+        <div class="recipe-grid" id="allRecipeGrid" role="list" aria-label="Danh sách công thức">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Pagination -->
+        <nav class="pagination" id="recipePagination" role="navigation" aria-label="Phân trang">
+          <!-- Populated by JS -->
+        </nav>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="siteFooter"></footer>
+
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/data/categories.js"></script>
+  <script src="../assets/js/data/ingredients.js"></script>
+  <script src="../assets/js/data/users.js"></script>
+  <script src="../assets/js/data/recipes.js"></script>
+  <script src="../assets/js/storage.js"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/navigation.js"></script>
+  <script src="../assets/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var ITEMS_PER_PAGE = 9;
+      var currentPage = 1;
+      var currentSort = 'newest';
+
+      function renderRecipes() {
+        var grid = document.getElementById('allRecipeGrid');
+        var pagination = document.getElementById('recipePagination');
+        var countEl = document.getElementById('recipeCount');
+        if (!grid) return;
+
+        var recipes = CookMateStorage.getAllRecipes();
+
+        // Sort
+        if (currentSort === 'newest') {
+          recipes.sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+        } else if (currentSort === 'popular') {
+          recipes.sort(function(a, b) { return (b.views || 0) - (a.views || 0); });
+        } else if (currentSort === 'rating') {
+          recipes.sort(function(a, b) { return (b.rating || 0) - (a.rating || 0); });
+        }
+
+        if (countEl) countEl.textContent = recipes.length;
+
+        var totalPages = Math.ceil(recipes.length / ITEMS_PER_PAGE);
+        var start = (currentPage - 1) * ITEMS_PER_PAGE;
+        var pageRecipes = recipes.slice(start, start + ITEMS_PER_PAGE);
+
+        grid.innerHTML = pageRecipes.length > 0
+          ? pageRecipes.map(function(r) { return CookMateUI.createRecipeCard(r); }).join('')
+          : CookMateUI.createEmptyState('fa-book-open', 'Chưa có công thức nào', 'Hãy quay lại sau');
+
+        if (pagination) {
+          pagination.innerHTML = CookMateUI.createPagination(currentPage, totalPages, 'goToPage');
+        }
+      }
+
+      window.goToPage = function(page) {
+        currentPage = page;
+        renderRecipes();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      window.sortRecipes = function(sort) {
+        currentSort = sort;
+        currentPage = 1;
+        document.querySelectorAll('.sort-btn').forEach(function(b) {
+          b.classList.remove('active');
+          b.setAttribute('aria-pressed', 'false');
+        });
+        var activeBtn = document.querySelector('[data-sort="' + sort + '"]');
+        if (activeBtn) {
+          activeBtn.classList.add('active');
+          activeBtn.setAttribute('aria-pressed', 'true');
+        }
+        renderRecipes();
+      };
+
+      renderRecipes();
+    });
+  </script>
+</body>
+</html>

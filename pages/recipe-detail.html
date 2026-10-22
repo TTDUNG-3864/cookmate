@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi tiết công thức | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/reset.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header" id="siteHeader"></header>
+
+  <main class="recipe-detail-page">
+    <div class="container">
+      
+      <!-- Top Action Bar -->
+      <div class="detail-topbar">
+        <a href="recipes.html" class="btn btn-secondary btn-sm" id="backToListBtn">
+          <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+        </a>
+        <div class="detail-topbar-actions">
+          <button class="btn btn-ghost btn-sm" id="kitchenModeBtn" onclick="toggleKitchenMode()" title="Bật chữ lớn dễ nhìn khi đang đứng nấu ăn">
+            <i class="fa-solid fa-mobile-screen-button"></i> <span>Chế độ Đứng bếp</span>
+          </button>
+          <button class="btn btn-primary btn-sm btn-favorite-toggle" id="detailFavBtn" onclick="toggleDetailFavorite()">
+            <i class="fa-regular fa-heart"></i> <span>Yêu thích</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Detail Container (Populated by JS) -->
+      <div id="recipeDetailContainer">
+        <!-- Spinner placeholder -->
+        <div class="text-center py-12">
+          <div class="spinner"></div>
+          <p class="mt-4 text-secondary">Đang tải công thức...</p>
+        </div>
+      </div>
+
+      <!-- Related Recipes Section -->
+      <section class="section related-section" id="relatedSection" style="display:none;">
+        <div class="section-header">
+          <h2 class="section-title">
+            <i class="fa-solid fa-utensils text-primary"></i>
+            Có thể bạn cũng thích
+          </h2>
+        </div>
+        <div class="recipe-grid" id="relatedGrid"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="site-footer" id="siteFooter"></footer>
+
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/data/categories.js"></script>
+  <script src="../assets/js/data/ingredients.js"></script>
+  <script src="../assets/js/data/users.js"></script>
+  <script src="../assets/js/data/recipes.js"></script>
+  <script src="../assets/js/storage.js"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/navigation.js"></script>
+  <script src="../assets/js/app.js"></script>
+
+  <script>
+    var currentRecipe = null;
+    var currentServings = 4;
+    var baseServings = 4;
+    var isKitchenMode = false;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var recipeId = parseInt(getQueryParam('id'), 10);
+      if (!recipeId) {
+        showNotFound();
+        return;
+      }
+
+      var allRecipes = CookMateStorage.getAllRecipes();
+      currentRecipe = allRecipes.find(function(r) { return r.id === recipeId; });
+
+      if (!currentRecipe) {
+        showNotFound();
+        return;
+      }
+
+      // Update page title
+      document.title = currentRecipe.title + ' | CookMate';
+
+      baseServings = currentRecipe.servings || 4;
+      currentServings = baseServings;
+
+      renderRecipeDetail();
+      renderRelatedRecipes();
+      updateFavoriteButtonState();
+    });
+
+    function showNotFound() {
+      var container = document.getElementById('recipeDetailContainer');
+      container.innerHTML = CookMateUI.createEmptyState(
+        'fa-circle-exclamation',
+        'Không tìm thấy công thức',
+        'Công thức bạn tìm kiếm không tồn tại hoặc đã bị xóa.',
+        '<a href="recipes.html" class="btn btn-primary mt-4">Khám phá công thức khác</a>'
+      );
+    }
+
+    function renderRecipeDetail() {
+      var container = document.getElementById('recipeDetailContainer');
+      var r = currentRecipe;
+
+      var category = CATEGORIES.find(function(c) { return c.id === r.categoryId; });
+      var author = CookMateStorage.getAllUsers().find(function(u) { return u.id === r.authorId; });
+      var totalTime = (r.prepTime || 0) + (r.cookTime || 0);
+
+      var html = `
+        <!-- 1. HERO / INTRO SECTION: 2 Cột Cân Đối -->
+        <article class="detail-hero-card">
+          <!-- Cột trái: Ảnh đại diện lớn sắc nét bo góc mềm mại -->
+          <div class="detail-hero-media">
+            <img src="${r.image}" alt="${escapeHtml(r.title)}" onerror="handleImageError(this)">
+            <div class="detail-hero-badges">
+              ${r.isFeatured ? '<span class="badge badge-primary"><i class="fa-solid fa-fire"></i> Nổi bật</span>' : ''}
+              ${r.isNew ? '<span class="badge badge-success"><i class="fa-solid fa-sparkles"></i> Mới</span>' : ''}
+            </div>
+          </div>
+
+          <!-- Cột phải: Thông tin món ăn -->
+          <div class="detail-hero-info">
+            <!-- Badges -->
+            <div class="detail-meta-tags">
+              ${category ? `<span class="badge badge-primary"><i class="fa-solid ${category.icon || 'fa-tag'}"></i> ${escapeHtml(category.name)}</span>` : ''}
+              ${r.occasion ? `<span class="badge badge-warning"><i class="fa-solid fa-calendar-check"></i> ${escapeHtml(r.occasion)}</span>` : ''}
+              ${r.difficulty ? `<span class="badge badge-info"><i class="fa-solid fa-signal"></i> ${escapeHtml(r.difficulty)}</span>` : ''}
+            </div>
+
+            <!-- Tên món ăn -->
+            <h1 class="detail-title">${escapeHtml(r.title)}</h1>
+
+            <!-- Mô tả ngắn -->
+            <p class="detail-desc">${escapeHtml(r.description || '')}</p>
+
+            <!-- Dòng sao đánh giá nằm ngay dưới mô tả ngắn (Vấn đề A & B) -->
+            <div class="detail-rating-line">
+              <span class="rating-stars-wrap">${renderStars(r.rating || 4.8)}</span>
+              <span class="rating-score-group">
+                <strong class="rating-score">${Number(r.rating || 4.8).toFixed(1)}</strong>
+                <span class="rating-max">/5</span>
+              </span>
+              <span class="rating-dot">•</span>
+              <span class="rating-count"><i class="fa-regular fa-eye"></i> ${formatNumber(r.views || 0)} lượt xem</span>
+              <span class="rating-dot">•</span>
+              <span class="detail-author"><i class="fa-solid fa-user-pen"></i> ${author ? escapeHtml(author.name) : 'Đầu bếp CookMate'}</span>
+            </div>
+
+            <!-- Lưới thẻ thông tin nhanh 6 ô -->
+            <div class="detail-meta-grid">
+              <div class="meta-card">
+                <i class="fa-solid fa-kitchen-set"></i>
+                <div class="meta-content">
+                  <span class="meta-label">Chuẩn bị</span>
+                  <span class="meta-val">${r.prepTime || 0} phút</span>
+                </div>
+              </div>
+              <div class="meta-card">
+                <i class="fa-solid fa-fire"></i>
+                <div class="meta-content">
+                  <span class="meta-label">Nấu nướng</span>
+                  <span class="meta-val">${r.cookTime || 0} phút</span>
+                </div>
+              </div>
+              <div class="meta-card">
+                <i class="fa-regular fa-clock"></i>
+                <div class="meta-content">
+                  <span class="meta-label">Tổng thời gian</span>
+                  <span class="meta-val">${totalTime} phút</span>
+                </div>
+              </div>
+              <div class="meta-card">
+                <i class="fa-solid fa-signal"></i>
+                <div class="meta-content">
+                  <span class="meta-label">Độ khó</span>
+                  <span class="meta-val">${escapeHtml(r.difficulty || 'Dễ')}</span>
+                </div>
+              </div>
+              <div class="meta-card">
+                <i class="fa-solid fa-users"></i>
+                <div class="meta-content">
+                  <span class="meta-label">Khẩu phần gốc</span>
+                  <span class="meta-val">${baseServings} người</span>
+                </div>
+              </div>
+              <div class="meta-card">
+                <i class="fa-solid fa-award"></i>
+                <div class="meta-content">
+                  <span class="meta-label">Đánh giá</span>
+                  <span class="meta-val">${Number(r.rating || 4.8).toFixed(1)} / 5</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hàng nút hành động nhanh trên hero -->
+            <div class="detail-hero-actions">
+              <button class="btn btn-primary btn-sm btn-favorite-toggle" id="heroFavBtn" onclick="toggleDetailFavorite()">
+                <i class="fa-regular fa-heart"></i> <span>Yêu thích</span>
+              </button>
+              <button class="btn btn-ghost btn-sm" id="heroKitchenBtn" onclick="toggleKitchenMode()" title="Bật chữ lớn dễ nhìn khi đang đứng nấu ăn">
+                <i class="fa-solid fa-mobile-screen-button"></i> <span>Chế độ Đứng bếp</span>
+              </button>
+              <button class="btn btn-ghost btn-sm" onclick="shareRecipe()" title="Sao chép liên kết công thức">
+                <i class="fa-solid fa-share-nodes"></i> <span>Chia sẻ</span>
+              </button>
+            </div>
+          </div>
+        </article>
+
+        <!-- 2. MIDDLE GRID: Nguyên liệu (Cột trái) & Dinh dưỡng (Cột phải) -->
+        <div class="detail-middle-grid">
+          <!-- Cột trái: Card Nguyên liệu chế biến -->
+          <section class="recipe-ingredients-card">
+            <div class="card-header-flex">
+              <div class="card-header-title">
+                <h3>
+                  <i class="fa-solid fa-basket-shopping text-primary"></i> Nguyên liệu chế biến
+                </h3>
+                <span class="card-subtitle">Gốc dành cho <strong>${baseServings} người</strong></span>
+              </div>
+
+              <!-- Bộ điều khiển co giãn khẩu phần -->
+              <div class="servings-control" role="group" aria-label="Điều chỉnh khẩu phần ăn">
+                <span class="servings-control-label">Khẩu phần:</span>
+                <div class="servings-stepper">
+                  <button type="button" class="stepper-btn" onclick="adjustServings(-1)" title="Giảm 1 người" aria-label="Giảm khẩu phần">
+                    <i class="fa-solid fa-minus"></i>
+                  </button>
+                  <span class="servings-number" id="servingsDisplay">${currentServings}</span>
+                  <button type="button" class="stepper-btn" onclick="adjustServings(1)" title="Tăng 1 người" aria-label="Tăng khẩu phần">
+                    <i class="fa-solid fa-plus"></i>
+                  </button>
+                </div>
+                <span class="servings-unit">người</span>
+              </div>
+            </div>
+
+            <!-- Danh sách nguyên liệu co giãn tự động -->
+            <div class="ingredients-list" id="ingredientsList">
+              ${renderIngredientsHTML()}
+            </div>
+          </section>
+
+          <!-- Cột phải: Card Ước tính dinh dưỡng -->
+          <section class="recipe-nutrition-card">
+            <div class="card-header-flex">
+              <div class="card-header-title">
+                <h3>
+                  <i class="fa-solid fa-heart-pulse text-success"></i> Ước tính dinh dưỡng
+                </h3>
+                <span class="card-subtitle">Giá trị trung bình trên <strong>1 khẩu phần ăn</strong></span>
+              </div>
+            </div>
+
+            <!-- Calo nổi bật -->
+            <div class="nutrition-calories-box">
+              <div class="calories-box-inner">
+                <i class="fa-solid fa-fire-flame-curved calories-icon"></i>
+                <span class="calories-num">${r.nutrition ? r.nutrition.calories : 0}</span>
+                <span class="calories-unit">kcal / khẩu phần</span>
+              </div>
+            </div>
+
+            <!-- 4 Chỉ số dinh dưỡng chính -->
+            <div class="nutrition-macro-grid">
+              <div class="macro-item">
+                <span class="macro-name">Chất đạm (Protein)</span>
+                <span class="macro-val">${r.nutrition ? r.nutrition.protein : 0}g</span>
+              </div>
+              <div class="macro-item">
+                <span class="macro-name">Chất béo (Fat)</span>
+                <span class="macro-val">${r.nutrition ? r.nutrition.fat : 0}g</span>
+              </div>
+              <div class="macro-item">
+                <span class="macro-name">Tinh bột (Carbs)</span>
+                <span class="macro-val">${r.nutrition ? r.nutrition.carbs : 0}g</span>
+              </div>
+              <div class="macro-item">
+                <span class="macro-name">Chất xơ (Fiber)</span>
+                <span class="macro-val">${r.nutrition ? r.nutrition.fiber : 0}g</span>
+              </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="nutrition-disclaimer">
+              <i class="fa-solid fa-circle-info"></i>
+              <span>Số liệu dinh dưỡng chỉ mang tính chất tham khảo dựa trên nguyên liệu chuẩn, không thay thế cho tư vấn y khoa chuyên nghiệp.</span>
+            </div>
+          </section>
+        </div>
+
+        <!-- 3. CÁC BƯỚC CHẾ BIẾN (Timeline trực quan) -->
+        <section class="detail-steps-card">
+          <div class="card-header-flex">
+            <div class="card-header-title">
+              <h3>
+                <i class="fa-solid fa-list-ol text-primary"></i> Các bước chế biến chi tiết
+              </h3>
+              <span class="card-subtitle">Thực hiện tuần tự theo ${(r.steps || []).length} bước sau đây</span>
+            </div>
+          </div>
+
+          <div class="steps-timeline">
+            ${(r.steps || []).map(function(s, idx) {
+              return `
+                <div class="step-timeline-item">
+                  <div class="step-badge">${s.step || (idx + 1)}</div>
+                  <div class="step-content">
+                    <h4 class="step-title">Bước ${s.step || (idx + 1)}</h4>
+                    <p class="step-text">${escapeHtml(s.description)}</p>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </section>
+
+        <!-- 4. BÌNH LUẬN & HỎI ĐÁP -->
+        <section class="detail-comments-card" id="commentsSection">
+          <div class="card-header-flex">
+            <div class="card-header-title">
+              <h3>
+                <i class="fa-solid fa-comments text-primary"></i> Bình luận & Hỏi đáp (<span id="commentCount">0</span>)
+              </h3>
+              <span class="card-subtitle">Chia sẻ trải nghiệm hoặc đặt câu hỏi về món ăn này</span>
+            </div>
+          </div>
+
+          <!-- Form gửi bình luận / Nhắc đăng nhập -->
+          <div class="comment-form-wrapper" id="commentFormWrapper">
+            <!-- Rendered by JS based on login state -->
+          </div>
+
+          <!-- Danh sách bình luận -->
+          <div class="comments-list" id="commentsList">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+      `;
+
+      container.innerHTML = html;
+      renderComments();
+      renderCommentForm();
+      updateFavoriteButtonState();
+    }
+
+    // Co giãn khẩu phần tự động
+    function adjustServings(delta) {
+      var next = currentServings + delta;
+      if (next < 1) {
+        CookMateUI.showToast('Khẩu phần tối thiểu là 1 người', 'warning');
+        return;
+      }
+      currentServings = next;
+      var display = document.getElementById('servingsDisplay');
+      if (display) display.textContent = currentServings;
+
+      var list = document.getElementById('ingredientsList');
+      if (list) list.innerHTML = renderIngredientsHTML();
+
+      CookMateUI.showToast('Đã tính lại nguyên liệu cho ' + currentServings + ' người', 'info', 1500);
+    }
+
+    function renderIngredientsHTML() {
+      if (!currentRecipe || !currentRecipe.ingredients) return '<p class="text-secondary" style="padding: 1rem; text-align: center;">Chưa có thông tin nguyên liệu</p>';
+      
+      var ratio = currentServings / baseServings;
+
+      return currentRecipe.ingredients.map(function(ing) {
+        var scaledAmount = ing.amount ? roundSmart(ing.amount * ratio) : null;
+        var displayAmount = scaledAmount !== null ? formatFraction(scaledAmount) : '';
+
+        return `
+          <div class="ingredient-row">
+            <span class="ingredient-name">
+              <i class="fa-solid fa-circle-check"></i> ${escapeHtml(ing.name)}
+            </span>
+            <span class="ingredient-qty">
+              <strong>${displayAmount}</strong> ${escapeHtml(ing.unit || '')}
+            </span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Chế độ đứng bếp (Kitchen Mode)
+    function toggleKitchenMode() {
+      isKitchenMode = !isKitchenMode;
+      document.body.classList.toggle('kitchen-mode-active', isKitchenMode);
+      var btns = [document.getElementById('kitchenModeBtn'), document.getElementById('heroKitchenBtn')];
+      btns.forEach(function(btn) {
+        if (!btn) return;
+        if (isKitchenMode) {
+          btn.classList.remove('btn-ghost');
+          btn.classList.add('btn-success');
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Đang bật Chế độ Đứng bếp</span>';
+        } else {
+          btn.classList.add('btn-ghost');
+          btn.classList.remove('btn-success');
+          btn.innerHTML = '<i class="fa-solid fa-mobile-screen-button"></i> <span>Chế độ Đứng bếp</span>';
+        }
+      });
+      if (isKitchenMode) {
+        CookMateUI.showToast('Đã bật Chế độ Đứng bếp (Chữ to, dễ đọc khi nấu ăn)', 'success');
+      }
+    }
+
+    // Quản lý Yêu thích trên trang chi tiết
+    function toggleDetailFavorite() {
+      if (!CookMateStorage.isLoggedIn()) {
+        CookMateUI.showToast('Vui lòng đăng nhập để lưu công thức yêu thích', 'warning');
+        return;
+      }
+      var added = CookMateStorage.toggleFavorite(currentRecipe.id);
+      updateFavoriteButtonState();
+      updateFavoriteBadge();
+
+      if (added) {
+        CookMateUI.showToast('Đã thêm "' + currentRecipe.title + '" vào danh sách yêu thích', 'success');
+      } else {
+        CookMateUI.showToast('Đã xóa khỏi danh sách yêu thích', 'info');
+      }
+    }
+
+    function updateFavoriteButtonState() {
+      if (!currentRecipe) return;
+      var isFav = CookMateStorage.isFavorite(currentRecipe.id);
+      var btns = [document.getElementById('detailFavBtn'), document.getElementById('heroFavBtn')];
+      btns.forEach(function(btn) {
+        if (!btn) return;
+        var icon = btn.querySelector('i');
+        var text = btn.querySelector('span');
+
+        if (isFav) {
+          btn.classList.remove('btn-primary');
+          btn.classList.add('btn-danger');
+          if (icon) icon.className = 'fa-solid fa-heart';
+          if (text) text.textContent = 'Đã yêu thích';
+        } else {
+          btn.classList.add('btn-primary');
+          btn.classList.remove('btn-danger');
+          if (icon) icon.className = 'fa-regular fa-heart';
+          if (text) text.textContent = 'Yêu thích';
+        }
+      });
+    }
+
+    function shareRecipe() {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(window.location.href).then(function() {
+          CookMateUI.showToast('Đã sao chép liên kết công thức vào bộ nhớ tạm', 'success');
+        }).catch(function() {
+          CookMateUI.showToast('Liên kết công thức: ' + window.location.href, 'info');
+        });
+      } else {
+        CookMateUI.showToast('Liên kết công thức: ' + window.location.href, 'info');
+      }
+    }
+
+    // Bình luận (UC14)
+    function renderCommentForm() {
+      var wrapper = document.getElementById('commentFormWrapper');
+      if (!wrapper) return;
+
+      var user = CookMateStorage.getCurrentUser();
+      if (!user) {
+        wrapper.innerHTML = `
+          <div class="comment-auth-alert">
+            <div class="comment-auth-alert__left">
+              <i class="fa-solid fa-circle-info"></i>
+              <span>Hãy đăng nhập để gửi câu hỏi hoặc chia sẻ trải nghiệm nấu món này.</span>
+            </div>
+            <a href="auth/login.html" class="btn btn-primary btn-sm">
+              <i class="fa-solid fa-right-to-bracket"></i> Đăng nhập ngay
+            </a>
+          </div>
+        `;
+      } else {
+        wrapper.innerHTML = `
+          <form class="comment-form" id="commentForm" onsubmit="handleCommentSubmit(event)">
+            <div class="comment-form-user">
+              <div class="comment-avatar">${user.name.charAt(0).toUpperCase()}</div>
+              <div>
+                <strong>${escapeHtml(user.name)}</strong>
+                <span class="text-xs text-secondary" style="display: block;">Chia sẻ cảm nhận về món ăn</span>
+              </div>
+            </div>
+            <div class="form-group" style="margin-top: 12px;">
+              <textarea id="commentInput" class="form-textarea" rows="3" placeholder="Món này bạn nấu thế nào? Hãy chia sẻ bí quyết hoặc đặt câu hỏi nhé..." required></textarea>
+            </div>
+            <div style="text-align: right; margin-top: 10px;">
+              <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-paper-plane"></i> Gửi bình luận
+              </button>
+            </div>
+          </form>
+        `;
+      }
+    }
+
+    function renderComments() {
+      var list = document.getElementById('commentsList');
+      var countEl = document.getElementById('commentCount');
+      if (!list || !currentRecipe) return;
+
+      var staticComments = (currentRecipe.comments || []).map(function(c) {
+        return Object.assign({}, c, { recipeId: currentRecipe.id, isStatic: true });
+      });
+      var userComments = CookMateStorage.getCommentsForRecipe(currentRecipe.id);
+      var all = staticComments.concat(userComments);
+
+      if (countEl) countEl.textContent = all.length;
+
+      if (all.length === 0) {
+        list.innerHTML = '<p class="text-secondary text-center py-6">Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ cảm nhận nhé!</p>';
+        return;
+      }
+
+      var currentUser = CookMateStorage.getCurrentUser();
+
+      list.innerHTML = all.map(function(c) {
+        var isOwner = currentUser && (currentUser.id === c.userId || currentUser.role === 'admin');
+        var dateFormatted = timeAgo(c.createdAt);
+
+        return `
+          <div class="comment-item" id="comment-${c.id}">
+            <div class="comment-avatar">${(c.userName || 'U').charAt(0).toUpperCase()}</div>
+            <div class="comment-content">
+              <div class="comment-meta">
+                <span class="comment-author">${escapeHtml(c.userName || 'Người dùng')}</span>
+                <span class="comment-date"><i class="fa-regular fa-clock"></i> ${dateFormatted}</span>
+                ${isOwner && !c.isStatic ? `
+                  <button class="btn-link text-danger text-xs ml-auto" onclick="deleteUserComment(${c.id})" title="Xóa bình luận">
+                    <i class="fa-solid fa-trash"></i> Xóa
+                  </button>
+                ` : ''}
+              </div>
+              <p class="comment-text">${escapeHtml(c.content)}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleCommentSubmit(e) {
+      e.preventDefault();
+      var input = document.getElementById('commentInput');
+      if (!input) return;
+      var content = input.value.trim();
+      if (!content) {
+        CookMateUI.showToast('Vui lòng nhập nội dung bình luận', 'warning');
+        return;
+      }
+
+      var newComment = CookMateStorage.addComment(currentRecipe.id, content);
+      if (newComment) {
+        input.value = '';
+        CookMateUI.showToast('Gửi bình luận thành công!', 'success');
+        renderComments();
+      } else {
+        CookMateUI.showToast('Có lỗi xảy ra khi gửi bình luận', 'error');
+      }
+    }
+
+    function deleteUserComment(id) {
+      CookMateUI.showConfirm('Bạn có chắc muốn xóa bình luận này?', function() {
+        CookMateStorage.deleteComment(id);
+        CookMateUI.showToast('Đã xóa bình luận', 'info');
+        renderComments();
+      });
+    }
+
+    // Công thức liên quan (Cùng danh mục)
+    function renderRelatedRecipes() {
+      var grid = document.getElementById('relatedGrid');
+      var section = document.getElementById('relatedSection');
+      if (!grid || !currentRecipe) return;
+
+      var all = CookMateStorage.getAllRecipes();
+      var related = all.filter(function(r) {
+        return r.categoryId === currentRecipe.categoryId && r.id !== currentRecipe.id;
+      }).slice(0, 3);
+
+      if (related.length === 0) {
+        // Fallback: Lấy 3 món khác bất kỳ
+        related = all.filter(function(r) { return r.id !== currentRecipe.id; }).slice(0, 3);
+      }
+
+      if (related.length > 0) {
+        section.style.display = 'block';
+        grid.innerHTML = related.map(function(r) {
+          return CookMateUI.createRecipeCard(r);
+        }).join('');
+      }
+    }
+  </script>
+</body>
+</html>

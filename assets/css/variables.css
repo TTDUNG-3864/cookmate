@@ -1,0 +1,119 @@
+/* ============================================
+   CookMate Design Tokens
+   CSS Custom Properties / Variables
+   ============================================ */
+
+:root {
+  /* ---- Colors ---- */
+  --primary: #E85D2A;
+  --primary-light: #FF7A45;
+  --primary-dark: #C74E22;
+  --primary-rgb: 232, 93, 42;
+
+  --secondary: #2E7D4F;
+  --secondary-light: #3A9D63;
+  --secondary-dark: #246841;
+  --secondary-rgb: 46, 125, 79;
+
+  --bg: #FFF9F2;
+  --bg-white: #FFFFFF;
+  --bg-dark: #292524;
+
+  --text: #292524;
+  --text-secondary: #78716C;
+  --text-light: #A8A29E;
+  --text-inverse: #FFFFFF;
+
+  --border: #E7E5E4;
+  --border-light: #F5F5F4;
+
+  --success: #16A34A;
+  --success-light: #DCFCE7;
+  --error: #DC2626;
+  --error-light: #FEE2E2;
+  --warning: #F59E0B;
+  --warning-light: #FEF3C7;
+  --info: #3B82F6;
+  --info-light: #DBEAFE;
+
+  /* ---- Rating Colors ---- */
+  --color-rating: #F59E0B;
+  --color-rating-empty: #D6D3D1;
+
+  /* ---- Shadows ---- */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+
+  /* ---- Border Radius ---- */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* ---- Spacing Scale ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 28px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-10: 40px;
+  --space-11: 44px;
+  --space-12: 48px;
+  --space-13: 52px;
+  --space-14: 56px;
+  --space-15: 60px;
+  --space-16: 64px;
+
+  /* ---- Font Sizes ---- */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  /* ---- Font Weights ---- */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+
+  /* ---- Line Heights ---- */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+
+  /* ---- Transitions ---- */
+  --transition-fast: 150ms ease;
+  --transition: 250ms ease;
+  --transition-slow: 350ms ease;
+
+  /* ---- Z-index Scale ---- */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-modal-backdrop: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+
+  /* ---- Container ---- */
+  --container: 1280px;
+
+  /* ---- Header Height ---- */
+  --header-height: 72px;
+
+  /* ---- Sidebar Width (Admin) ---- */
+  --sidebar-width: 260px;
+}

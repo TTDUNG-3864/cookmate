@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thực đơn theo Dịp lễ | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/reset.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header" id="siteHeader"></header>
+
+  <main>
+    <section class="section" aria-labelledby="holidayRecipesHeading">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1 class="page-title" id="holidayRecipesHeading">
+              <i class="fa-solid fa-calendar-days" aria-hidden="true"></i>
+              Thực đơn theo Dịp lễ
+            </h1>
+            <p class="page-subtitle">Những công thức đặc sắc cho từng dịp lễ hội trong năm</p>
+          </div>
+        </div>
+
+        <!-- Occasion Filter Pills -->
+        <div class="pills-container" id="holidayOccasionPills" role="tablist" aria-label="Lọc theo dịp lễ">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Recipe Grid -->
+        <div class="recipe-grid" id="holidayRecipeGrid" role="list" aria-label="Công thức theo dịp lễ">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="siteFooter"></footer>
+
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/data/categories.js"></script>
+  <script src="../assets/js/data/ingredients.js"></script>
+  <script src="../assets/js/data/users.js"></script>
+  <script src="../assets/js/data/recipes.js"></script>
+  <script src="../assets/js/storage.js"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/navigation.js"></script>
+  <script src="../assets/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var pills = document.getElementById('holidayOccasionPills');
+      var grid = document.getElementById('holidayRecipeGrid');
+      if (!pills || !grid) return;
+
+      var recipes = CookMateStorage.getAllRecipes();
+      var occasionSet = {};
+      recipes.forEach(function(r) {
+        if (r.occasion) occasionSet[r.occasion] = true;
+      });
+      var occasions = Object.keys(occasionSet);
+
+      if (occasions.length === 0) {
+        pills.style.display = 'none';
+        grid.innerHTML = CookMateUI.createEmptyState(
+          'fa-calendar-days',
+          'Chưa có thực đơn theo dịp lễ',
+          'Các công thức theo mùa lễ hội sẽ xuất hiện tại đây.'
+        );
+        return;
+      }
+
+      // Check URL param for deep linking
+      var params = new URLSearchParams(window.location.search);
+      var urlOccasion = params.get('occasion');
+      var activeOccasion = urlOccasion && occasions.indexOf(urlOccasion) !== -1 ? urlOccasion : occasions[0];
+
+      function renderPills() {
+        pills.innerHTML = occasions.map(function(o) {
+          return '<button class="tag ' + (o === activeOccasion ? 'tag-active' : '') + '" onclick="filterHolidayOccasion(\'' + o.replace(/'/g, "\\'") + '\')" role="tab" aria-selected="' + (o === activeOccasion) + '">' + o + '</button>';
+        }).join('');
+      }
+
+      window.filterHolidayOccasion = function(occ) {
+        activeOccasion = occ;
+        renderPills();
+
+        // Update URL without reload
+        var url = new URL(window.location);
+        url.searchParams.set('occasion', occ);
+        window.history.replaceState({}, '', url);
+
+        var filtered = recipes.filter(function(r) { return r.occasion === occ; });
+        if (filtered.length === 0) {
+          grid.innerHTML = CookMateUI.createEmptyState('fa-calendar', 'Chưa có công thức cho dịp "' + occ + '"', 'Hãy chọn dịp lễ khác.');
+        } else {
+          grid.innerHTML = filtered.map(function(r) { return CookMateUI.createRecipeCard(r); }).join('');
+        }
+      };
+
+      renderPills();
+      window.filterHolidayOccasion(activeOccasion);
+    });
+  </script>
+</body>
+</html>

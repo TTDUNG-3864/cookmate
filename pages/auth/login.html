@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng nhập | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/variables.css">
+  <link rel="stylesheet" href="../../assets/css/reset.css">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/pages.css">
+  <link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body>
+
+  <main class="auth-page">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <a href="../../index.html" class="auth-logo">
+            <i class="fas fa-utensils"></i>
+            <span>CookMate</span>
+          </a>
+          <h1 class="auth-title">Đăng nhập</h1>
+          <p class="auth-subtitle">Chào mừng bạn trở lại! Đăng nhập để tiếp tục.</p>
+        </div>
+
+        <form id="loginForm" class="auth-form" novalidate>
+          <div class="form-group">
+            <label for="loginEmail" class="form-label">
+              <i class="fas fa-envelope"></i> Email
+            </label>
+            <input type="email" id="loginEmail" class="form-input" placeholder="Nhập email của bạn" required autocomplete="email">
+            <div class="form-error" id="loginEmailError"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="loginPassword" class="form-label">
+              <i class="fas fa-lock"></i> Mật khẩu
+            </label>
+            <div class="password-input-wrapper">
+              <input type="password" id="loginPassword" class="form-input" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+              <button type="button" class="password-toggle" aria-label="Hiện mật khẩu" onclick="togglePasswordVisibility(this)">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="form-error" id="loginPasswordError"></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary auth-submit-btn">
+            <i class="fas fa-sign-in-alt"></i> Đăng nhập
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          <p>Chưa có tài khoản? <a href="register.html" class="auth-link">Đăng ký ngay</a></p>
+        </div>
+
+        <div class="demo-credentials">
+          <h3 class="demo-credentials-title">
+            <i class="fas fa-info-circle"></i> Tài khoản demo
+          </h3>
+          <div class="demo-credential-item">
+            <div class="demo-credential-role">
+              <i class="fas fa-user-shield"></i> Quản trị viên
+            </div>
+            <div class="demo-credential-info">
+              <span><strong>Email:</strong> admin@cookmate.vn</span>
+              <span><strong>Mật khẩu:</strong> admin123</span>
+            </div>
+          </div>
+          <div class="demo-credential-item">
+            <div class="demo-credential-role">
+              <i class="fas fa-user"></i> Người dùng
+            </div>
+            <div class="demo-credential-info">
+              <span><strong>Email:</strong> giang@cookmate.vn</span>
+              <span><strong>Mật khẩu:</strong> giang123</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../../assets/js/utils.js"></script>
+  <script src="../../assets/js/data/categories.js"></script>
+  <script src="../../assets/js/data/ingredients.js"></script>
+  <script src="../../assets/js/data/users.js"></script>
+  <script src="../../assets/js/data/recipes.js"></script>
+  <script src="../../assets/js/storage.js"></script>
+  <script src="../../assets/js/components.js"></script>
+  <script src="../../assets/js/navigation.js"></script>
+  <script src="../../assets/js/app.js"></script>
+  <script>
+    function togglePasswordVisibility(btn) {
+      var input = btn.parentElement.querySelector('input');
+      var icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        btn.setAttribute('aria-label', 'Ẩn mật khẩu');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        btn.setAttribute('aria-label', 'Hiện mật khẩu');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof CookMateStorage !== 'undefined' && CookMateStorage.isLoggedIn()) {
+        window.location.href = '../../index.html';
+        return;
+      }
+
+      var form = document.getElementById('loginForm');
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        clearAllErrors(form);
+
+        var email = document.getElementById('loginEmail').value.trim();
+        var password = document.getElementById('loginPassword').value;
+
+        var hasError = false;
+
+        var emailErr = validateEmail(email);
+        if (emailErr) {
+          showFieldError(document.getElementById('loginEmail'), emailErr);
+          hasError = true;
+        }
+
+        var passErr = validateRequired(password, 'Mật khẩu');
+        if (passErr) {
+          showFieldError(document.getElementById('loginPassword'), passErr);
+          hasError = true;
+        }
+
+        if (hasError) return;
+
+        var allCreds = (typeof DEMO_CREDENTIALS !== 'undefined' ? DEMO_CREDENTIALS : []).concat(CookMateStorage.get('cookmate_demo_creds') || []);
+        var match = allCreds.find(function(c) { return c.email === email && c.passwordHint === password; });
+
+        if (match) {
+          var allUsers = CookMateStorage.getAllUsers();
+          var user = allUsers.find(function(u) { return u.id === match.userId || u.email === email; });
+          if (user) {
+            CookMateStorage.setCurrentUser(user);
+            if (typeof CookMateUI !== 'undefined') {
+              CookMateUI.showToast('Đăng nhập thành công! Chào mừng ' + user.name, 'success');
+            }
+            setTimeout(function() {
+              window.location.href = '../../index.html';
+            }, 1000);
+            return;
+          }
+        }
+
+        if (typeof CookMateUI !== 'undefined') {
+          CookMateUI.showToast('Email hoặc mật khẩu không đúng', 'error');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

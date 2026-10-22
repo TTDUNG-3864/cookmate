@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Danh mục món ăn | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/reset.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header" id="siteHeader"></header>
+
+  <main>
+    <section class="section" aria-labelledby="categoryPageHeading">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1 class="page-title" id="categoryPageHeading">
+              <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+              <span id="categoryPageTitle">Danh mục món ăn</span>
+            </h1>
+            <p class="page-subtitle" id="categoryPageSubtitle">Khám phá các loại món ăn phong phú của Việt Nam</p>
+          </div>
+          <a href="categories.html" class="btn btn-outline" id="backToCategoriesBtn" style="display:none;">
+            <i class="fa-solid fa-arrow-left" aria-hidden="true"></i> Tất cả danh mục
+          </a>
+        </div>
+
+        <!-- All Categories Grid (shown when no ?id) -->
+        <div class="category-grid" id="allCategoryGrid" role="list" aria-label="Tất cả danh mục">
+          <!-- Populated by JS -->
+        </div>
+
+        <!-- Category Recipes Grid (shown when ?id is present) -->
+        <div class="recipe-grid" id="categoryRecipeGrid" role="list" aria-label="Công thức trong danh mục" style="display:none;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="siteFooter"></footer>
+
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/data/categories.js"></script>
+  <script src="../assets/js/data/ingredients.js"></script>
+  <script src="../assets/js/data/users.js"></script>
+  <script src="../assets/js/data/recipes.js"></script>
+  <script src="../assets/js/storage.js"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/navigation.js"></script>
+  <script src="../assets/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var params = new URLSearchParams(window.location.search);
+      var categoryId = params.get('id');
+
+      if (categoryId) {
+        renderCategoryRecipes(categoryId);
+      } else {
+        renderAllCategories();
+      }
+    });
+
+    function renderAllCategories() {
+      var grid = document.getElementById('allCategoryGrid');
+      var recipeGrid = document.getElementById('categoryRecipeGrid');
+      var backBtn = document.getElementById('backToCategoriesBtn');
+      if (!grid) return;
+
+      grid.style.display = '';
+      if (recipeGrid) recipeGrid.style.display = 'none';
+      if (backBtn) backBtn.style.display = 'none';
+
+      var cats = CookMateStorage.getAllCategories();
+      var recipes = CookMateStorage.getAllRecipes();
+
+      cats.forEach(function(c) {
+        c.recipeCount = recipes.filter(function(r) { return r.categoryId === c.id; }).length;
+      });
+
+      if (cats.length === 0) {
+        grid.innerHTML = CookMateUI.createEmptyState('fa-layer-group', 'Chưa có danh mục nào', 'Vui lòng quay lại sau.');
+        return;
+      }
+
+      grid.innerHTML = cats.map(function(c) { return CookMateUI.createCategoryCard(c); }).join('');
+    }
+
+    function renderCategoryRecipes(categoryId) {
+      var allGrid = document.getElementById('allCategoryGrid');
+      var grid = document.getElementById('categoryRecipeGrid');
+      var backBtn = document.getElementById('backToCategoriesBtn');
+      var titleEl = document.getElementById('categoryPageTitle');
+      var subtitleEl = document.getElementById('categoryPageSubtitle');
+      if (!grid) return;
+
+      if (allGrid) allGrid.style.display = 'none';
+      grid.style.display = '';
+      if (backBtn) backBtn.style.display = '';
+
+      var category = CookMateStorage.getCategoryById(categoryId);
+      if (!category) {
+        if (titleEl) titleEl.textContent = 'Không tìm thấy danh mục';
+        if (subtitleEl) subtitleEl.textContent = 'Danh mục này không tồn tại hoặc đã bị xóa.';
+        grid.innerHTML = CookMateUI.createEmptyState('fa-exclamation-triangle', 'Không tìm thấy danh mục', '<a href="categories.html" class="btn btn-primary">Quay lại danh mục</a>');
+        return;
+      }
+
+      if (titleEl) titleEl.innerHTML = '<i class="' + (category.icon || 'fa-solid fa-utensils') + '" aria-hidden="true"></i> ' + category.name;
+      if (subtitleEl) subtitleEl.textContent = category.description || 'Các công thức thuộc danh mục ' + category.name;
+
+      document.title = category.name + ' | CookMate';
+
+      var numCatId = parseInt(categoryId, 10);
+      var recipes = CookMateStorage.getAllRecipes().filter(function(r) {
+        return r.categoryId === numCatId || r.categoryId == categoryId;
+      });
+
+      if (recipes.length === 0) {
+        grid.innerHTML = CookMateUI.createEmptyState('fa-book-open', 'Chưa có công thức nào', 'Danh mục này hiện chưa có công thức.');
+        return;
+      }
+
+      grid.innerHTML = recipes.map(function(r) { return CookMateUI.createRecipeCard(r); }).join('');
+    }
+  </script>
+</body>
+</html>

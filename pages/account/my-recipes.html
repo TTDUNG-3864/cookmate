@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Công thức của tôi | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/variables.css">
+  <link rel="stylesheet" href="../../assets/css/reset.css">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/pages.css">
+  <link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header" id="siteHeader"></header>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="page-header">
+        <div class="page-header-top">
+          <h1 class="page-title"><i class="fas fa-book-open"></i> Công thức của tôi</h1>
+          <a href="recipe-form.html" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Đăng công thức mới
+          </a>
+        </div>
+      </div>
+
+      <div class="my-recipes-list" id="myRecipesList">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal" style="display: none;">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Xác nhận xóa</h3>
+        <button class="modal-close" id="deleteModalClose" aria-label="Đóng">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Bạn có chắc chắn muốn xóa công thức "<span id="deleteRecipeName"></span>"?</p>
+        <p class="text-secondary">Hành động này không thể hoàn tác.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" id="deleteCancelBtn">Hủy</button>
+        <button class="btn btn-danger" id="deleteConfirmBtn">
+          <i class="fas fa-trash"></i> Xóa
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer" id="siteFooter"></footer>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="../../assets/js/utils.js"></script>
+  <script src="../../assets/js/data/categories.js"></script>
+  <script src="../../assets/js/data/ingredients.js"></script>
+  <script src="../../assets/js/data/users.js"></script>
+  <script src="../../assets/js/data/recipes.js"></script>
+  <script src="../../assets/js/storage.js"></script>
+  <script src="../../assets/js/components.js"></script>
+  <script src="../../assets/js/navigation.js"></script>
+  <script src="../../assets/js/app.js"></script>
+  <script>
+    var deleteTargetId = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof CookMateStorage === 'undefined' || !CookMateStorage.isLoggedIn()) {
+        window.location.href = '../auth/login.html';
+        return;
+      }
+
+      renderMyRecipes();
+      setupDeleteModal();
+    });
+
+    function renderMyRecipes() {
+      var currentUser = CookMateStorage.getCurrentUser();
+      var allRecipes = CookMateStorage.getAllRecipes ? CookMateStorage.getAllRecipes() : [];
+      var myRecipes = allRecipes.filter(function(r) {
+        return r.authorId === currentUser.id;
+      });
+
+      var container = document.getElementById('myRecipesList');
+
+      if (myRecipes.length === 0) {
+        container.innerHTML =
+          '<div class="empty-state">' +
+            '<div class="empty-state-icon"><i class="fas fa-book-open"></i></div>' +
+            '<h3 class="empty-state-title">Chưa có công thức nào</h3>' +
+            '<p class="empty-state-text">Bạn chưa đăng công thức nào. Hãy bắt đầu chia sẻ món ăn yêu thích của bạn!</p>' +
+            '<a href="recipe-form.html" class="btn btn-primary">' +
+              '<i class="fas fa-plus"></i> Đăng công thức mới' +
+            '</a>' +
+          '</div>';
+        return;
+      }
+
+      var html = '<div class="recipe-grid">';
+      myRecipes.forEach(function(recipe) {
+        var recipeTitle = recipe.title || recipe.name || 'Không có tên';
+        var imgSrc = recipe.image || recipe.imageUrl || '../../assets/images/placeholders/recipe-placeholder.svg';
+        var difficulty = recipe.difficulty || 'Trung bình';
+        var totalTime = ((recipe.prepTime || 0) + (recipe.cookTime || 0)) || '';
+        var timeStr = totalTime ? totalTime + ' phút' : '';
+
+        html +=
+          '<div class="recipe-card my-recipe-card">' +
+            '<div class="recipe-card__image">' +
+              '<a href="../recipe-detail.html?id=' + recipe.id + '">' +
+                '<img src="' + imgSrc + '" alt="' + escapeHtml(recipeTitle) + '" loading="lazy" onerror="handleImageError(this)">' +
+              '</a>' +
+              '<span class="badge badge-primary text-xs" style="position: absolute; top: 12px; left: 12px;">' + difficulty + '</span>' +
+            '</div>' +
+            '<div class="recipe-card__content">' +
+              '<h3 class="recipe-card__title">' +
+                '<a href="../recipe-detail.html?id=' + recipe.id + '">' + escapeHtml(recipeTitle) + '</a>' +
+              '</h3>' +
+              '<p class="recipe-card__desc">' + escapeHtml((recipe.description || '').substring(0, 80)) + '...</p>' +
+              '<div class="recipe-card__meta">' +
+                (timeStr ? '<span><i class="fa-regular fa-clock"></i> ' + timeStr + '</span>' : '') +
+                '<span><i class="fa-solid fa-users"></i> ' + (recipe.servings || 4) + ' người</span>' +
+              '</div>' +
+              '<div class="flex items-center gap-2 mt-4 pt-3 border-t border-light">' +
+                '<a href="recipe-form.html?id=' + recipe.id + '" class="btn btn-sm btn-secondary flex-1">' +
+                  '<i class="fa-solid fa-pen-to-square"></i> Sửa' +
+                '</a>' +
+                '<button class="btn btn-sm btn-danger flex-1" onclick="confirmDelete(\'' + recipe.id + '\', \'' + escapeHtml(recipeTitle).replace(/'/g, "\\'") + '\')">' +
+                  '<i class="fa-solid fa-trash"></i> Xóa' +
+                '</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    function confirmDelete(recipeId, recipeName) {
+      deleteTargetId = recipeId;
+      document.getElementById('deleteRecipeName').textContent = recipeName;
+      document.getElementById('deleteModal').style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+      deleteTargetId = null;
+      document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    function setupDeleteModal() {
+      document.getElementById('deleteModalClose').addEventListener('click', closeDeleteModal);
+      document.getElementById('deleteCancelBtn').addEventListener('click', closeDeleteModal);
+
+      document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+      });
+
+      document.getElementById('deleteConfirmBtn').addEventListener('click', function() {
+        if (!deleteTargetId) return;
+
+        if (CookMateStorage.deleteRecipe) {
+          CookMateStorage.deleteRecipe(deleteTargetId);
+        } else {
+          /* Fallback: remove from stored recipes */
+          var allRecipes = CookMateStorage.getAllRecipes();
+          var filtered = allRecipes.filter(function(r) { return r.id !== deleteTargetId; });
+          CookMateStorage.set('cookmate_recipes', filtered);
+        }
+
+        closeDeleteModal();
+        renderMyRecipes();
+
+        if (typeof CookMateUI !== 'undefined') {
+          CookMateUI.showToast('Đã xóa công thức thành công!', 'success');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,2181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CookMate - Website Hỗ Trợ Nấu Ăn Thông Minh</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+            },
+            leaf: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              600: '#16a34a',
+              700: '#15803d',
+            },
+            cream: '#FFFDF9'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #FFFDF9;
+      color: #1C1917;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .dropdown:hover .dropdown-menu {
+      display: block;
+    }
+    .recipe-card:hover .recipe-img {
+      transform: scale(1.05);
+    }
+    .kitchen-mode-active {
+      font-size: 1.15rem;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #d6d3d1;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+  <!-- THANH CÔNG CỤ DEMO NHANH CHO NHÓM (DŨNG - GIANG - ĐẠT) -->
+  <div class="bg-stone-900 text-stone-200 text-xs py-2 px-4 border-b border-stone-700">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span class="bg-brand-600 text-white font-bold px-2 py-0.5 rounded uppercase tracking-wider text-[10px]">Chế độ Demo Báo cáo</span>
+        <span class="hidden sm:inline text-stone-400">Chuyển nhanh Use Case của 3 thành viên:</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-1.5">
+        <button onclick="navigate('home')" class="px-2.5 py-1 rounded bg-stone-800 hover:bg-stone-700 text-stone-200 transition">🏠 Trang chủ</button>
+        <button onclick="navigate('search')" class="px-2.5 py-1 rounded bg-stone-800 hover:bg-brand-600 text-stone-200 transition">🔍 UC Tìm kiếm (Dũng)</button>
+        <button onclick="navigate('register')" class="px-2.5 py-1 rounded bg-stone-800 hover:bg-brand-600 text-stone-200 transition">📝 UC Đăng ký (Dũng)</button>
+        <button onclick="openRecipeDetail(1)" class="px-2.5 py-1 rounded bg-stone-800 hover:bg-leaf-600 text-stone-200 transition">🍲 UC Xem chi tiết + Khẩu phần (Giang)</button>
+        <button onclick="quickSwitchRole('member'); navigate('create')" class="px-2.5 py-1 rounded bg-stone-800 hover:bg-leaf-600 text-stone-200 transition">➕ UC Đăng công thức (Giang)</button>
+        <button onclick="navigate('login')" class="px-2.5 py-1 rounded bg-stone-800 hover:bg-amber-600 text-stone-200 transition">🔑 UC Đăng nhập (Đạt)</button>
+        <button onclick="quickSwitchRole('admin'); navigate('admin')" class="px-2.5 py-1 rounded bg-stone-800 hover:bg-amber-600 text-stone-200 transition">⚙️ UC Bảo trì danh mục (Đạt)</button>
+      </div>
+      <div class="flex items-center gap-1.5 border-l border-stone-700 pl-2">
+        <span class="text-stone-400">Tác nhân:</span>
+        <select id="roleSwitcher" onchange="quickSwitchRole(this.value)" class="bg-stone-800 text-amber-400 font-semibold rounded px-2 py-1 border border-stone-600 focus:outline-none">
+          <option value="guest">Khách (Chưa đăng nhập)</option>
+          <option value="member" selected>Người dùng (Hương Giang)</option>
+          <option value="admin">Quản trị viên (Như Đạt)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER & MENU ĐIỀU HƯỚNG CHÍNH -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+      
+      <!-- Cụm Trái: Logo CookMate -->
+      <div onclick="navigate('home')" class="flex items-center gap-3 cursor-pointer group shrink-0">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition">
+          <i class="fa-solid fa-utensils text-xl"></i>
+        </div>
+        <div>
+          <span class="text-2xl font-extrabold tracking-tight text-stone-900">Cook<span class="text-brand-600">Mate</span></span>
+          <p class="text-[11px] text-stone-500 font-medium -mt-1">Chuẩn định lượng • Trọn dinh dưỡng</p>
+        </div>
+      </div>
+
+      <!-- Cụm Giữa: Menu Điều Hướng (Chuyển Tab & Dropdown Danh mục / Dịp lễ) -->
+      <nav class="hidden lg:flex items-center gap-1">
+        <button onclick="navigate('home')" id="nav-home" class="nav-btn px-3.5 py-2 rounded-xl text-sm font-semibold text-brand-600 bg-brand-50 transition">
+          <i class="fa-solid fa-house mr-1.5"></i>Trang chủ
+        </button>
+
+        <!-- Dropdown 1: Xem công thức theo Danh mục (Use Case 2) -->
+        <div class="relative dropdown">
+          <button onclick="navigate('search')" id="nav-categories" class="nav-btn px-3.5 py-2 rounded-xl text-sm font-semibold text-stone-700 hover:text-brand-600 hover:bg-stone-100 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-layer-group text-brand-500"></i>Danh mục món <i class="fa-solid fa-chevron-down text-[10px]"></i>
+          </button>
+          <div class="dropdown-menu hidden absolute left-0 mt-1 w-60 bg-white rounded-2xl shadow-xl border border-stone-100 p-2 z-50">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-stone-400 px-3 py-1.5">Chọn danh mục (Bảng DANHMUC)</div>
+            <div id="headerCategoryDropdown" class="space-y-0.5"></div>
+          </div>
+        </div>
+
+        <!-- Dropdown 2: Xem công thức theo Dịp lễ (Use Case 5) -->
+        <div class="relative dropdown">
+          <button onclick="filterByOccasion('Tất cả')" id="nav-occasions" class="nav-btn px-3.5 py-2 rounded-xl text-sm font-semibold text-stone-700 hover:text-brand-600 hover:bg-stone-100 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-calendar-star text-amber-500"></i>Món ngon dịp lễ <i class="fa-solid fa-chevron-down text-[10px]"></i>
+          </button>
+          <div class="dropdown-menu hidden absolute left-0 mt-1 w-60 bg-white rounded-2xl shadow-xl border border-stone-100 p-2 z-50">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-stone-400 px-3 py-1.5">Sự kiện & Lễ Tết (Bảng DIPLE)</div>
+            <div id="headerOccasionDropdown" class="space-y-0.5"></div>
+          </div>
+        </div>
+
+        <!-- Tab: Tìm kiếm & Bộ lọc (Use Case 7 - Tiến Dũng) -->
+        <button onclick="navigate('search')" id="nav-search" class="nav-btn px-3.5 py-2 rounded-xl text-sm font-semibold text-stone-700 hover:text-brand-600 hover:bg-stone-100 transition">
+          <i class="fa-solid fa-magnifying-glass mr-1.5 text-brand-500"></i>Tìm kiếm
+        </button>
+
+        <!-- Tab: Món mới & Nổi bật (Use Case 3 & 4) -->
+        <button onclick="showFeaturedRecipes()" id="nav-featured" class="nav-btn px-3.5 py-2 rounded-xl text-sm font-semibold text-stone-700 hover:text-brand-600 hover:bg-stone-100 transition">
+          <i class="fa-solid fa-fire mr-1.5 text-red-500"></i>Món nổi bật
+        </button>
+      </nav>
+
+      <!-- Cụm Phải: Tìm kiếm nhanh + Khu vực Tài khoản -->
+      <div class="flex items-center gap-3">
+        <!-- Ô tìm kiếm nhanh trên Header -->
+        <div class="hidden sm:flex items-center bg-stone-100 rounded-full px-3.5 py-1.5 border border-transparent focus-within:border-brand-500 focus-within:bg-white transition w-56 xl:w-64">
+          <i class="fa-solid fa-magnifying-glass text-stone-400 text-sm mr-2"></i>
+          <input id="headerQuickSearch" type="text" placeholder="Tìm món, nguyên liệu..." 
+            onkeydown="if(event.key==='Enter') triggerHeaderSearch()"
+            class="bg-transparent text-sm w-full focus:outline-none text-stone-800 placeholder-stone-400" />
+        </div>
+
+        <!-- Nút Danh sách Yêu thích (Use Case 15) -->
+        <button onclick="openProfileTab('favorites')" title="Công thức yêu thích" class="relative p-2.5 rounded-full bg-stone-100 hover:bg-red-50 text-stone-600 hover:text-red-500 transition">
+          <i class="fa-solid fa-heart"></i>
+          <span id="favCountBadge" class="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center">2</span>
+        </button>
+
+        <!-- Khu vực hiển thị theo Trạng thái Đăng nhập -->
+        <div id="headerAuthArea" class="flex items-center gap-2"></div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- NỘI DUNG CHÍNH (CHỨA CÁC TAB MÀN HÌNH) -->
+  <main class="flex-grow">
+
+    <!-- ==================== TAB 1: TRANG CHỦ (HOME VIEW) ==================== -->
+    <section id="view-home" class="view-section">
+      
+      <!-- Khu vực Banner (Hero Section) -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+        <div class="relative rounded-3xl overflow-hidden bg-stone-900 text-white shadow-2xl">
+          <img src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1400&q=80" 
+               alt="CookMate Banner" 
+               onerror="this.src='https://placehold.co/1200x500/1c1917/ff6b35?text=CookMate+Kitchen'"
+               class="absolute inset-0 w-full h-full object-cover opacity-40" />
+          <div class="relative z-10 px-6 py-12 sm:px-12 sm:py-16 lg:py-20 max-w-3xl">
+            <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/20 border border-brand-400/40 text-brand-200 text-xs font-bold uppercase tracking-wider mb-4">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Tự động co giãn khẩu phần & Tính Calo
+            </span>
+            <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight mb-4">
+              Hôm nay ăn gì? Nấu ngon chuẩn vị cùng <span class="text-brand-500">CookMate</span>
+            </h1>
+            <p class="text-stone-200 text-base sm:text-lg mb-8 leading-relaxed">
+              Tra cứu công thức theo nguyên liệu sẵn có trong tủ lạnh, tự động nhân chia định lượng gia vị theo số người ăn và ước tính dinh dưỡng tức thì.
+            </p>
+
+            <!-- Thanh tìm kiếm trung tâm trên Banner -->
+            <div class="bg-white p-2 rounded-2xl shadow-lg flex flex-col sm:flex-row gap-2 max-w-2xl">
+              <div class="flex-1 flex items-center px-3 py-2">
+                <i class="fa-solid fa-magnifying-glass text-brand-500 mr-3 text-lg"></i>
+                <input id="heroSearchInput" type="text" 
+                  onkeydown="if(event.key==='Enter') executeHeroSearch()"
+                  placeholder="Nhập tên món ăn hoặc nguyên liệu (vd: ức gà, sườn, đậu hũ)..." 
+                  class="w-full text-stone-800 placeholder-stone-400 focus:outline-none text-sm sm:text-base" />
+              </div>
+              <button onclick="executeHeroSearch()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-3.5 rounded-xl transition flex items-center justify-center gap-2 shrink-0">
+                <span>Tìm công thức</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+
+            <!-- Thẻ từ khóa gợi ý nhanh -->
+            <div class="mt-4 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+              <span class="text-stone-300 font-medium">Gợi ý nhanh:</span>
+              <button onclick="quickKeywordSearch('Ức gà')" class="px-3 py-1 rounded-full bg-white/15 hover:bg-brand-500 text-white backdrop-blur-sm transition">#ỨcGà</button>
+              <button onclick="quickKeywordSearch('Canh')" class="px-3 py-1 rounded-full bg-white/15 hover:bg-brand-500 text-white backdrop-blur-sm transition">#MónCanh</button>
+              <button onclick="quickKeywordSearch('Chay')" class="px-3 py-1 rounded-full bg-white/15 hover:bg-brand-500 text-white backdrop-blur-sm transition">#MónChay</button>
+              <button onclick="quickKeywordSearch('Bò')" class="px-3 py-1 rounded-full bg-white/15 hover:bg-brand-500 text-white backdrop-blur-sm transition">#ThịtBò</button>
+              <button onclick="filterByOccasion('Tết cổ truyền')" class="px-3 py-1 rounded-full bg-amber-500/30 border border-amber-400/50 hover:bg-amber-500 text-amber-200 hover:text-white transition">🌸 Mâm cỗ Tết</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Khu vực 1: Khám phá theo Danh mục món ăn (Use Case 2) -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="flex items-center justify-between mb-5">
+          <div>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-stone-900">Danh mục món ăn</h2>
+            <p class="text-sm text-stone-500">Phân loại trực quan giúp bạn chọn nhanh món ăn cho bữa cơm gia đình</p>
+          </div>
+          <button onclick="navigate('search')" class="text-sm font-bold text-brand-600 hover:text-brand-700 flex items-center gap-1">
+            Xem tất cả <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+        <div id="homeCategoryList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4"></div>
+      </div>
+
+      <!-- Khu vực 2: Công thức Nổi bật trong tuần (Use Case 4) -->
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-6 gap-2">
+          <div>
+            <div class="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-brand-600 mb-1">
+              <i class="fa-solid fa-fire"></i> Được nấu nhiều nhất
+            </div>
+            <h2 class="text-2xl font-extrabold text-stone-900">Công thức nổi bật</h2>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="renderHomeRecipes('all')" id="homeFilter-all" class="home-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-brand-600 text-white transition">Tất cả</button>
+            <button onclick="renderHomeRecipes('popular')" id="homeFilter-popular" class="home-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-stone-200 text-stone-700 hover:bg-stone-300 transition">Nổi bật nhất (UC4)</button>
+            <button onclick="renderHomeRecipes('newest')" id="homeFilter-newest" class="home-filter-btn px-4 py-1.5 rounded-full text-xs font-bold bg-stone-200 text-stone-700 hover:bg-stone-300 transition">Mới chia sẻ (UC3)</button>
+          </div>
+        </div>
+        <div id="homeRecipeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </div>
+
+      <!-- Khu vực 3: Thực đơn theo Dịp lễ & Sự kiện (Use Case 5 - Bảng DIPLE) -->
+      <div class="bg-amber-50/70 border-y border-amber-200/60 py-10 my-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-700 bg-amber-100 px-3 py-1 rounded-full">
+                <i class="fa-solid fa-calendar-check mr-1"></i> Gợi ý theo sự kiện (Use Case 5)
+              </span>
+              <h2 class="text-2xl font-extrabold text-stone-900 mt-2">Thực đơn Đặc sắc theo Dịp lễ</h2>
+              <p class="text-sm text-stone-600">Lựa chọn món ăn phù hợp cho ngày Tết, Rằm, Giáng sinh hoặc tiệc cuối tuần</p>
+            </div>
+            <div id="occasionPills" class="flex flex-wrap gap-2"></div>
+          </div>
+          <div id="occasionRecipeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ==================== TAB 2: TÌM KIẾM CÔNG THỨC (USE CASE TRẦN TIẾN DŨNG) ==================== -->
+    <section id="view-search" class="view-section hidden py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 mb-8">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-brand-600">Use Case: Tìm kiếm công thức (Phụ trách: Trần Tiến Dũng)</span>
+              <h1 class="text-2xl font-extrabold text-stone-900">Tra cứu & Lọc công thức nấu ăn</h1>
+            </div>
+            <span class="text-xs bg-stone-100 text-stone-600 px-3 py-1.5 rounded-lg">
+              Hỗ trợ tìm gần đúng theo <b>Tên món</b> hoặc <b>Nguyên liệu</b> (Bảng CONGTHUC, NGUYENLIEU)
+            </span>
+          </div>
+
+          <!-- Thanh nhập từ khóa tìm kiếm chính -->
+          <div class="flex flex-col sm:flex-row gap-3">
+            <div class="flex-1 relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-stone-400"></i>
+              <input id="searchKeywordInput" type="text" 
+                onkeydown="if(event.key==='Enter') handleSearchSubmit()"
+                placeholder="Nhập tên món ăn hoặc nguyên liệu có sẵn (ví dụ: ức gà, cam, hạt sen, đậu hũ)..." 
+                class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-stone-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 focus:outline-none text-sm sm:text-base" />
+            </div>
+            <button onclick="handleSearchSubmit()" class="bg-brand-600 hover:bg-brand-700 text-white font-bold px-7 py-3.5 rounded-xl transition flex items-center justify-center gap-2 shrink-0">
+              <i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm
+            </button>
+            <button onclick="resetSearchFilters()" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold px-4 py-3.5 rounded-xl transition shrink-0">
+              Đặt lại
+            </button>
+          </div>
+
+          <!-- Thông báo kiểm thử Luồng rẽ nhánh của Use Case Tìm kiếm -->
+          <div id="searchValidationAlert" class="hidden mt-4 p-4 rounded-xl border text-sm font-semibold flex items-center gap-2.5"></div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <!-- Cột Trái: Bộ lọc chi tiết -->
+          <aside class="lg:col-span-1 space-y-6">
+            <div class="bg-white rounded-2xl p-5 border border-stone-200 shadow-sm space-y-5">
+              <h3 class="font-bold text-stone-900 border-b border-stone-100 pb-3 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-brand-500"></i> Bộ lọc nâng cao
+              </h3>
+
+              <!-- Lọc theo Danh mục -->
+              <div>
+                <label class="block text-xs font-bold uppercase text-stone-500 mb-2">Danh mục món ăn</label>
+                <select id="filterCategorySelect" onchange="applyFilters()" class="w-full rounded-xl border border-stone-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none">
+                  <option value="Tất cả">Tất cả danh mục</option>
+                </select>
+              </div>
+
+              <!-- Lọc theo Dịp lễ -->
+              <div>
+                <label class="block text-xs font-bold uppercase text-stone-500 mb-2">Dịp lễ / Sự kiện</label>
+                <select id="filterOccasionSelect" onchange="applyFilters()" class="w-full rounded-xl border border-stone-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none">
+                  <option value="Tất cả">Tất cả dịp lễ</option>
+                </select>
+              </div>
+
+              <!-- Lọc theo Độ khó -->
+              <div>
+                <label class="block text-xs font-bold uppercase text-stone-500 mb-2">Độ khó thực hiện</label>
+                <select id="filterDifficultySelect" onchange="applyFilters()" class="w-full rounded-xl border border-stone-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none">
+                  <option value="Tất cả">Mọi cấp độ</option>
+                  <option value="Dễ">Dễ</option>
+                  <option value="Trung bình">Trung bình</option>
+                  <option value="Khó">Khó</option>
+                </select>
+              </div>
+
+              <!-- Lọc theo Thời gian nấu -->
+              <div>
+                <label class="block text-xs font-bold uppercase text-stone-500 mb-2">Thời gian thực hiện</label>
+                <select id="filterTimeSelect" onchange="applyFilters()" class="w-full rounded-xl border border-stone-300 px-3 py-2.5 text-sm focus:border-brand-500 focus:outline-none">
+                  <option value="0">Tất cả thời gian</option>
+                  <option value="25">Nhanh (≤ 25 phút)</option>
+                  <option value="45">Vừa phải (≤ 45 phút)</option>
+                  <option value="999">Món hầm / Công phu</option>
+                </select>
+              </div>
+
+              <!-- Gợi ý kiểm thử nhanh Luồng rẽ nhánh cho Tiến Dũng -->
+              <div class="pt-3 border-t border-stone-100">
+                <p class="text-[11px] font-bold text-stone-400 uppercase mb-2">Test nhanh Luồng rẽ nhánh (Báo cáo 2.1.3.4):</p>
+                <div class="flex flex-col gap-1.5">
+                  <button onclick="document.getElementById('searchKeywordInput').value=''; handleSearchSubmit()" class="text-left text-xs px-2.5 py-1.5 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition">
+                    1. Test bỏ trống từ khóa tìm kiếm
+                  </button>
+                  <button onclick="document.getElementById('searchKeywordInput').value='Bánh mì thanh long vũ trụ'; handleSearchSubmit()" class="text-left text-xs px-2.5 py-1.5 rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 transition">
+                    2. Test từ khóa không có kết quả
+                  </button>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Cột Phải: Danh sách kết quả tìm kiếm -->
+          <div class="lg:col-span-3">
+            <div class="flex items-center justify-between mb-4">
+              <p id="searchResultSummary" class="text-sm font-semibold text-stone-600"></p>
+            </div>
+            <div id="searchResultGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: XEM CHI TIẾT CÔNG THỨC + KHẨU PHẦN & DINH DƯỠNG (HƯƠNG GIANG) ==================== -->
+    <section id="view-detail" class="view-section hidden py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Thanh điều hướng quay lại & Chế độ đứng bếp -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+          <button onclick="navigate('home')" class="inline-flex items-center gap-2 text-sm font-bold text-stone-600 hover:text-brand-600 bg-white px-4 py-2 rounded-xl border border-stone-200 shadow-sm transition">
+            <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+          </button>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-leaf-700 bg-leaf-50 border border-leaf-100 px-3 py-1.5 rounded-lg">
+              Use Case: Xem chi tiết + Co giãn khẩu phần & Dinh dưỡng (Hương Giang)
+            </span>
+            <button onclick="toggleKitchenMode()" id="kitchenModeBtn" class="inline-flex items-center gap-2 text-xs font-bold bg-stone-800 text-white px-3.5 py-2 rounded-xl hover:bg-stone-700 transition">
+              <i class="fa-solid fa-mobile-screen-button"></i> Chế độ Đứng bếp (Chữ to)
+            </button>
+          </div>
+        </div>
+
+        <!-- Khung thông tin tổng quan món ăn -->
+        <div id="recipeDetailContainer"></div>
+
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: ĐĂNG CÔNG THỨC NẤU ĂN (USE CASE HƯƠNG GIANG) ==================== -->
+    <section id="view-create" class="view-section hidden py-8">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-stone-200">
+          
+          <div class="border-b border-stone-100 pb-5 mb-6 flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-brand-600">Use Case: Đăng công thức (Phụ trách: Trương Thị Hương Giang)</span>
+              <h1 class="text-2xl font-extrabold text-stone-900 mt-1">Chia sẻ công thức nấu ăn mới</h1>
+              <p class="text-sm text-stone-500">Điền thông tin món ăn, định lượng nguyên liệu gốc và các bước thực hiện</p>
+            </div>
+            <button onclick="fillSampleRecipeForm()" class="text-xs font-bold bg-brand-50 text-brand-700 hover:bg-brand-100 px-3.5 py-2 rounded-xl border border-brand-200 transition">
+              <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Điền dữ liệu mẫu nhanh
+            </button>
+          </div>
+
+          <div id="createRecipeAlert" class="hidden mb-6 p-4 rounded-xl border text-sm font-semibold"></div>
+
+          <form id="createRecipeForm" onsubmit="handleCreateRecipe(event)" class="space-y-6" novalidate>
+            <!-- Thông tin cơ bản -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-bold text-stone-800 mb-1.5">Tên công thức món ăn <span class="text-red-500">*</span></label>
+                <input id="crTitle" type="text" placeholder="Ví dụ: Cá hồi áp chảo sốt bơ chanh tỏi" class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm focus:border-brand-500 focus:outline-none" />
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold text-stone-800 mb-1.5">Danh mục món ăn <span class="text-red-500">*</span></label>
+                <select id="crCategory" class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm focus:border-brand-500 focus:outline-none"></select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold text-stone-800 mb-1.5">Dịp lễ / Sự kiện</label>
+                <select id="crOccasion" class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm focus:border-brand-500 focus:outline-none"></select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold text-stone-800 mb-1.5">Số khẩu phần gốc (người ăn) <span class="text-red-500">*</span></label>
+                <input id="crServings" type="number" min="1" max="20" value="2" class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm focus:border-brand-500 focus:outline-none" />
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold text-stone-800 mb-1.5">Thời gian thực hiện (phút) <span class="text-red-500">*</span></label>
+                <input id="crTime" type="number" min="5" max="300" value="25" class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm focus:border-brand-500 focus:outline-none" />
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold text-stone-800 mb-1.5">Độ khó</label>
+                <select id="crDifficulty" class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm focus:border-brand-500 focus:outline-none">
+                  <option value="Dễ">Dễ</option>
+                  <option value="Trung bình">Trung bình</option>
+                  <option value="Khó">Khó</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-bold text-stone-800 mb-1.5">Đường dẫn hình ảnh (/static/uploads/recipes/...)</label>
+                <input id="crImage" type="text" placeholder="Để trống sẽ dùng ảnh minh họa mặc định" class="w-full rounded-xl border border-stone-300 px-4 py-3 text-sm focus:border-brand-500 focus:outline-none" />
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-sm font-bold text-stone-800 mb-1.5">Mô tả ngắn về món ăn <span class="text-red-500">*</span></label>
+                <textarea id="crDesc" rows="2" placeholder="Giới thiệu hương vị, điểm hấp dẫn hoặc mẹo nhỏ của món ăn..." class="w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:outline-none"></textarea>
+              </div>
+            </div>
+
+            <!-- Danh sách nguyên liệu & định lượng (Phục vụ co giãn khẩu phần & tính dinh dưỡng) -->
+            <div class="bg-stone-50 p-5 rounded-2xl border border-stone-200">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h3 class="font-bold text-stone-900">Danh sách nguyên liệu & Định lượng <span class="text-red-500">*</span></h3>
+                  <p class="text-xs text-stone-500">Chọn nguyên liệu để hệ thống tự động tính Calories, Protein, Carbs, Fat</p>
+                </div>
+                <button type="button" onclick="addIngredientRow()" class="text-xs font-bold bg-white hover:bg-brand-50 text-brand-600 border border-brand-200 px-3 py-1.5 rounded-lg transition">
+                  + Thêm nguyên liệu
+                </button>
+              </div>
+              <div id="crIngredientRows" class="space-y-2.5"></div>
+            </div>
+
+            <!-- Các bước thực hiện -->
+            <div class="bg-stone-50 p-5 rounded-2xl border border-stone-200">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h3 class="font-bold text-stone-900">Các bước thực hiện <span class="text-red-500">*</span></h3>
+                  <p class="text-xs text-stone-500">Chia nhỏ từng bước rõ ràng để người đọc dễ theo dõi khi đứng bếp</p>
+                </div>
+                <button type="button" onclick="addStepRow()" class="text-xs font-bold bg-white hover:bg-brand-50 text-brand-600 border border-brand-200 px-3 py-1.5 rounded-lg transition">
+                  + Thêm bước nấu
+                </button>
+              </div>
+              <div id="crStepRows" class="space-y-3"></div>
+            </div>
+
+            <!-- Nút Đăng công thức & Hủy (Đúng đặc tả Use Case của Hương Giang) -->
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-stone-200">
+              <button type="button" onclick="cancelCreateRecipe()" class="px-6 py-3 rounded-xl border border-stone-300 text-stone-700 font-bold text-sm hover:bg-stone-100 transition">
+                Hủy
+              </button>
+              <button type="submit" class="px-7 py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-md shadow-brand-600/20 transition">
+                <i class="fa-solid fa-paper-plane mr-1.5"></i> Đăng công thức
+              </button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 5: ĐĂNG KÝ TÀI KHOẢN (USE CASE TRẦN TIẾN DŨNG) ==================== -->
+    <section id="view-register" class="view-section hidden py-10">
+      <div class="max-w-md mx-auto px-4">
+        <div class="bg-white rounded-3xl p-7 shadow-lg border border-stone-200">
+          <div class="text-center mb-6">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-3 py-1 rounded-full">Use Case: Đăng ký (Trần Tiến Dũng)</span>
+            <h1 class="text-2xl font-extrabold text-stone-900 mt-3">Tạo tài khoản CookMate</h1>
+            <p class="text-sm text-stone-500 mt-1">Tham gia cộng đồng chia sẻ công thức và lưu món ăn yêu thích</p>
+          </div>
+
+          <div id="registerAlert" class="hidden mb-4 p-3.5 rounded-xl border text-sm font-semibold"></div>
+
+          <form id="registerForm" onsubmit="handleRegisterSubmit(event)" class="space-y-4" novalidate>
+            <div>
+              <label class="block text-sm font-bold text-stone-700 mb-1">Họ và tên <span class="text-red-500">*</span></label>
+              <input id="regFullName" type="text" placeholder="Nhập họ và tên của bạn" class="reg-input w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-stone-700 mb-1">Email <span class="text-red-500">*</span></label>
+              <input id="regEmail" type="email" placeholder="vidu@email.com (Thử: giang@cookmate.vn để test trùng)" class="reg-input w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-stone-700 mb-1">Mật khẩu <span class="text-red-500">*</span></label>
+              <input id="regPassword" type="password" placeholder="Nhập mật khẩu" class="reg-input w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-stone-700 mb-1">Xác nhận mật khẩu <span class="text-red-500">*</span></label>
+              <input id="regConfirmPassword" type="password" placeholder="Nhập lại mật khẩu" class="reg-input w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:outline-none" />
+            </div>
+
+            <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl shadow-md transition">
+              Đăng ký
+            </button>
+          </form>
+
+          <!-- Hộp test nhanh 4 luồng rẽ nhánh của Tiến Dũng -->
+          <div class="mt-6 pt-4 border-t border-stone-100">
+            <p class="text-[11px] font-bold uppercase text-stone-400 mb-2">Kiểm thử nhanh các Luồng rẽ nhánh (Mục 2.1.3.3):</p>
+            <div class="grid grid-cols-2 gap-1.5 text-xs">
+              <button onclick="testRegisterCase('empty')" class="p-1.5 rounded bg-stone-100 hover:bg-red-50 text-stone-700 hover:text-red-600 text-left">1. Bỏ trống trường</button>
+              <button onclick="testRegisterCase('mismatch')" class="p-1.5 rounded bg-stone-100 hover:bg-red-50 text-stone-700 hover:text-red-600 text-left">2. Lệch mật khẩu</button>
+              <button onclick="testRegisterCase('invalidEmail')" class="p-1.5 rounded bg-stone-100 hover:bg-red-50 text-stone-700 hover:text-red-600 text-left">3. Sai định dạng Email</button>
+              <button onclick="testRegisterCase('dupEmail')" class="p-1.5 rounded bg-stone-100 hover:bg-red-50 text-stone-700 hover:text-red-600 text-left">4. Email đã tồn tại</button>
+            </div>
+          </div>
+
+          <p class="text-center text-sm text-stone-600 mt-5">
+            Đã có tài khoản? <button onclick="navigate('login')" class="text-brand-600 font-bold hover:underline">Đăng nhập ngay</button>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 6: ĐĂNG NHẬP HỆ THỐNG (USE CASE HOÀNG NHƯ ĐẠT) ==================== -->
+    <section id="view-login" class="view-section hidden py-10">
+      <div class="max-w-md mx-auto px-4">
+        <div class="bg-white rounded-3xl p-7 shadow-lg border border-stone-200">
+          <div class="text-center mb-6">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 px-3 py-1 rounded-full">Use Case: Đăng nhập (Hoàng Như Đạt)</span>
+            <h1 class="text-2xl font-extrabold text-stone-900 mt-3">Đăng nhập CookMate</h1>
+            <p class="text-sm text-stone-500 mt-1">Đăng nhập để chia sẻ công thức và quản lý bộ sưu tập món ngon</p>
+          </div>
+
+          <div id="loginAlert" class="hidden mb-4 p-3.5 rounded-xl border text-sm font-semibold"></div>
+
+          <form id="loginForm" onsubmit="handleLoginSubmit(event)" class="space-y-4" novalidate>
+            <div>
+              <label class="block text-sm font-bold text-stone-700 mb-1">Tên đăng nhập / Email <span class="text-red-500">*</span></label>
+              <input id="loginIdentifier" type="text" placeholder="Nhập email hoặc tên đăng nhập" class="w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:outline-none" />
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-stone-700 mb-1">Mật khẩu <span class="text-red-500">*</span></label>
+              <input id="loginPassword" type="password" placeholder="Nhập mật khẩu" class="w-full rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:outline-none" />
+            </div>
+            <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl shadow-md transition">
+              Đăng nhập
+            </button>
+          </form>
+
+          <!-- Hộp test nhanh các luồng rẽ nhánh Đăng nhập của Như Đạt -->
+          <div class="mt-6 pt-4 border-t border-stone-100">
+            <p class="text-[11px] font-bold uppercase text-stone-400 mb-2">Kiểm thử nhanh Luồng cơ bản & Rẽ nhánh (Mục 2.1.3.5):</p>
+            <div class="grid grid-cols-2 gap-1.5 text-xs">
+              <button onclick="testLoginCase('empty')" class="p-1.5 rounded bg-stone-100 hover:bg-red-50 text-stone-700 text-left">1. Bỏ trống thông tin</button>
+              <button onclick="testLoginCase('notExist')" class="p-1.5 rounded bg-stone-100 hover:bg-red-50 text-stone-700 text-left">2. TK không tồn tại</button>
+              <button onclick="testLoginCase('wrongPass')" class="p-1.5 rounded bg-stone-100 hover:bg-red-50 text-stone-700 text-left">3. Sai mật khẩu</button>
+              <button onclick="testLoginCase('successMember')" class="p-1.5 rounded bg-leaf-50 hover:bg-leaf-100 text-leaf-700 font-semibold text-left">4. Đăng nhập Thành viên</button>
+            </div>
+          </div>
+
+          <p class="text-center text-sm text-stone-600 mt-5">
+            Chưa có tài khoản? <button onclick="navigate('register')" class="text-brand-600 font-bold hover:underline">Đăng ký thành viên</button>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 7: TRANG CÁ NHÂN & MÓN YÊU THÍCH (USE CASE 11, 13, 15) ==================== -->
+    <section id="view-profile" class="view-section hidden py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <img id="profileAvatarImg" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" alt="Avatar" class="w-16 h-16 rounded-2xl object-cover border-2 border-brand-500" />
+            <div>
+              <h1 id="profileUserName" class="text-xl font-extrabold text-stone-900">Trương Thị Hương Giang</h1>
+              <p id="profileUserEmail" class="text-sm text-stone-500">giang@cookmate.vn • Thành viên CookMate</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="switchProfileSubTab('my-recipes')" id="profTab-my-recipes" class="px-4 py-2 rounded-xl text-sm font-bold bg-brand-600 text-white transition">
+              <i class="fa-solid fa-book-open mr-1.5"></i>Công thức của tôi (UC13)
+            </button>
+            <button onclick="switchProfileSubTab('favorites')" id="profTab-favorites" class="px-4 py-2 rounded-xl text-sm font-bold bg-stone-100 text-stone-700 hover:bg-stone-200 transition">
+              <i class="fa-solid fa-heart mr-1.5 text-red-500"></i>Món yêu thích (UC15)
+            </button>
+            <button onclick="switchProfileSubTab('info')" id="profTab-info" class="px-4 py-2 rounded-xl text-sm font-bold bg-stone-100 text-stone-700 hover:bg-stone-200 transition">
+              <i class="fa-solid fa-user-pen mr-1.5"></i>Hồ sơ cá nhân (UC11)
+            </button>
+          </div>
+        </div>
+
+        <div id="profileSubContent"></div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 8: QUẢN TRỊ HỆ THỐNG & BẢO TRÌ DANH MỤC (HOÀNG NHƯ ĐẠT) ==================== -->
+    <section id="view-admin" class="view-section hidden py-8">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          
+          <!-- Sidebar Quản trị viên (Use Case 16 -> 21) -->
+          <aside class="lg:col-span-1">
+            <div class="bg-stone-900 text-white rounded-3xl p-5 space-y-2 shadow-lg">
+              <div class="px-3 py-2 border-b border-stone-700 mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-amber-400">Phân hệ Quản trị viên</span>
+                <h2 class="text-lg font-extrabold">CookMate Admin</h2>
+              </div>
+              <button onclick="switchAdminSubTab('categories')" id="admTab-categories" class="w-full text-left px-4 py-3 rounded-xl text-sm font-bold bg-brand-600 text-white flex items-center justify-between transition">
+                <span><i class="fa-solid fa-folder-tree mr-2.5"></i>Bảo trì danh mục (UC17)</span>
+                <span class="text-[10px] bg-white/20 px-1.5 py-0.5 rounded">Như Đạt</span>
+              </button>
+              <button onclick="switchAdminSubTab('ingredients')" id="admTab-ingredients" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-stone-300 hover:bg-stone-800 flex items-center justify-between transition">
+                <span><i class="fa-solid fa-carrot mr-2.5"></i>Bảo trì nguyên liệu (UC18)</span>
+              </button>
+              <button onclick="switchAdminSubTab('recipes')" id="admTab-recipes" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-stone-300 hover:bg-stone-800 flex items-center justify-between transition">
+                <span><i class="fa-solid fa-utensils mr-2.5"></i>Bảo trì công thức (UC16)</span>
+              </button>
+              <button onclick="switchAdminSubTab('users')" id="admTab-users" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-stone-300 hover:bg-stone-800 flex items-center justify-between transition">
+                <span><i class="fa-solid fa-users-gear mr-2.5"></i>Quản lý tài khoản (UC19)</span>
+              </button>
+              <button onclick="switchAdminSubTab('stats')" id="admTab-stats" class="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-stone-300 hover:bg-stone-800 flex items-center justify-between transition">
+                <span><i class="fa-solid fa-chart-pie mr-2.5"></i>Thống kê báo cáo (UC21)</span>
+              </button>
+            </div>
+          </aside>
+
+          <!-- Khu vực nội dung Quản trị -->
+          <div class="lg:col-span-3">
+            <div id="adminSubContent" class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- HỘP THOẠI XÁC NHẬN (MODAL) THAY THẾ CONFIRM() -->
+  <div id="customConfirmModal" class="fixed inset-0 z-50 hidden bg-stone-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200">
+      <div class="w-12 h-12 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center text-xl mb-4">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 id="confirmModalTitle" class="text-lg font-extrabold text-stone-900 mb-2">Xác nhận xóa danh mục</h3>
+      <p id="confirmModalMessage" class="text-sm text-stone-600 mb-6">Bạn có chắc chắn muốn xóa mục này khỏi hệ thống?</p>
+      <div class="flex items-center justify-end gap-3">
+        <button onclick="closeConfirmModal()" class="px-5 py-2.5 rounded-xl border border-stone-300 text-stone-700 font-bold text-sm hover:bg-stone-100 transition">
+          Hủy
+        </button>
+        <button id="confirmModalAcceptBtn" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm transition">
+          Đồng ý
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- KHUNG THÔNG BÁO NỔI (TOAST NOTIFICATION) -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 space-y-2 max-w-sm w-full pointer-events-none"></div>
+
+  <!-- FOOTER -->
+  <footer class="bg-stone-900 text-stone-400 py-10 mt-16 border-t border-stone-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center text-white">
+          <i class="fa-solid fa-utensils"></i>
+        </div>
+        <div>
+          <span class="font-extrabold text-white text-lg">CookMate</span>
+          <p class="text-xs text-stone-500">Đề tài Thực tập cơ sở ngành • Xây dựng website hỗ trợ nấu ăn</p>
+        </div>
+      </div>
+      <div class="text-xs text-stone-400 text-center sm:text-right">
+        <p class="font-semibold text-stone-300">Nhóm thực hiện: Trần Tiến Dũng • Trương Thị Hương Giang • Hoàng Như Đạt</p>
+        <p class="mt-0.5">Cơ sở dữ liệu: TAIKHOAN, CONGTHUC, DANHMUC, NGUYENLIEU, DIPLE, BINHLUAN, YEUTHICH</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ==================== 1. CƠ SỞ DỮ LIỆU MẪU BÁM SÁT MỤC 2.2 CỦA BÁO CÁO ====================
+
+    // Bảng DANHMUC
+    let categoriesDB = [
+      { id: 'DM01', name: 'Món áp chảo & Eat Clean', icon: 'fa-leaf', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80', desc: 'Món ngon ít dầu mỡ, giàu đạm và cân bằng calo' },
+      { id: 'DM02', name: 'Món canh & Súp', icon: 'fa-bowl-food', image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=300&q=80', desc: 'Các món canh thanh mát, bổ dưỡng cho bữa cơm gia đình' },
+      { id: 'DM03', name: 'Món mặn & Kho', icon: 'fa-drumstick-bite', image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=300&q=80', desc: 'Món kho đậm đà đưa cơm truyền thống Việt Nam' },
+      { id: 'DM04', name: 'Món xào', icon: 'fa-pepper-hot', image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=300&q=80', desc: 'Món xào nhanh gọn, giữ trọn độ giòn ngọt tự nhiên' },
+      { id: 'DM05', name: 'Món chay thanh đạm', icon: 'fa-seedling', image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=300&q=80', desc: 'Ẩm thực chay tốt cho sức khỏe từ rau củ và nấm' },
+      { id: 'DM06', name: 'Tráng miệng & Đồ uống', icon: 'fa-ice-cream', image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=300&q=80', desc: 'Chè, bánh ngọt và sinh tố giải nhiệt' }
+    ];
+
+    // Bảng DIPLE (Dịp lễ / Sự kiện)
+    let occasionsDB = [
+      { id: 'DL01', name: 'Bữa cơm hàng ngày' },
+      { id: 'DL02', name: 'Tết cổ truyền' },
+      { id: 'DL03', name: 'Cuối tuần sum vầy' },
+      { id: 'DL04', name: 'Rằm & Mùng 1' },
+      { id: 'DL05', name: 'Tiệc Giáng sinh' }
+    ];
+
+    // Bảng NGUYENLIEU (Có chỉ số dinh dưỡng trên mỗi 100g hoặc 1 đơn vị chuẩn để phục vụ Mục 3.6.2)
+    let ingredientsDB = [
+      { id: 'NL01', name: 'Phi lê ức gà', unit: 'g', baseAmount: 100, cal: 165, protein: 31, carbs: 0, fat: 3.6 },
+      { id: 'NL02', name: 'Cam vàng tươi', unit: 'g', baseAmount: 100, cal: 47, protein: 0.9, carbs: 11.8, fat: 0.1 },
+      { id: 'NL03', name: 'Mật ong nguyên chất', unit: 'ml', baseAmount: 100, cal: 304, protein: 0.3, carbs: 82, fat: 0 },
+      { id: 'NL04', name: 'Dầu oliu', unit: 'ml', baseAmount: 100, cal: 884, protein: 0, carbs: 0, fat: 100 },
+      { id: 'NL05', name: 'Sườn non heo', unit: 'g', baseAmount: 100, cal: 277, protein: 15.5, carbs: 0, fat: 23 },
+      { id: 'NL06', name: 'Hạt sen tươi', unit: 'g', baseAmount: 100, cal: 89, protein: 4.1, carbs: 17.2, fat: 0.5 },
+      { id: 'NL07', name: 'Cà rốt & Củ sen', unit: 'g', baseAmount: 100, cal: 41, protein: 0.9, carbs: 9.6, fat: 0.2 },
+      { id: 'NL08', name: 'Thịt thăn bò', unit: 'g', baseAmount: 100, cal: 250, protein: 26, carbs: 0, fat: 15 },
+      { id: 'NL09', name: 'Khoai tây', unit: 'g', baseAmount: 100, cal: 77, protein: 2, carbs: 17, fat: 0.1 },
+      { id: 'NL10', name: 'Ớt chuông Đà Lạt', unit: 'g', baseAmount: 100, cal: 31, protein: 1, carbs: 6, fat: 0.3 },
+      { id: 'NL11', name: 'Đậu hũ non', unit: 'g', baseAmount: 100, cal: 76, protein: 8, carbs: 1.9, fat: 4.8 },
+      { id: 'NL12', name: 'Nấm đông cô tươi', unit: 'g', baseAmount: 100, cal: 34, protein: 2.2, carbs: 6.8, fat: 0.5 },
+      { id: 'NL13', name: 'Thịt ba chỉ heo', unit: 'g', baseAmount: 100, cal: 518, protein: 9.3, carbs: 0, fat: 53 },
+      { id: 'NL14', name: 'Trứng vịt / Trứng gà', unit: 'quả', baseAmount: 1, cal: 78, protein: 6.3, carbs: 0.6, fat: 5.3 }
+    ];
+
+    // Bảng TAIKHOAN
+    let usersDB = [
+      { id: 'TK01', fullName: 'Trương Thị Hương Giang', username: 'huonggiang', email: 'giang@cookmate.vn', password: '123', role: 'member', status: 'Hoạt động' },
+      { id: 'TK02', fullName: 'Trần Tiến Dũng', username: 'tiendung', email: 'dung@cookmate.vn', password: '123', role: 'member', status: 'Hoạt động' },
+      { id: 'TK03', fullName: 'Hoàng Như Đạt', username: 'nhudat', email: 'admin@cookmate.vn', password: '123', role: 'admin', status: 'Hoạt động' }
+    ];
+
+    // Bảng CONGTHUC
+    let recipesDB = [
+      {
+        id: 1,
+        title: 'Ức gà áp chảo sốt cam mật ong Eat Clean',
+        categoryId: 'DM01',
+        occasionName: 'Bữa cơm hàng ngày',
+        author: 'Trương Thị Hương Giang',
+        prepTime: 10,
+        cookTime: 15,
+        baseServings: 2,
+        difficulty: 'Dễ',
+        views: 1420,
+        createdAt: '20/10/2026',
+        image: 'https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=900&q=80',
+        desc: 'Ức gà mềm mọng không hề bị khô, quyện cùng vị chua ngọt thanh mát của sốt cam tươi và mật ong. Món ăn lý tưởng cho người tập luyện và kiểm soát cân nặng.',
+        ingredients: [
+          { ingId: 'NL01', amount: 300 },
+          { ingId: 'NL02', amount: 150 },
+          { ingId: 'NL03', amount: 25 },
+          { ingId: 'NL04', amount: 10 }
+        ],
+        steps: [
+          { title: 'Sơ chế và ướp ức gà', content: 'Rửa sạch phi lê ức gà với nước muối loãng, dùng khăn giấy thấm khô. Dùng dao khía nhẹ các đường chéo trên bề mặt miếng gà rồi ướp với 1/2 thìa cà phê muối, tiêu đen và tỏi băm trong 10 phút.' },
+          { title: 'Pha nước sốt cam mật ong', content: 'Cam vàng vắt lấy nước cốt (bỏ hạt), bào thêm một chút vỏ cam để tạo hương thơm. Khuấy đều nước cam cùng mật ong nguyên chất và 1 thìa nước tương.' },
+          { title: 'Áp chảo và hoàn thiện', content: 'Làm nóng chảo với dầu oliu, cho ức gà vào áp chảo lửa vừa mỗi mặt khoảng 4 phút tới khi vàng xém. Đổ hỗn hợp sốt cam mật ong vào đun liu riu cho tới khi sốt sánh lại áo đều quanh miếng gà.' }
+        ],
+        comments: [
+          { user: 'Trần Tiến Dũng', time: '2 giờ trước', rating: 5, text: 'Tính năng tăng giảm khẩu phần tự nhân số gram ức gà và mật ong cực kỳ tiện khi mình nấu cho 1 người ăn!' },
+          { user: 'Nguyễn Thị Mai', time: '1 ngày trước', rating: 5, text: 'Sốt cam thơm lắm, gà không bị bã. Có bảng tính sẵn Calo nên mình rất yên tâm.' }
+        ]
+      },
+      {
+        id: 2,
+        title: 'Canh sườn non hầm hạt sen củ sen thanh ngọt',
+        categoryId: 'DM02',
+        occasionName: 'Cuối tuần sum vầy',
+        author: 'Trần Tiến Dũng',
+        prepTime: 15,
+        cookTime: 35,
+        baseServings: 4,
+        difficulty: 'Trung bình',
+        views: 1180,
+        createdAt: '19/10/2026',
+        image: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?auto=format&fit=crop&w=900&q=80',
+        desc: 'Nước canh trong vắt, ngọt thanh tự nhiên từ sườn non, hạt sen bùi bùi và cà rốt, giúp bồi bổ sức khỏe và an thần cho cả gia đình.',
+        ingredients: [
+          { ingId: 'NL05', amount: 400 },
+          { ingId: 'NL06', amount: 150 },
+          { ingId: 'NL07', amount: 200 }
+        ],
+        steps: [
+          { title: 'Chần sườn non', content: 'Sườn non chặt miếng vừa ăn, chần qua nước sôi có pha chút muối và gừng đập dập trong 3 phút để loại bỏ bọt bẩn, sau đó rửa lại thật sạch.' },
+          { title: 'Hầm sườn và củ sen', content: 'Cho sườn vào nồi cùng 1.2 lít nước lọc, hầm nhỏ lửa 20 phút rồi cho củ sen, cà rốt thái khoanh vào nấu cùng.' },
+          { title: 'Thêm hạt sen và nêm nếm', content: 'Khi sườn đã mềm, thả hạt sen tươi vào đun thêm 10 phút tới khi hạt sen chín bở. Nêm hạt nêm, nước mắm vừa miệng và rắc hành ngò.' }
+        ],
+        comments: [
+          { user: 'Hoàng Như Đạt', time: 'Hôm qua', rating: 5, text: 'Món canh quốc dân cho ngày cuối tuần, công thức chia các bước rất rõ ràng.' }
+        ]
+      },
+      {
+        id: 3,
+        title: 'Thịt kho tàu trứng vịt nước dừa chuẩn mâm cỗ Tết',
+        categoryId: 'DM03',
+        occasionName: 'Tết cổ truyền',
+        author: 'Hoàng Như Đạt',
+        prepTime: 20,
+        cookTime: 60,
+        baseServings: 4,
+        difficulty: 'Trung bình',
+        views: 1690,
+        createdAt: '18/10/2026',
+        image: 'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?auto=format&fit=crop&w=900&q=80',
+        desc: 'Thịt ba chỉ mềm rục, lên màu nâu cánh gián óng ả tự nhiên nhờ nước dừa tươi, quyện cùng trứng vịt thấm đẫm gia vị truyền thống ngày Tết.',
+        ingredients: [
+          { ingId: 'NL13', amount: 500 },
+          { ingId: 'NL14', amount: 4 },
+          { ingId: 'NL03', amount: 20 }
+        ],
+        steps: [
+          { title: 'Ướp thịt ba chỉ', content: 'Thịt ba chỉ thái khối vuông khoảng 4cm, ướp với hành tỏi băm, nước mắm ngon, chút mật ong/đường và hạt tiêu trong 30 phút.' },
+          { title: 'Kho thịt với nước dừa', content: 'Xào săn thịt với nước màu đường, sau đó đổ ngập nước dừa tươi, đun sôi rồi hạ lửa nhỏ liu riu trong 45 phút.' },
+          { title: 'Cho trứng vào kho cùng', content: 'Trứng luộc chín bóc vỏ, thả vào nồi thịt kho thêm 15 phút để trứng thấm màu đẹp mắt.' }
+        ],
+        comments: []
+      },
+      {
+        id: 4,
+        title: 'Bò lúc lắc xào ớt chuông và khoai tây chiên',
+        categoryId: 'DM04',
+        occasionName: 'Tiệc Giáng sinh',
+        author: 'Trương Thị Hương Giang',
+        prepTime: 15,
+        cookTime: 15,
+        baseServings: 3,
+        difficulty: 'Dễ',
+        views: 950,
+        createdAt: '21/10/2026',
+        image: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?auto=format&fit=crop&w=900&q=80',
+        desc: 'Thịt thăn bò thái vuông áp lửa lớn mềm ngọt, kết hợp cùng ớt chuông giòn tươi nhiều màu sắc rất hợp cho các bữa tiệc.',
+        ingredients: [
+          { ingId: 'NL08', amount: 350 },
+          { ingId: 'NL10', amount: 200 },
+          { ingId: 'NL09', amount: 250 },
+          { ingId: 'NL04', amount: 15 }
+        ],
+        steps: [
+          { title: 'Sơ chế thịt bò và rau củ', content: 'Thăn bò thái quân cờ 2cm, ướp dầu hào, dầu oliu, tỏi băm và tiêu đen. Ớt chuông, hành tây cắt miếng vuông tương đương.' },
+          { title: 'Xào lửa lớn', content: 'Đun chảo thật nóng, cho bò vào đảo nhanh tay trên lửa lớn 2 phút cho cháy cạnh bên ngoài nhưng bên trong vẫn mềm mọng rồi trút hợp với ớt chuông xào chín tới.' }
+        ],
+        comments: []
+      },
+      {
+        id: 5,
+        title: 'Đậu hũ non sốt nấm đông cô chay thanh đạm',
+        categoryId: 'DM05',
+        occasionName: 'Rằm & Mùng 1',
+        author: 'Trần Tiến Dũng',
+        prepTime: 10,
+        cookTime: 15,
+        baseServings: 2,
+        difficulty: 'Dễ',
+        views: 830,
+        createdAt: '22/10/2026',
+        image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=900&q=80',
+        desc: 'Món chay mềm mịn, thơm lừng mùi nấm đông cô và dầu mè, rất nhẹ bụng và giàu đạm thực vật cho ngày Rằm.',
+        ingredients: [
+          { ingId: 'NL11', amount: 300 },
+          { ingId: 'NL12', amount: 150 },
+          { ingId: 'NL04', amount: 10 }
+        ],
+        steps: [
+          { title: 'Cắt đậu hũ và xào nấm', content: 'Đậu hũ non cắt khoanh tròn xếp ra đĩa sâu lòng. Nấm đông cô thái lát xào thơm với dầu oliu và nước tương chay.' },
+          { title: 'Rưới sốt nấm', content: 'Pha chút bột năng tạo độ sánh cho sốt nấm, đun sôi cùng đậu hũ 3 phút rồi rắc hành boa-rô lên trên.' }
+        ],
+        comments: []
+      }
+    ];
+
+    // Trạng thái phiên làm việc hiện tại
+    let currentUser = usersDB[0]; // Mặc định đăng nhập Hương Giang để xem đủ tính năng
+    let favoriteRecipeIds = [1, 2];
+    let currentDetailRecipeId = 1;
+    let currentServings = 2;
+    let selectedOccasionOnHome = 'Tất cả';
+    let kitchenMode = false;
+
+    // ==================== 2. HÀM TÍNH TOÁN DINH DƯỠNG (MỤC 3.6.2) ====================
+    function calculateRecipeNutrition(recipe, targetServings = null) {
+      const servingsToUse = targetServings || recipe.baseServings;
+      const ratio = servingsToUse / recipe.baseServings;
+      let totalCal = 0, totalPro = 0, totalCarbs = 0, totalFat = 0;
+
+      recipe.ingredients.forEach(item => {
+        const ingInfo = ingredientsDB.find(i => i.id === item.ingId);
+        if (ingInfo) {
+          const scaledAmount = item.amount * ratio;
+          const unitFactor = scaledAmount / ingInfo.baseAmount;
+          totalCal += ingInfo.cal * unitFactor;
+          totalPro += ingInfo.protein * unitFactor;
+          totalCarbs += ingInfo.carbs * unitFactor;
+          totalFat += ingInfo.fat * unitFactor;
+        }
+      });
+
+      return {
+        totalCal: Math.round(totalCal),
+        totalPro: Math.round(totalPro * 10) / 10,
+        totalCarbs: Math.round(totalCarbs * 10) / 10,
+        totalFat: Math.round(totalFat * 10) / 10,
+        perServingCal: Math.round(totalCal / servingsToUse)
+      };
+    }
+
+    function getCategoryName(catId) {
+      const cat = categoriesDB.find(c => c.id === catId);
+      return cat ? cat.name : 'Chưa phân loại';
+    }
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toastContainer');
+      const colors = {
+        success: 'bg-leaf-600 text-white border-leaf-700',
+        error: 'bg-red-600 text-white border-red-700',
+        info: 'bg-stone-900 text-white border-stone-700'
+      };
+      const icons = {
+        success: 'fa-circle-check',
+        error: 'fa-circle-exclamation',
+        info: 'fa-bell'
+      };
+      const toast = document.createElement('div');
+      toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl shadow-xl border ${colors[type] || colors.info} text-sm font-semibold transition-all duration-300`;
+      toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info} text-base"></i><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    // ==================== 3. ĐIỀU HƯỚNG TAB & CẬP NHẬT HEADER ====================
+    function navigate(viewName) {
+      if (viewName === 'create' && !currentUser) {
+        showToast('Chỉ người dùng đã đăng nhập mới được Đăng công thức! Vui lòng đăng nhập.', 'error');
+        navigate('login');
+        return;
+      }
+      if (viewName === 'admin' && (!currentUser || currentUser.role !== 'admin')) {
+        showToast('Bạn cần đăng nhập quyền Quản trị viên để vào phân hệ Admin!', 'error');
+        return;
+      }
+
+      document.querySelectorAll('.view-section').forEach(sec => sec.classList.add('hidden'));
+      const target = document.getElementById(`view-${viewName}`);
+      if (target) target.classList.remove('hidden');
+
+      // Highlight nút menu
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-brand-600', 'bg-brand-50');
+        btn.classList.add('text-stone-700');
+      });
+      const activeNav = document.getElementById(`nav-${viewName}`);
+      if (activeNav) {
+        activeNav.classList.remove('text-stone-700');
+        activeNav.classList.add('text-brand-600', 'bg-brand-50');
+      }
+
+      if (viewName === 'home') renderHomeView();
+      if (viewName === 'search') applyFilters();
+      if (viewName === 'create') initCreateRecipeForm();
+      if (viewName === 'profile') switchProfileSubTab('my-recipes');
+      if (viewName === 'admin') switchAdminSubTab('categories');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function quickSwitchRole(role) {
+      const switcher = document.getElementById('roleSwitcher');
+      if (role === 'guest') {
+        currentUser = null;
+        if (switcher) switcher.value = 'guest';
+        showToast('Đã chuyển sang vai trò: Khách vãng lai (Chưa đăng nhập)', 'info');
+      } else if (role === 'member') {
+        currentUser = usersDB[0];
+        if (switcher) switcher.value = 'member';
+        showToast(`Đã đăng nhập thành viên: ${currentUser.fullName}`, 'success');
+      } else if (role === 'admin') {
+        currentUser = usersDB[2];
+        if (switcher) switcher.value = 'admin';
+        showToast(`Đã chuyển sang Quản trị viên: ${currentUser.fullName}`, 'info');
+      }
+      renderHeaderAuth();
+    }
+
+    function renderHeaderAuth() {
+      const authArea = document.getElementById('headerAuthArea');
+      const favBadge = document.getElementById('favCountBadge');
+      favBadge.textContent = favoriteRecipeIds.length;
+
+      if (!currentUser) {
+        authArea.innerHTML = `
+          <button onclick="navigate('login')" class="px-4 py-2 rounded-xl text-sm font-bold text-stone-700 hover:bg-stone-100 transition">Đăng nhập</button>
+          <button onclick="navigate('register')" class="px-4 py-2 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition">Đăng ký</button>
+        `;
+      } else {
+        authArea.innerHTML = `
+          <button onclick="navigate('create')" class="hidden md:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white shadow-sm transition">
+            <i class="fa-solid fa-plus"></i> Đăng công thức
+          </button>
+          ${currentUser.role === 'admin' ? `
+            <button onclick="navigate('admin')" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-stone-900 hover:bg-stone-800 text-amber-400 transition">
+              <i class="fa-solid fa-shield-halved mr-1"></i>Quản trị
+            </button>
+          ` : ''}
+          <div class="relative dropdown">
+            <button onclick="navigate('profile')" class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full bg-stone-100 hover:bg-stone-200 transition">
+              <div class="w-7 h-7 rounded-full bg-brand-600 text-white text-xs font-bold flex items-center justify-center">
+                ${currentUser.fullName.charAt(0)}
+              </div>
+              <span class="text-xs font-bold text-stone-800 hidden sm:inline">${currentUser.fullName.split(' ').slice(-2).join(' ')}</span>
+              <i class="fa-solid fa-chevron-down text-[10px] text-stone-500"></i>
+            </button>
+            <div class="dropdown-menu hidden absolute right-0 mt-1 w-52 bg-white rounded-2xl shadow-xl border border-stone-100 p-2 z-50">
+              <button onclick="openProfileTab('my-recipes')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-stone-700 hover:bg-brand-50 hover:text-brand-600">
+                <i class="fa-solid fa-book mr-2"></i>Quản lý công thức cá nhân
+              </button>
+              <button onclick="openProfileTab('favorites')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-stone-700 hover:bg-brand-50 hover:text-brand-600">
+                <i class="fa-solid fa-heart mr-2 text-red-500"></i>Công thức yêu thích
+              </button>
+              <button onclick="openProfileTab('info')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-semibold text-stone-700 hover:bg-brand-50 hover:text-brand-600">
+                <i class="fa-solid fa-user-gear mr-2"></i>Thông tin cá nhân
+              </button>
+              <hr class="my-1 border-stone-100" />
+              <button onclick="quickSwitchRole('guest'); navigate('home')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50">
+                <i class="fa-solid fa-right-from-bracket mr-2"></i>Đăng xuất (UC10)
+              </button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function renderDropdownMenus() {
+      const catDropdown = document.getElementById('headerCategoryDropdown');
+      catDropdown.innerHTML = categoriesDB.map(c => `
+        <button onclick="filterByCategory('${c.id}')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-stone-700 hover:bg-brand-50 hover:text-brand-600 flex items-center justify-between transition">
+          <span><i class="fa-solid ${c.icon || 'fa-utensils'} w-5 text-brand-500"></i> ${c.name}</span>
+          <span class="text-xs text-stone-400">${recipesDB.filter(r => r.categoryId === c.id).length}</span>
+        </button>
+      `).join('');
+
+      const occDropdown = document.getElementById('headerOccasionDropdown');
+      occDropdown.innerHTML = occasionsDB.map(o => `
+        <button onclick="filterByOccasion('${o.name}')" class="w-full text-left px-3 py-2 rounded-xl text-sm font-medium text-stone-700 hover:bg-amber-50 hover:text-amber-700 flex items-center justify-between transition">
+          <span><i class="fa-solid fa-star w-5 text-amber-500"></i> ${o.name}</span>
+        </button>
+      `).join('');
+    }
+
+    // ==================== 4. RENDER THẺ MÓN ĂN & TRANG CHỦ ====================
+    function createRecipeCardHTML(recipe) {
+      const nutri = calculateRecipeNutrition(recipe, 1);
+      const isFav = favoriteRecipeIds.includes(recipe.id);
+      const totalTime = recipe.prepTime + recipe.cookTime;
+
+      return `
+        <article class="recipe-card bg-white rounded-3xl overflow-hidden border border-stone-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col">
+          <div class="relative h-52 overflow-hidden bg-stone-100 cursor-pointer" onclick="openRecipeDetail(${recipe.id})">
+            <img src="${recipe.image}" alt="${recipe.title}" 
+                 onerror="this.src='https://placehold.co/600x400/ffedd5/ea580c?text=CookMate+Recipe'"
+                 class="recipe-img w-full h-full object-cover transition-transform duration-500" />
+            <span class="absolute top-3 left-3 bg-stone-900/80 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1 rounded-full">
+              ${getCategoryName(recipe.categoryId)}
+            </span>
+            <button onclick="event.stopPropagation(); toggleFavorite(${recipe.id})" 
+              class="absolute top-3 right-3 w-9 h-9 rounded-full ${isFav ? 'bg-red-500 text-white' : 'bg-white/90 text-stone-600 hover:text-red-500'} shadow flex items-center justify-center transition">
+              <i class="fa-solid fa-heart"></i>
+            </button>
+            <span class="absolute bottom-3 right-3 bg-leaf-600 text-white text-xs font-extrabold px-2.5 py-1 rounded-lg shadow">
+              🔥 ${nutri.perServingCal} kcal / người
+            </span>
+          </div>
+
+          <div class="p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 text-xs text-amber-700 font-semibold mb-1.5">
+                <i class="fa-solid fa-calendar-day"></i> ${recipe.occasionName}
+              </div>
+              <h3 onclick="openRecipeDetail(${recipe.id})" class="font-extrabold text-lg text-stone-900 hover:text-brand-600 cursor-pointer line-clamp-2 leading-snug mb-2">
+                ${recipe.title}
+              </h3>
+              <p class="text-xs text-stone-500 line-clamp-2 mb-4">${recipe.desc}</p>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between text-xs text-stone-600 bg-stone-50 px-3 py-2 rounded-xl mb-3">
+                <span><i class="fa-regular fa-clock text-brand-500 mr-1"></i>${totalTime} phút</span>
+                <span><i class="fa-solid fa-user-group text-brand-500 mr-1"></i>${recipe.baseServings} khẩu phần</span>
+                <span><i class="fa-solid fa-signal text-leaf-600 mr-1"></i>${recipe.difficulty}</span>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-stone-100 text-xs text-stone-500">
+                <span class="font-semibold text-stone-700"><i class="fa-regular fa-user mr-1 text-brand-500"></i>${recipe.author}</span>
+                <span><i class="fa-regular fa-eye mr-1"></i>${recipe.views} lượt xem</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderHomeView() {
+      renderDropdownMenus();
+      // Danh mục
+      const catList = document.getElementById('homeCategoryList');
+      catList.innerHTML = categoriesDB.map(cat => `
+        <div onclick="filterByCategory('${cat.id}')" class="group cursor-pointer bg-white rounded-2xl p-4 border border-stone-200/80 shadow-sm hover:border-brand-500 hover:shadow-md transition text-center">
+          <div class="w-14 h-14 mx-auto rounded-2xl overflow-hidden mb-3 relative">
+            <img src="${cat.image}" alt="${cat.name}" class="w-full h-full object-cover group-hover:scale-110 transition" />
+          </div>
+          <h3 class="font-bold text-sm text-stone-800 group-hover:text-brand-600 transition line-clamp-1">${cat.name}</h3>
+          <p class="text-[11px] text-stone-400 mt-0.5">${recipesDB.filter(r => r.categoryId === cat.id).length} công thức</p>
+        </div>
+      `).join('');
+
+      renderHomeRecipes('all');
+      renderOccasionSection(selectedOccasionOnHome);
+    }
+
+    function renderHomeRecipes(mode) {
+      document.querySelectorAll('.home-filter-btn').forEach(b => {
+        b.classList.remove('bg-brand-600', 'text-white');
+        b.classList.add('bg-stone-200', 'text-stone-700');
+      });
+      const activeBtn = document.getElementById(`homeFilter-${mode}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-stone-200', 'text-stone-700');
+        activeBtn.classList.add('bg-brand-600', 'text-white');
+      }
+
+      let list = [...recipesDB];
+      if (mode === 'popular') list.sort((a, b) => b.views - a.views);
+      if (mode === 'newest') list.sort((a, b) => b.id - a.id);
+
+      document.getElementById('homeRecipeGrid').innerHTML = list.map(r => createRecipeCardHTML(r)).join('');
+    }
+
+    function renderOccasionSection(occName) {
+      selectedOccasionOnHome = occName;
+      const pills = document.getElementById('occasionPills');
+      const allOccs = ['Tất cả', ...occasionsDB.map(o => o.name)];
+      pills.innerHTML = allOccs.map(name => `
+        <button onclick="renderOccasionSection('${name}')" 
+          class="px-3.5 py-1.5 rounded-full text-xs font-bold transition ${name === occName ? 'bg-amber-600 text-white shadow' : 'bg-white text-stone-700 border border-amber-200 hover:bg-amber-100'}">
+          ${name}
+        </button>
+      `).join('');
+
+      const filtered = occName === 'Tất cả' ? recipesDB.slice(0, 3) : recipesDB.filter(r => r.occasionName === occName);
+      const grid = document.getElementById('occasionRecipeGrid');
+      grid.innerHTML = filtered.length
+        ? filtered.map(r => createRecipeCardHTML(r)).join('')
+        : `<div class="col-span-3 bg-white rounded-2xl p-8 text-center text-stone-500">Chưa có món ăn nào gắn với dịp lễ "${occName}".</div>`;
+    }
+
+    // ==================== 5. USE CASE TÌM KIẾM CÔNG THỨC (TRẦN TIẾN DŨNG) ====================
+    function populateSearchSelects() {
+      const catSel = document.getElementById('filterCategorySelect');
+      catSel.innerHTML = `<option value="Tất cả">Tất cả danh mục</option>` +
+        categoriesDB.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+
+      const occSel = document.getElementById('filterOccasionSelect');
+      occSel.innerHTML = `<option value="Tất cả">Tất cả dịp lễ</option>` +
+        occasionsDB.map(o => `<option value="${o.name}">${o.name}</option>`).join('');
+    }
+
+    function executeHeroSearch() {
+      const kw = document.getElementById('heroSearchInput').value;
+      populateSearchSelects();
+      navigate('search');
+      document.getElementById('searchKeywordInput').value = kw;
+      handleSearchSubmit();
+    }
+
+    function triggerHeaderSearch() {
+      const kw = document.getElementById('headerQuickSearch').value;
+      populateSearchSelects();
+      navigate('search');
+      document.getElementById('searchKeywordInput').value = kw;
+      handleSearchSubmit();
+    }
+
+    function quickKeywordSearch(kw) {
+      populateSearchSelects();
+      navigate('search');
+      document.getElementById('searchKeywordInput').value = kw;
+      handleSearchSubmit();
+    }
+
+    function filterByCategory(catId) {
+      populateSearchSelects();
+      navigate('search');
+      document.getElementById('searchKeywordInput').value = '';
+      document.getElementById('filterCategorySelect').value = catId;
+      document.getElementById('searchValidationAlert').classList.add('hidden');
+      applyFilters();
+    }
+
+    function filterByOccasion(occName) {
+      populateSearchSelects();
+      navigate('search');
+      document.getElementById('searchKeywordInput').value = '';
+      document.getElementById('filterOccasionSelect').value = occName;
+      document.getElementById('searchValidationAlert').classList.add('hidden');
+      applyFilters();
+    }
+
+    function showFeaturedRecipes() {
+      navigate('home');
+      renderHomeRecipes('popular');
+    }
+
+    // Kiểm tra đúng Luồng rẽ nhánh 1 & 2 trong Bảng đặc tả Use Case Tìm kiếm của Trần Tiến Dũng
+    function handleSearchSubmit() {
+      const kw = document.getElementById('searchKeywordInput').value.trim();
+      const alertBox = document.getElementById('searchValidationAlert');
+
+      if (!kw) {
+        // Luồng rẽ nhánh 1: Không nhập từ khóa mà vẫn nhấn tìm kiếm
+        alertBox.className = 'mt-4 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold flex items-center gap-2.5';
+        alertBox.innerHTML = `<i class="fa-solid fa-circle-exclamation text-lg"></i> <span>Vui lòng nhập từ khóa tìm kiếm!</span>`;
+        alertBox.classList.remove('hidden');
+        return;
+      }
+
+      alertBox.classList.add('hidden');
+      applyFilters(true);
+    }
+
+    function applyFilters(fromKeywordSubmit = false) {
+      if (document.getElementById('filterCategorySelect').options.length <= 1) {
+        populateSearchSelects();
+      }
+      const kw = document.getElementById('searchKeywordInput').value.trim().toLowerCase();
+      const catId = document.getElementById('filterCategorySelect').value;
+      const occName = document.getElementById('filterOccasionSelect').value;
+      const diff = document.getElementById('filterDifficultySelect').value;
+      const maxTime = parseInt(document.getElementById('filterTimeSelect').value || '0', 10);
+      const alertBox = document.getElementById('searchValidationAlert');
+
+      const results = recipesDB.filter(r => {
+        // Tìm gần đúng theo tên món hoặc tên nguyên liệu
+        const ingNames = r.ingredients.map(item => {
+          const found = ingredientsDB.find(i => i.id === item.ingId);
+          return found ? found.name.toLowerCase() : '';
+        }).join(' ');
+
+        const matchKw = !kw || r.title.toLowerCase().includes(kw) || r.desc.toLowerCase().includes(kw) || ingNames.includes(kw);
+        const matchCat = catId === 'Tất cả' || r.categoryId === catId;
+        const matchOcc = occName === 'Tất cả' || r.occasionName === occName;
+        const matchDiff = diff === 'Tất cả' || r.difficulty === diff;
+        const matchTime = maxTime === 0 || (r.prepTime + r.cookTime) <= maxTime;
+
+        return matchKw && matchCat && matchOcc && matchDiff && matchTime;
+      });
+
+      const summary = document.getElementById('searchResultSummary');
+      const grid = document.getElementById('searchResultGrid');
+
+      if (results.length === 0) {
+        // Luồng rẽ nhánh 2: Không có công thức nào khớp với từ khóa tìm kiếm
+        alertBox.className = 'mt-4 p-4 rounded-xl border border-amber-200 bg-amber-50 text-amber-800 text-sm font-semibold flex items-center gap-2.5';
+        alertBox.innerHTML = `<i class="fa-solid fa-magnifying-glass-minus text-lg"></i> <span>Không tìm thấy công thức nào phù hợp! Gợi ý: Bạn hãy thử lại với từ khóa khác (ví dụ: "gà", "sườn", "đậu hũ").</span>`;
+        alertBox.classList.remove('hidden');
+        summary.textContent = 'Tìm thấy 0 công thức';
+        grid.innerHTML = '';
+      } else {
+        if (!fromKeywordSubmit) alertBox.classList.add('hidden');
+        summary.textContent = `Hiển thị ${results.length} công thức phù hợp`;
+        grid.innerHTML = results.map(r => createRecipeCardHTML(r)).join('');
+      }
+    }
+
+    function resetSearchFilters() {
+      document.getElementById('searchKeywordInput').value = '';
+      populateSearchSelects();
+      document.getElementById('filterDifficultySelect').value = 'Tất cả';
+      document.getElementById('filterTimeSelect').value = '0';
+      document.getElementById('searchValidationAlert').classList.add('hidden');
+      applyFilters();
+    }
+
+    // ==================== 6. XEM CHI TIẾT CÔNG THỨC + CO GIÃN KHẨU PHẦN & DINH DƯỠNG (HƯƠNG GIANG) ====================
+    function openRecipeDetail(recipeId) {
+      const recipe = recipesDB.find(r => r.id === recipeId);
+      const container = document.getElementById('recipeDetailContainer');
+      navigate('detail');
+
+      if (!recipe) {
+        // Luồng rẽ nhánh 1: Không tìm thấy công thức
+        container.innerHTML = `<div class="bg-red-50 border border-red-200 text-red-700 p-8 rounded-3xl font-bold text-center">Không tìm thấy công thức!</div>`;
+        return;
+      }
+
+      recipe.views += 1;
+      currentDetailRecipeId = recipe.id;
+      currentServings = recipe.baseServings;
+      renderRecipeDetailContent();
+    }
+
+    function changePortion(delta) {
+      if (currentServings + delta < 1 || currentServings + delta > 30) return;
+      currentServings += delta;
+      renderRecipeDetailContent();
+    }
+
+    function setExactPortion(num) {
+      currentServings = num;
+      renderRecipeDetailContent();
+    }
+
+    function toggleKitchenMode() {
+      kitchenMode = !kitchenMode;
+      const btn = document.getElementById('kitchenModeBtn');
+      const detailSec = document.getElementById('view-detail');
+      if (kitchenMode) {
+        detailSec.classList.add('kitchen-mode-active');
+        btn.className = 'inline-flex items-center gap-2 text-xs font-bold bg-brand-600 text-white px-3.5 py-2 rounded-xl transition';
+        showToast('Đã bật Chế độ Đứng bếp: Chữ to rõ ràng trên màn hình điện thoại!', 'info');
+      } else {
+        detailSec.classList.remove('kitchen-mode-active');
+        btn.className = 'inline-flex items-center gap-2 text-xs font-bold bg-stone-800 text-white px-3.5 py-2 rounded-xl transition';
+      }
+    }
+
+    function renderRecipeDetailContent() {
+      const recipe = recipesDB.find(r => r.id === currentDetailRecipeId);
+      if (!recipe) return;
+
+      const ratio = currentServings / recipe.baseServings;
+      const nutri = calculateRecipeNutrition(recipe, currentServings);
+      const isFav = favoriteRecipeIds.includes(recipe.id);
+
+      const ingredientsHTML = recipe.ingredients && recipe.ingredients.length > 0
+        ? recipe.ingredients.map((item, idx) => {
+            const info = ingredientsDB.find(i => i.id === item.ingId);
+            if (!info) return '';
+            const rawScaled = item.amount * ratio;
+            const formattedAmount = Number.isInteger(rawScaled) ? rawScaled : rawScaled.toFixed(1);
+            const itemCal = Math.round((rawScaled / info.baseAmount) * info.cal);
+            return `
+              <label class="flex items-center justify-between p-3 rounded-xl bg-stone-50 hover:bg-brand-50/60 border border-stone-200/80 cursor-pointer transition">
+                <div class="flex items-center gap-3">
+                  <input type="checkbox" class="w-4 h-4 accent-brand-600 rounded" />
+                  <span class="font-semibold text-stone-800">${info.name}</span>
+                </div>
+                <div class="text-right">
+                  <span class="font-extrabold text-brand-600 text-base">${formattedAmount} ${info.unit}</span>
+                  <span class="block text-[11px] text-stone-400">~${itemCal} kcal</span>
+                </div>
+              </label>
+            `;
+          }).join('')
+        : `<p class="text-amber-700 bg-amber-50 p-3 rounded-xl text-sm font-semibold">Công thức chưa có thông tin nguyên liệu!</p>`;
+
+      const stepsHTML = recipe.steps && recipe.steps.length > 0
+        ? recipe.steps.map((st, idx) => `
+            <div class="flex gap-4 p-5 rounded-2xl bg-stone-50 border border-stone-200/80">
+              <div class="w-10 h-10 rounded-2xl bg-brand-600 text-white font-extrabold flex items-center justify-center shrink-0 shadow-sm">
+                ${idx + 1}
+              </div>
+              <div class="space-y-1.5">
+                <h4 class="font-extrabold text-stone-900 text-base">${st.title || `Bước ${idx + 1}`}</h4>
+                <p class="text-stone-700 leading-relaxed">${st.content}</p>
+              </div>
+            </div>
+          `).join('')
+        : `<p class="text-amber-700 bg-amber-50 p-4 rounded-xl font-semibold">Công thức chưa có hướng dẫn thực hiện!</p>`;
+
+      const commentsHTML = recipe.comments.length > 0
+        ? recipe.comments.map(c => `
+            <div class="p-4 rounded-2xl bg-stone-50 border border-stone-200/70">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-bold text-stone-900 text-sm"><i class="fa-solid fa-user-circle text-brand-500 mr-1.5"></i>${c.user}</span>
+                <span class="text-xs text-stone-400">${c.time}</span>
+              </div>
+              <div class="text-amber-400 text-xs mb-1.5">${'★'.repeat(c.rating || 5)}</div>
+              <p class="text-sm text-stone-700">${c.text}</p>
+            </div>
+          `).join('')
+        : `<p class="text-sm text-stone-400 italic">Chưa có bình luận nào. Hãy là người đầu tiên chia sẻ cảm nhận!</p>`;
+
+      document.getElementById('recipeDetailContainer').innerHTML = `
+        <!-- Phần đầu: Ảnh & Thông số món ăn -->
+        <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-stone-200 mb-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div class="lg:col-span-5 h-72 sm:h-80 rounded-2xl overflow-hidden bg-stone-100">
+            <img src="${recipe.image}" alt="${recipe.title}" class="w-full h-full object-cover" />
+          </div>
+          <div class="lg:col-span-7 space-y-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="px-3 py-1 rounded-full bg-brand-50 text-brand-700 font-bold text-xs">${getCategoryName(recipe.categoryId)}</span>
+              <span class="px-3 py-1 rounded-full bg-amber-50 text-amber-700 font-bold text-xs"><i class="fa-solid fa-calendar-day mr-1"></i>${recipe.occasionName}</span>
+              <span class="text-xs text-stone-400 ml-auto"><i class="fa-regular fa-eye mr-1"></i>${recipe.views} lượt xem</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-stone-900 leading-tight">${recipe.title}</h1>
+            <p class="text-stone-600 leading-relaxed">${recipe.desc}</p>
+
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+              <div class="bg-stone-50 p-3 rounded-2xl border border-stone-200/60 text-center">
+                <span class="text-xs text-stone-400 block">Chuẩn bị</span>
+                <strong class="text-stone-900 text-base">${recipe.prepTime} phút</strong>
+              </div>
+              <div class="bg-stone-50 p-3 rounded-2xl border border-stone-200/60 text-center">
+                <span class="text-xs text-stone-400 block">Thời gian nấu</span>
+                <strong class="text-stone-900 text-base">${recipe.cookTime} phút</strong>
+              </div>
+              <div class="bg-stone-50 p-3 rounded-2xl border border-stone-200/60 text-center">
+                <span class="text-xs text-stone-400 block">Độ khó</span>
+                <strong class="text-leaf-700 text-base">${recipe.difficulty}</strong>
+              </div>
+              <div class="bg-stone-50 p-3 rounded-2xl border border-stone-200/60 text-center">
+                <span class="text-xs text-stone-400 block">Người đăng</span>
+                <strong class="text-stone-900 text-sm line-clamp-1">${recipe.author}</strong>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3 pt-2">
+              <button onclick="toggleFavorite(${recipe.id}); renderRecipeDetailContent()" 
+                class="px-5 py-2.5 rounded-xl font-bold text-sm transition flex items-center gap-2 ${isFav ? 'bg-red-500 text-white' : 'bg-stone-100 hover:bg-red-50 text-stone-700 hover:text-red-600'}">
+                <i class="fa-solid fa-heart"></i> ${isFav ? 'Đã lưu vào Yêu thích' : 'Lưu vào Yêu thích (UC15)'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Phần giữa: Cột Trái (Nguyên liệu + Co giãn khẩu phần + Dinh dưỡng) & Cột Phải (Các bước nấu + Bình luận) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          
+          <!-- Cột Trái (5 cột): Chức năng điểm nhấn 3.6.1 & 3.6.2 -->
+          <div class="lg:col-span-5 space-y-6">
+            
+            <!-- Hộp 1: Điều chỉnh định lượng theo khẩu phần (Mục 3.6.1) -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200">
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2.5 py-1 rounded-md">
+                  Điểm nhấn 3.6.1 • Co giãn khẩu phần
+                </span>
+                <span class="text-xs text-stone-400">Gốc: ${recipe.baseServings} người</span>
+              </div>
+              <h3 class="text-xl font-extrabold text-stone-900 mb-4">Nguyên liệu cần chuẩn bị</h3>
+
+              <!-- Bộ nút tăng giảm số người ăn -->
+              <div class="bg-brand-50/70 border border-brand-200 rounded-2xl p-4 mb-5">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="text-xs font-bold text-brand-700 uppercase block">Số khẩu phần ăn</span>
+                    <span class="text-xs text-stone-500">Định lượng tự động nhân/chia</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <button onclick="changePortion(-1)" class="w-9 h-9 rounded-xl bg-white border border-brand-300 text-brand-600 hover:bg-brand-600 hover:text-white font-extrabold transition shadow-sm">-</button>
+                    <span class="text-xl font-extrabold text-stone-900 min-w-[68px] text-center">${currentServings} người</span>
+                    <button onclick="changePortion(1)" class="w-9 h-9 rounded-xl bg-white border border-brand-300 text-brand-600 hover:bg-brand-600 hover:text-white font-extrabold transition shadow-sm">+</button>
+                  </div>
+                </div>
+                <div class="flex items-center gap-1.5 mt-3 pt-3 border-t border-brand-200/60 text-xs">
+                  <span class="text-stone-500 mr-1">Chọn nhanh:</span>
+                  ${[1, 2, 4, 6].map(n => `
+                    <button onclick="setExactPortion(${n})" class="px-2.5 py-1 rounded-lg font-bold transition ${currentServings === n ? 'bg-brand-600 text-white' : 'bg-white text-stone-700 hover:bg-brand-100'}">${n} người</button>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- Danh sách nguyên liệu -->
+              <div class="space-y-2.5">
+                ${ingredientsHTML}
+              </div>
+            </div>
+
+            <!-- Hộp 2: Ước tính giá trị dinh dưỡng (Mục 3.6.2) -->
+            <div class="bg-white rounded-3xl p-6 shadow-sm border border-leaf-600/30">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-leaf-700 bg-leaf-50 px-2.5 py-1 rounded-md">
+                  Điểm nhấn 3.6.2 • Ước tính dinh dưỡng
+                </span>
+                <span class="text-xs font-semibold text-stone-500">Cho ${currentServings} khẩu phần</span>
+              </div>
+              <h3 class="text-xl font-extrabold text-stone-900 mb-1">Giá trị dinh dưỡng ước tính</h3>
+              <p class="text-xs text-stone-500 mb-4">Trung bình 1 người ăn: <strong class="text-leaf-700">${nutri.perServingCal} kcal</strong></p>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div class="p-4 rounded-2xl bg-orange-50 border border-orange-200/70">
+                  <div class="text-xs font-bold text-orange-700 uppercase">🔥 Tổng Calories</div>
+                  <div class="text-2xl font-extrabold text-stone-900 mt-1">${nutri.totalCal} <span class="text-xs font-semibold">kcal</span></div>
+                </div>
+                <div class="p-4 rounded-2xl bg-leaf-50 border border-leaf-100">
+                  <div class="text-xs font-bold text-leaf-700 uppercase">🥩 Chất đạm (Protein)</div>
+                  <div class="text-2xl font-extrabold text-stone-900 mt-1">${nutri.totalPro} <span class="text-xs font-semibold">g</span></div>
+                </div>
+                <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200/70">
+                  <div class="text-xs font-bold text-amber-800 uppercase">🍚 Tinh bột (Carbs)</div>
+                  <div class="text-2xl font-extrabold text-stone-900 mt-1">${nutri.totalCarbs} <span class="text-xs font-semibold">g</span></div>
+                </div>
+                <div class="p-4 rounded-2xl bg-blue-50 border border-blue-200/70">
+                  <div class="text-xs font-bold text-blue-700 uppercase">🥑 Chất béo (Fat)</div>
+                  <div class="text-2xl font-extrabold text-stone-900 mt-1">${nutri.totalFat} <span class="text-xs font-semibold">g</span></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Cột Phải (7 cột): Hướng dẫn từng bước & Bình luận -->
+          <div class="lg:col-span-7 space-y-6">
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-stone-200">
+              <h3 class="text-xl font-extrabold text-stone-900 mb-5 flex items-center gap-2">
+                <i class="fa-solid fa-fire-burner text-brand-500"></i> Các bước thực hiện
+              </h3>
+              <div class="space-y-4">
+                ${stepsHTML}
+              </div>
+            </div>
+
+            <!-- Khu vực Bình luận (Use Case 14) -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-stone-200">
+              <h3 class="text-lg font-extrabold text-stone-900 mb-4">
+                <i class="fa-regular fa-comments text-brand-500 mr-1.5"></i> Bình luận & Đánh giá từ cộng đồng (${recipe.comments.length})
+              </h3>
+              <div class="flex flex-col sm:flex-row gap-2.5 mb-6">
+                <input id="newCommentInput" type="text" placeholder="Chia sẻ cảm nhận hoặc mẹo nấu món này..." class="flex-1 rounded-xl border border-stone-300 px-4 py-2.5 text-sm focus:border-brand-500 focus:outline-none" />
+                <button onclick="submitRecipeComment(${recipe.id})" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shrink-0 transition">
+                  Gửi bình luận
+                </button>
+              </div>
+              <div class="space-y-3">
+                ${commentsHTML}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      `;
+    }
+
+    function submitRecipeComment(recipeId) {
+      if (!currentUser) {
+        showToast('Vui lòng đăng nhập để gửi bình luận!', 'error');
+        return;
+      }
+      const inp = document.getElementById('newCommentInput');
+      const text = inp.value.trim();
+      if (!text) {
+        showToast('Vui lòng nhập nội dung bình luận!', 'error');
+        return;
+      }
+      const recipe = recipesDB.find(r => r.id === recipeId);
+      recipe.comments.unshift({
+        user: currentUser.fullName,
+        time: 'Vừa xong',
+        rating: 5,
+        text
+      });
+      showToast('Đã đăng bình luận thành công!', 'success');
+      renderRecipeDetailContent();
+    }
+
+    function toggleFavorite(recipeId) {
+      if (!currentUser) {
+        showToast('Vui lòng đăng nhập để lưu công thức yêu thích!', 'error');
+        return;
+      }
+      const idx = favoriteRecipeIds.indexOf(recipeId);
+      if (idx > -1) {
+        favoriteRecipeIds.splice(idx, 1);
+        showToast('Đã xóa khỏi danh sách yêu thích', 'info');
+      } else {
+        favoriteRecipeIds.push(recipeId);
+        showToast('Đã thêm vào danh sách Công thức yêu thích!', 'success');
+      }
+      renderHeaderAuth();
+      if (!document.getElementById('view-home').classList.contains('hidden')) renderHomeView();
+    }
+
+    // ==================== 7. ĐĂNG CÔNG THỨC NẤU ĂN (USE CASE HƯƠNG GIANG) ====================
+    function initCreateRecipeForm() {
+      document.getElementById('createRecipeAlert').classList.add('hidden');
+      document.getElementById('crCategory').innerHTML = categoriesDB.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      document.getElementById('crOccasion').innerHTML = occasionsDB.map(o => `<option value="${o.name}">${o.name}</option>`).join('');
+
+      const ingContainer = document.getElementById('crIngredientRows');
+      const stepContainer = document.getElementById('crStepRows');
+      if (ingContainer.children.length === 0) {
+        addIngredientRow('NL01', 250);
+        addIngredientRow('NL04', 10);
+      }
+      if (stepContainer.children.length === 0) {
+        addStepRow('Sơ chế nguyên liệu sạch sẽ và để ráo nước.');
+        addStepRow('Chế biến trên lửa vừa và trình bày ra đĩa.');
+      }
+    }
+
+    function addIngredientRow(defaultIngId = 'NL01', defaultAmt = 100) {
+      const container = document.getElementById('crIngredientRows');
+      const row = document.createElement('div');
+      row.className = 'flex items-center gap-2 cr-ing-row';
+      row.innerHTML = `
+        <select class="cr-ing-select flex-1 rounded-xl border border-stone-300 px-3 py-2 text-sm bg-white">
+          ${ingredientsDB.map(i => `<option value="${i.id}" ${i.id === defaultIngId ? 'selected' : ''}>${i.name} (${i.cal} kcal/${i.baseAmount}${i.unit})</option>`).join('')}
+        </select>
+        <input type="number" min="1" value="${defaultAmt}" placeholder="Định lượng" class="cr-ing-amount w-28 rounded-xl border border-stone-300 px-3 py-2 text-sm bg-white" />
+        <button type="button" onclick="this.parentElement.remove()" class="p-2 text-stone-400 hover:text-red-500">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+      `;
+      container.appendChild(row);
+    }
+
+    function addStepRow(defaultText = '') {
+      const container = document.getElementById('crStepRows');
+      const row = document.createElement('div');
+      row.className = 'flex items-start gap-2 cr-step-row';
+      row.innerHTML = `
+        <textarea rows="2" placeholder="Nhập hướng dẫn chi tiết cho bước này..." class="cr-step-text flex-1 rounded-xl border border-stone-300 px-3 py-2 text-sm bg-white">${defaultText}</textarea>
+        <button type="button" onclick="this.parentElement.remove()" class="p-2 text-stone-400 hover:text-red-500">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+      `;
+      container.appendChild(row);
+    }
+
+    function fillSampleRecipeForm() {
+      document.getElementById('crTitle').value = 'Salad ức gà áp chảo bơ tươi sốt mè rang';
+      document.getElementById('crDesc').value = 'Món salad tươi mát, giàu protein và chất béo tốt, chuẩn bị chỉ trong 15 phút cho bữa tối nhẹ nhàng.';
+      document.getElementById('crServings').value = 2;
+      document.getElementById('crTime').value = 15;
+      showToast('Đã điền dữ liệu mẫu, bạn có thể bấm Đăng công thức ngay!', 'info');
+    }
+
+    function handleCreateRecipe(e) {
+      e.preventDefault();
+      const title = document.getElementById('crTitle').value.trim();
+      const desc = document.getElementById('crDesc').value.trim();
+      const servings = parseInt(document.getElementById('crServings').value, 10);
+      const time = parseInt(document.getElementById('crTime').value, 10);
+      const alertBox = document.getElementById('createRecipeAlert');
+
+      const ingRows = [...document.querySelectorAll('.cr-ing-row')];
+      const stepRows = [...document.querySelectorAll('.cr-step-row')];
+
+      // Luồng rẽ nhánh 1 & 2 trong đặc tả Use Case Đăng công thức của Hương Giang
+      if (!title || !desc || !servings || !time || ingRows.length === 0 || stepRows.length === 0) {
+        alertBox.className = 'mb-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold';
+        alertBox.textContent = 'Vui lòng bổ sung đầy đủ thông tin bắt buộc của công thức (Tên món, mô tả, nguyên liệu và các bước thực hiện)!';
+        alertBox.classList.remove('hidden');
+        return;
+      }
+
+      const ingredients = ingRows.map(r => ({
+        ingId: r.querySelector('.cr-ing-select').value,
+        amount: parseFloat(r.querySelector('.cr-ing-amount').value) || 100
+      }));
+
+      const steps = stepRows.map((r, i) => ({
+        title: `Bước ${i + 1}`,
+        content: r.querySelector('.cr-step-text').value.trim() || 'Thực hiện chế biến theo hướng dẫn.'
+      }));
+
+      const newRecipe = {
+        id: Date.now(),
+        title,
+        categoryId: document.getElementById('crCategory').value,
+        occasionName: document.getElementById('crOccasion').value,
+        author: currentUser ? currentUser.fullName : 'Thành viên CookMate',
+        prepTime: 10,
+        cookTime: time,
+        baseServings: servings,
+        difficulty: document.getElementById('crDifficulty').value,
+        views: 1,
+        createdAt: 'Hôm nay',
+        image: document.getElementById('crImage').value.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=900&q=80',
+        desc,
+        ingredients,
+        steps,
+        comments: []
+      };
+
+      recipesDB.unshift(newRecipe);
+      showToast('Đăng công thức thành công!', 'success');
+      openRecipeDetail(newRecipe.id);
+    }
+
+    function cancelCreateRecipe() {
+      // Luồng rẽ nhánh 3: Người dùng kích vào nút Hủy
+      showToast('Đã hủy thao tác chia sẻ công thức', 'info');
+      navigate('home');
+    }
+
+    // ==================== 8. USE CASE ĐĂNG KÝ (TIẾN DŨNG) & ĐĂNG NHẬP (NHƯ ĐẠT) ====================
+    function handleRegisterSubmit(e) {
+      e.preventDefault();
+      const nameEl = document.getElementById('regFullName');
+      const emailEl = document.getElementById('regEmail');
+      const passEl = document.getElementById('regPassword');
+      const confEl = document.getElementById('regConfirmPassword');
+      const alertBox = document.getElementById('registerAlert');
+
+      document.querySelectorAll('.reg-input').forEach(el => el.classList.remove('border-red-500', 'bg-red-50/30'));
+
+      const fullName = nameEl.value.trim();
+      const email = emailEl.value.trim();
+      const password = passEl.value;
+      const confirmPass = confEl.value;
+
+      // Luồng rẽ nhánh 1: Bỏ trống trường bắt buộc -> báo đỏ các trường và hiện đúng thông báo
+      if (!fullName || !email || !password || !confirmPass) {
+        [nameEl, emailEl, passEl, confEl].forEach(el => {
+          if (!el.value.trim()) el.classList.add('border-red-500', 'bg-red-50/30');
+        });
+        showRegisterAlert('Vui lòng điền đầy đủ thông tin!', 'error');
+        return;
+      }
+
+      // Luồng rẽ nhánh 3: Định dạng Email không đúng
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        emailEl.classList.add('border-red-500', 'bg-red-50/30');
+        showRegisterAlert('Email không hợp lệ!', 'error');
+        return;
+      }
+
+      // Luồng rẽ nhánh 2: Mật khẩu và xác nhận mật khẩu không khớp
+      if (password !== confirmPass) {
+        confEl.classList.add('border-red-500', 'bg-red-50/30');
+        showRegisterAlert('Mật khẩu xác nhận không khớp!', 'error');
+        return;
+      }
+
+      // Luồng rẽ nhánh 4: Email đã tồn tại trên hệ thống
+      if (usersDB.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+        emailEl.classList.add('border-red-500', 'bg-red-50/30');
+        showRegisterAlert('Email đã được sử dụng, vui lòng chọn email khác!', 'error');
+        return;
+      }
+
+      // Luồng cơ bản bước 4 & 5: Tạo tài khoản mới và chuyển sang trang Đăng nhập
+      usersDB.push({
+        id: `TK0${usersDB.length + 1}`,
+        fullName,
+        username: email.split('@')[0],
+        email,
+        password,
+        role: 'member',
+        status: 'Hoạt động'
+      });
+
+      showRegisterAlert('Đăng ký tài khoản thành công!', 'success');
+      showToast('Đăng ký tài khoản thành công! Đang chuyển đến trang Đăng nhập...', 'success');
+      setTimeout(() => {
+        document.getElementById('loginIdentifier').value = email;
+        navigate('login');
+      }, 1000);
+    }
+
+    function showRegisterAlert(msg, type) {
+      const alertBox = document.getElementById('registerAlert');
+      alertBox.className = type === 'error'
+        ? 'mb-4 p-3.5 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold'
+        : 'mb-4 p-3.5 rounded-xl border border-leaf-200 bg-leaf-50 text-leaf-700 text-sm font-semibold';
+      alertBox.textContent = msg;
+      alertBox.classList.remove('hidden');
+    }
+
+    function testRegisterCase(mode) {
+      const nameEl = document.getElementById('regFullName');
+      const emailEl = document.getElementById('regEmail');
+      const passEl = document.getElementById('regPassword');
+      const confEl = document.getElementById('regConfirmPassword');
+
+      if (mode === 'empty') {
+        nameEl.value = ''; emailEl.value = ''; passEl.value = ''; confEl.value = '';
+      } else if (mode === 'mismatch') {
+        nameEl.value = 'Trần Tiến Dũng'; emailEl.value = 'dung_moi@gmail.com'; passEl.value = '123456'; confEl.value = '999999';
+      } else if (mode === 'invalidEmail') {
+        nameEl.value = 'Trần Tiến Dũng'; emailEl.value = 'email_sai_dinh_dang'; passEl.value = '123456'; confEl.value = '123456';
+      } else if (mode === 'dupEmail') {
+        nameEl.value = 'Trần Tiến Dũng'; emailEl.value = 'giang@cookmate.vn'; passEl.value = '123456'; confEl.value = '123456';
+      }
+      document.getElementById('registerForm').dispatchEvent(new Event('submit'));
+    }
+
+    // Xử lý Đăng nhập (Use Case Hoàng Như Đạt)
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const idVal = document.getElementById('loginIdentifier').value.trim();
+      const passVal = document.getElementById('loginPassword').value;
+      const alertBox = document.getElementById('loginAlert');
+
+      // Luồng rẽ nhánh 1: Bỏ trống tên đăng nhập/email hoặc mật khẩu
+      if (!idVal || !passVal) {
+        alertBox.className = 'mb-4 p-3.5 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold';
+        alertBox.textContent = 'Vui lòng nhập đầy đủ thông tin đăng nhập!';
+        alertBox.classList.remove('hidden');
+        return;
+      }
+
+      const foundUser = usersDB.find(u => u.email.toLowerCase() === idVal.toLowerCase() || u.username.toLowerCase() === idVal.toLowerCase());
+
+      // Luồng rẽ nhánh 3: Tài khoản không tồn tại
+      if (!foundUser) {
+        alertBox.className = 'mb-4 p-3.5 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold';
+        alertBox.textContent = 'Tài khoản không tồn tại!';
+        alertBox.classList.remove('hidden');
+        return;
+      }
+
+      // Luồng rẽ nhánh 2: Mật khẩu không chính xác
+      if (foundUser.password !== passVal) {
+        alertBox.className = 'mb-4 p-3.5 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold';
+        alertBox.textContent = 'Tên đăng nhập hoặc mật khẩu không chính xác!';
+        alertBox.classList.remove('hidden');
+        return;
+      }
+
+      currentUser = foundUser;
+      document.getElementById('roleSwitcher').value = foundUser.role;
+      renderHeaderAuth();
+      showToast(`Đăng nhập thành công! Xin chào ${foundUser.fullName}`, 'success');
+      navigate('home');
+    }
+
+    function testLoginCase(mode) {
+      const idEl = document.getElementById('loginIdentifier');
+      const pwEl = document.getElementById('loginPassword');
+      if (mode === 'empty') { idEl.value = ''; pwEl.value = ''; }
+      if (mode === 'notExist') { idEl.value = 'khongtontai@cookmate.vn'; pwEl.value = '123456'; }
+      if (mode === 'wrongPass') { idEl.value = 'giang@cookmate.vn'; pwEl.value = 'sai_mat_khau'; }
+      if (mode === 'successMember') { idEl.value = 'giang@cookmate.vn'; pwEl.value = '123'; }
+      document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+    }
+
+    // ==================== 9. TRANG CÁ NHÂN & MÓN YÊU THÍCH ====================
+    function openProfileTab(subTab) {
+      if (!currentUser) {
+        showToast('Vui lòng đăng nhập để xem khu vực cá nhân!', 'error');
+        navigate('login');
+        return;
+      }
+      navigate('profile');
+      switchProfileSubTab(subTab);
+    }
+
+    function switchProfileSubTab(subTab) {
+      if (!currentUser) return;
+      document.getElementById('profileUserName').textContent = currentUser.fullName;
+      document.getElementById('profileUserEmail').textContent = `${currentUser.email} • Vai trò: ${currentUser.role === 'admin' ? 'Quản trị viên' : 'Thành viên'}`;
+
+      ['my-recipes', 'favorites', 'info'].forEach(t => {
+        const btn = document.getElementById(`profTab-${t}`);
+        if (btn) {
+          btn.className = t === subTab
+            ? 'px-4 py-2 rounded-xl text-sm font-bold bg-brand-600 text-white transition'
+            : 'px-4 py-2 rounded-xl text-sm font-bold bg-stone-100 text-stone-700 hover:bg-stone-200 transition';
+        }
+      });
+
+      const content = document.getElementById('profileSubContent');
+      if (subTab === 'my-recipes') {
+        const myList = recipesDB.filter(r => r.author === currentUser.fullName);
+        content.innerHTML = `
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-extrabold text-stone-900">Công thức do bạn chia sẻ (${myList.length})</h2>
+            <button onclick="navigate('create')" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-bold">+ Đăng món mới</button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            ${myList.length ? myList.map(r => createRecipeCardHTML(r)).join('') : '<p class="text-stone-500">Bạn chưa đăng công thức nào.</p>'}
+          </div>
+        `;
+      } else if (subTab === 'favorites') {
+        const favList = recipesDB.filter(r => favoriteRecipeIds.includes(r.id));
+        content.innerHTML = `
+          <h2 class="text-lg font-extrabold text-stone-900 mb-4">Danh sách Công thức Yêu thích (${favList.length})</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            ${favList.length ? favList.map(r => createRecipeCardHTML(r)).join('') : '<p class="text-stone-500">Chưa có món ăn nào trong danh sách yêu thích.</p>'}
+          </div>
+        `;
+      } else {
+        content.innerHTML = `
+          <div class="bg-white rounded-3xl p-6 border border-stone-200 max-w-xl">
+            <h2 class="text-lg font-extrabold text-stone-900 mb-4">Cập nhật thông tin cá nhân (Bảng TAIKHOAN)</h2>
+            <div class="space-y-3 text-sm">
+              <div><label class="font-bold text-stone-600">Họ và tên:</label><input id="updName" value="${currentUser.fullName}" class="w-full mt-1 rounded-xl border border-stone-300 px-3 py-2" /></div>
+              <div><label class="font-bold text-stone-600">Email:</label><input disabled value="${currentUser.email}" class="w-full mt-1 rounded-xl border border-stone-200 bg-stone-100 px-3 py-2 text-stone-500" /></div>
+              <button onclick="currentUser.fullName = document.getElementById('updName').value; renderHeaderAuth(); switchProfileSubTab('info'); showToast('Đã cập nhật thông tin cá nhân!', 'success')" class="px-5 py-2.5 rounded-xl bg-brand-600 text-white font-bold">Lưu thay đổi</button>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // ==================== 10. QUẢN TRỊ VIÊN & BẢO TRÌ DANH MỤC (USE CASE HOÀNG NHƯ ĐẠT) ====================
+    let editingCategoryId = null;
+
+    function switchAdminSubTab(tab) {
+      ['categories', 'ingredients', 'recipes', 'users', 'stats'].forEach(t => {
+        const btn = document.getElementById(`admTab-${t}`);
+        if (btn) {
+          btn.className = t === tab
+            ? 'w-full text-left px-4 py-3 rounded-xl text-sm font-bold bg-brand-600 text-white flex items-center justify-between transition'
+            : 'w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-stone-300 hover:bg-stone-800 flex items-center justify-between transition';
+        }
+      });
+
+      const box = document.getElementById('adminSubContent');
+
+      if (tab === 'categories') {
+        renderAdminCategories(box);
+      } else if (tab === 'ingredients') {
+        box.innerHTML = `
+          <h2 class="text-xl font-extrabold text-stone-900 mb-1">Bảo trì Nguyên liệu & Chỉ số Dinh dưỡng (UC18 - Bảng NGUYENLIEU)</h2>
+          <p class="text-xs text-stone-500 mb-5">Dữ liệu gốc để tính tự động Calories, Protein, Carbs, Fat cho mọi công thức</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm border-collapse">
+              <thead>
+                <tr class="bg-stone-100 text-stone-700 text-left">
+                  <th class="p-3 rounded-tl-xl">Mã NL</th><th class="p-3">Tên nguyên liệu</th><th class="p-3">Đơn vị gốc</th><th class="p-3">Calories</th><th class="p-3">Protein</th><th class="p-3">Carbs</th><th class="p-3 rounded-tr-xl">Fat</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-stone-200">
+                ${ingredientsDB.map(i => `
+                  <tr>
+                    <td class="p-3 font-bold text-brand-600">${i.id}</td>
+                    <td class="p-3 font-semibold">${i.name}</td>
+                    <td class="p-3">${i.baseAmount} ${i.unit}</td>
+                    <td class="p-3 font-bold text-orange-600">${i.cal} kcal</td>
+                    <td class="p-3">${i.protein}g</td>
+                    <td class="p-3">${i.carbs}g</td>
+                    <td class="p-3">${i.fat}g</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } else if (tab === 'recipes') {
+        box.innerHTML = `
+          <h2 class="text-xl font-extrabold text-stone-900 mb-4">Bảo trì & Kiểm duyệt Công thức (UC16 - Bảng CONGTHUC)</h2>
+          <div class="space-y-3">
+            ${recipesDB.map(r => `
+              <div class="flex items-center justify-between p-4 rounded-2xl border border-stone-200">
+                <div>
+                  <h4 class="font-bold text-stone-900">${r.title}</h4>
+                  <p class="text-xs text-stone-500">Người đăng: ${r.author} • Danh mục: ${getCategoryName(r.categoryId)} • ${r.views} lượt xem</p>
+                </div>
+                <div class="flex gap-2">
+                  <button onclick="openRecipeDetail(${r.id})" class="px-3 py-1.5 rounded-lg bg-stone-100 text-xs font-bold">Xem</button>
+                  <button onclick="recipesDB = recipesDB.filter(x => x.id !== ${r.id}); switchAdminSubTab('recipes'); showToast('Đã xóa công thức!', 'info')" class="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 text-xs font-bold">Xóa</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else if (tab === 'users') {
+        box.innerHTML = `
+          <h2 class="text-xl font-extrabold text-stone-900 mb-4">Quản lý Tài khoản (UC19 - Bảng TAIKHOAN)</h2>
+          <table class="w-full text-sm">
+            <thead><tr class="bg-stone-100 text-left"><th class="p-3">Mã TK</th><th class="p-3">Họ tên</th><th class="p-3">Email</th><th class="p-3">Quyền</th><th class="p-3">Trạng thái</th></tr></thead>
+            <tbody class="divide-y divide-stone-200">
+              ${usersDB.map(u => `<tr><td class="p-3 font-bold">${u.id}</td><td class="p-3">${u.fullName}</td><td class="p-3">${u.email}</td><td class="p-3 uppercase text-xs font-bold">${u.role}</td><td class="p-3 text-leaf-700 font-semibold">${u.status}</td></tr>`).join('')}
+            </tbody>
+          </table>
+        `;
+      } else {
+        box.innerHTML = `
+          <h2 class="text-xl font-extrabold text-stone-900 mb-4">Thống kê báo cáo toàn hệ thống (UC21)</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+            <div class="p-4 rounded-2xl bg-brand-50 border border-brand-200"><span class="text-xs text-brand-700 font-bold">TỔNG CÔNG THỨC</span><p class="text-3xl font-extrabold text-stone-900 mt-1">${recipesDB.length}</p></div>
+            <div class="p-4 rounded-2xl bg-leaf-50 border border-leaf-200"><span class="text-xs text-leaf-700 font-bold">DANH MỤC</span><p class="text-3xl font-extrabold text-stone-900 mt-1">${categoriesDB.length}</p></div>
+            <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200"><span class="text-xs text-amber-800 font-bold">NGUYÊN LIỆU</span><p class="text-3xl font-extrabold text-stone-900 mt-1">${ingredientsDB.length}</p></div>
+            <div class="p-4 rounded-2xl bg-blue-50 border border-blue-200"><span class="text-xs text-blue-700 font-bold">TÀI KHOẢN</span><p class="text-3xl font-extrabold text-stone-900 mt-1">${usersDB.length}</p></div>
+          </div>
+        `;
+      }
+    }
+
+    // Giao diện chi tiết Use Case Bảo trì danh mục (Hoàng Như Đạt - Mục 2.1.3.6)
+    function renderAdminCategories(box) {
+      box.innerHTML = `
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-stone-100">
+          <div>
+            <span class="text-xs font-bold uppercase tracking-wider text-brand-600">Use Case: Bảo trì danh mục (Phụ trách: Hoàng Như Đạt)</span>
+            <h2 class="text-xl font-extrabold text-stone-900">Quản lý bảng DANHMUC</h2>
+          </div>
+        </div>
+
+        <div id="adminCatAlert" class="hidden mb-4 p-3.5 rounded-xl border text-sm font-semibold"></div>
+
+        <!-- Form Thêm / Cập nhật Danh mục -->
+        <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200 mb-6">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input id="admCatName" type="text" placeholder="Nhập tên danh mục món ăn (*)" class="sm:col-span-2 rounded-xl border border-stone-300 px-4 py-2.5 text-sm bg-white focus:border-brand-500 focus:outline-none" />
+            <div class="flex gap-2">
+              <button onclick="saveCategory()" id="admCatSaveBtn" class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 px-4 rounded-xl text-sm transition">
+                + Thêm mới
+              </button>
+              <button onclick="resetCatForm()" id="admCatCancelBtn" class="hidden bg-stone-200 hover:bg-stone-300 text-stone-700 font-bold py-2.5 px-3 rounded-xl text-sm transition">
+                Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bảng danh sách danh mục -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm border-collapse">
+            <thead>
+              <tr class="bg-stone-900 text-white text-left">
+                <th class="p-3.5 rounded-tl-xl">Mã DM</th>
+                <th class="p-3.5">Tên danh mục</th>
+                <th class="p-3.5">Số công thức đang dùng</th>
+                <th class="p-3.5 text-right rounded-tr-xl">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-200">
+              ${categoriesDB.map(c => {
+                const count = recipesDB.filter(r => r.categoryId === c.id).length;
+                return `
+                  <tr class="hover:bg-stone-50">
+                    <td class="p-3.5 font-bold text-brand-600">${c.id}</td>
+                    <td class="p-3.5 font-bold text-stone-900">${c.name}</td>
+                    <td class="p-3.5">
+                      <span class="px-2.5 py-1 rounded-full text-xs font-bold ${count > 0 ? 'bg-leaf-50 text-leaf-700' : 'bg-stone-100 text-stone-500'}">
+                        ${count} công thức
+                      </span>
+                    </td>
+                    <td class="p-3.5 text-right space-x-1.5">
+                      <button onclick="startEditCategory('${c.id}')" class="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold text-xs transition">
+                        <i class="fa-solid fa-pen mr-1"></i>Sửa
+                      </button>
+                      <button onclick="requestDeleteCategory('${c.id}')" class="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs transition">
+                        <i class="fa-solid fa-trash mr-1"></i>Xóa
+                      </button>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function showAdminCatAlert(msg, type = 'error') {
+      const el = document.getElementById('adminCatAlert');
+      if (!el) return;
+      el.className = type === 'error'
+        ? 'mb-4 p-3.5 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm font-semibold'
+        : 'mb-4 p-3.5 rounded-xl border border-leaf-200 bg-leaf-50 text-leaf-700 text-sm font-semibold';
+      el.textContent = msg;
+      el.classList.remove('hidden');
+    }
+
+    function saveCategory() {
+      const nameInput = document.getElementById('admCatName');
+      const name = nameInput.value.trim();
+
+      // Luồng rẽ nhánh 1: Không nhập tên danh mục
+      if (!name) {
+        showAdminCatAlert('Vui lòng nhập tên danh mục!', 'error');
+        return;
+      }
+
+      // Luồng rẽ nhánh 2 & 3: Tên danh mục đã tồn tại trong CSDL
+      const duplicate = categoriesDB.some(c => c.name.toLowerCase() === name.toLowerCase() && c.id !== editingCategoryId);
+      if (duplicate) {
+        showAdminCatAlert('Tên danh mục đã tồn tại!', 'error');
+        return;
+      }
+
+      if (editingCategoryId) {
+        const cat = categoriesDB.find(c => c.id === editingCategoryId);
+        if (cat) cat.name = name;
+        editingCategoryId = null;
+        showToast('Cập nhật danh mục thành công!', 'success');
+      } else {
+        const nextNum = categoriesDB.length + 1;
+        categoriesDB.push({
+          id: `DM0${nextNum}`,
+          name,
+          icon: 'fa-utensils',
+          image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=300&q=80',
+          desc: 'Danh mục mới thêm'
+        });
+        showToast('Đã thêm danh mục mới thành công!', 'success');
+      }
+
+      renderDropdownMenus();
+      switchAdminSubTab('categories');
+    }
+
+    function startEditCategory(catId) {
+      const cat = categoriesDB.find(c => c.id === catId);
+      if (!cat) return;
+      editingCategoryId = catId;
+      document.getElementById('admCatName').value = cat.name;
+      document.getElementById('admCatSaveBtn').textContent = 'Cập nhật';
+      document.getElementById('admCatCancelBtn').classList.remove('hidden');
+    }
+
+    function resetCatForm() {
+      editingCategoryId = null;
+      switchAdminSubTab('categories');
+    }
+
+    function requestDeleteCategory(catId) {
+      const cat = categoriesDB.find(c => c.id === catId);
+      if (!cat) return;
+
+      const modal = document.getElementById('customConfirmModal');
+      document.getElementById('confirmModalTitle').textContent = `Xác nhận xóa "${cat.name}"`;
+      document.getElementById('confirmModalMessage').textContent = `Bạn có chắc chắn muốn xóa danh mục "${cat.name}" (${cat.id}) khỏi bảng DANHMUC?`;
+      modal.classList.remove('hidden');
+
+      document.getElementById('confirmModalAcceptBtn').onclick = () => {
+        closeConfirmModal();
+        const inUseCount = recipesDB.filter(r => r.categoryId === catId).length;
+        // Luồng rẽ nhánh 4: Danh mục đang được sử dụng bởi các công thức món ăn
+        if (inUseCount > 0) {
+          showAdminCatAlert('Không thể xóa danh mục đang được sử dụng!', 'error');
+          showToast('Không thể xóa danh mục đang được sử dụng!', 'error');
+          return;
+        }
+        categoriesDB = categoriesDB.filter(c => c.id !== catId);
+        renderDropdownMenus();
+        switchAdminSubTab('categories');
+        showToast('Đã xóa danh mục thành công!', 'success');
+      };
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('customConfirmModal').classList.add('hidden');
+    }
+
+    // Khởi chạy ứng dụng khi tải trang
+    window.onload = function () {
+      renderHeaderAuth();
+      populateSearchSelects();
+      renderHomeView();
+    };
+  </script>
+</body>
+</html>

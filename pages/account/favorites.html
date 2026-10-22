@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Món yêu thích | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/variables.css">
+  <link rel="stylesheet" href="../../assets/css/reset.css">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/pages.css">
+  <link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header" id="siteHeader"></header>
+
+  <main class="py-8">
+    <div class="container">
+      
+      <div class="page-header flex-between flex-wrap gap-4 mb-6">
+        <div>
+          <h1 class="page-title text-2xl font-bold">
+            <i class="fa-solid fa-heart text-danger"></i> Món ăn Yêu thích
+            <span class="badge badge-primary text-sm ml-2" id="favCount">0</span>
+          </h1>
+          <p class="text-secondary text-sm mt-1">Danh sách các công thức món ăn bạn đã lưu lại để nấu cho gia đình.</p>
+        </div>
+        <a href="../recipes.html" class="btn btn-secondary btn-sm">
+          <i class="fa-solid fa-compass"></i> Khám phá thêm món mới
+        </a>
+      </div>
+
+      <div id="favoritesContainer">
+        <!-- Rendered by JS -->
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer" id="siteFooter"></footer>
+
+  <script src="../../assets/js/utils.js"></script>
+  <script src="../../assets/js/data/categories.js"></script>
+  <script src="../../assets/js/data/ingredients.js"></script>
+  <script src="../../assets/js/data/users.js"></script>
+  <script src="../../assets/js/data/recipes.js"></script>
+  <script src="../../assets/js/storage.js"></script>
+  <script src="../../assets/js/components.js"></script>
+  <script src="../../assets/js/navigation.js"></script>
+  <script src="../../assets/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!CookMateStorage.isLoggedIn()) {
+        CookMateUI.showToast('Vui lòng đăng nhập để xem danh sách món yêu thích', 'warning');
+        setTimeout(function() {
+          window.location.href = '../auth/login.html';
+        }, 1200);
+        return;
+      }
+
+      renderFavorites();
+    });
+
+    function renderFavorites() {
+      var favoriteIds = CookMateStorage.getFavorites();
+      var allRecipes = CookMateStorage.getAllRecipes();
+      var container = document.getElementById('favoritesContainer');
+      var countBadge = document.getElementById('favCount');
+
+      var favoriteRecipes = allRecipes.filter(function(r) {
+        return favoriteIds.includes(r.id);
+      });
+
+      if (countBadge) countBadge.textContent = favoriteRecipes.length + ' món';
+
+      if (favoriteRecipes.length === 0) {
+        container.innerHTML = CookMateUI.createEmptyState(
+          'fa-heart-crack',
+          'Chưa có món ăn yêu thích',
+          'Bạn chưa lưu món ăn nào. Hãy bấm vào biểu tượng trái tim ở bất kỳ công thức nào để lưu lại nhé!',
+          '<a href="../recipes.html" class="btn btn-primary mt-4"><i class="fa-solid fa-book-open mr-1"></i> Khám phá công thức ngay</a>'
+        );
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="recipe-grid">
+          ${favoriteRecipes.map(function(r) {
+            return CookMateUI.createRecipeCard(r, { linkBase: '../' });
+          }).join('')}
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

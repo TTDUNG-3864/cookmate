@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Công thức Nổi bật | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/reset.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header" id="siteHeader"></header>
+
+  <main>
+    <section class="section" aria-labelledby="featuredRecipesHeading">
+      <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-header-text">
+            <h1 class="page-title" id="featuredRecipesHeading">
+              <i class="fa-solid fa-fire-flame-curved" aria-hidden="true"></i>
+              Công thức Nổi bật
+            </h1>
+            <p class="page-subtitle">Những công thức được yêu thích và đánh giá cao nhất trên CookMate</p>
+          </div>
+        </div>
+
+        <!-- Recipe Grid -->
+        <div class="recipe-grid" id="featuredRecipeGrid" role="list" aria-label="Công thức nổi bật">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="siteFooter"></footer>
+
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/data/categories.js"></script>
+  <script src="../assets/js/data/ingredients.js"></script>
+  <script src="../assets/js/data/users.js"></script>
+  <script src="../assets/js/data/recipes.js"></script>
+  <script src="../assets/js/storage.js"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/navigation.js"></script>
+  <script src="../assets/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var grid = document.getElementById('featuredRecipeGrid');
+      if (!grid) return;
+
+      var recipes = CookMateStorage.getAllRecipes()
+        .filter(function(r) { return r.isFeatured; })
+        .sort(function(a, b) { return (b.views || 0) - (a.views || 0); });
+
+      if (recipes.length === 0) {
+        grid.innerHTML = CookMateUI.createEmptyState(
+          'fa-fire-flame-curved',
+          'Chưa có công thức nổi bật',
+          'Các công thức được đánh giá cao sẽ xuất hiện tại đây.'
+        );
+        return;
+      }
+
+      grid.innerHTML = recipes.map(function(r) {
+        return CookMateUI.createRecipeCard(r, { showFeaturedBadge: true });
+      }).join('');
+    });
+  </script>
+</body>
+</html>

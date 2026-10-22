@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Danh mục | CookMate Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/variables.css">
+  <link rel="stylesheet" href="../../assets/css/reset.css">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/pages.css">
+  <link rel="stylesheet" href="../../assets/css/admin.css">
+  <link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body data-admin-page="categories">
+
+  <div class="admin-layout">
+    
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-sidebar__header">
+        <a href="index.html" class="admin-sidebar__logo">
+          <i class="fa-solid fa-utensils"></i>
+          <span>CookMate</span>
+        </a>
+        <span class="admin-sidebar__badge">Admin</span>
+        <button class="admin-sidebar__close" id="sidebarCloseBtn" aria-label="Đóng menu">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <nav class="admin-sidebar__nav">
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Hệ thống</div>
+          <a href="index.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Tổng quan</span>
+          </a>
+          <a href="statistics.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Thống kê & Báo cáo</span>
+          </a>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Nội dung ẩm thực</div>
+          <a href="recipes.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Quản lý Công thức</span>
+          </a>
+          <a href="categories.html" class="admin-sidebar__link active">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Quản lý Danh mục</span>
+          </a>
+          <a href="ingredients.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-carrot"></i>
+            <span>Quản lý Nguyên liệu</span>
+          </a>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Người dùng & Tương tác</div>
+          <a href="accounts.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-users"></i>
+            <span>Quản lý Tài khoản</span>
+          </a>
+          <a href="comments.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-comments"></i>
+            <span>Quản lý Bình luận</span>
+          </a>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Điều hướng</div>
+          <a href="../../index.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-house"></i>
+            <span>Về trang chủ CookMate</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="admin-sidebar__footer">
+        <div class="admin-sidebar__user">
+          <div class="user-avatar" id="adminUserAvatar">A</div>
+          <div>
+            <div class="admin-sidebar__user-name" id="adminUserName">Admin</div>
+            <div class="admin-sidebar__user-role">Quản trị viên</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="admin-sidebar__backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="admin-header__toggle" id="sidebarToggleBtn" aria-label="Mở menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <h1 class="admin-header__title">Quản lý Danh mục món ăn</h1>
+        <div class="admin-header__actions">
+          <button type="button" class="btn btn-primary btn-sm" onclick="openAddCategoryModal()">
+            <i class="fa-solid fa-plus"></i> Thêm danh mục
+          </button>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        
+        <div class="admin-card">
+          <div class="admin-card__header">
+            <h3 class="admin-card__title">
+              <i class="fa-solid fa-list text-primary mr-1"></i> Danh sách phân loại món ăn (Bảng DANHMUC)
+            </h3>
+            <span class="text-xs text-secondary">Tổng cộng: <strong id="totalCatCount">0</strong> danh mục</span>
+          </div>
+
+          <div class="admin-card__body admin-card__body--flush">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Icon</th>
+                    <th>Tên danh mục</th>
+                    <th>Mô tả</th>
+                    <th>Số công thức</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody id="categoryTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="../../assets/js/utils.js"></script>
+  <script src="../../assets/js/data/categories.js"></script>
+  <script src="../../assets/js/data/ingredients.js"></script>
+  <script src="../../assets/js/data/users.js"></script>
+  <script src="../../assets/js/data/recipes.js"></script>
+  <script src="../../assets/js/storage.js"></script>
+  <script src="../../assets/js/components.js"></script>
+  <script src="../../assets/js/navigation.js"></script>
+  <script src="../../assets/js/app.js"></script>
+
+  <script>
+    var currentCategories = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+      setupSidebar();
+      loadCategories();
+      renderCategoryTable();
+    });
+
+    function setupSidebar() {
+      var toggleBtn = document.getElementById('sidebarToggleBtn');
+      var closeBtn = document.getElementById('sidebarCloseBtn');
+      var sidebar = document.getElementById('adminSidebar');
+      var backdrop = document.getElementById('sidebarBackdrop');
+
+      if (toggleBtn) toggleBtn.addEventListener('click', function() {
+        sidebar.classList.add('active');
+        backdrop.classList.add('active');
+      });
+      if (closeBtn) closeBtn.addEventListener('click', function() {
+        sidebar.classList.remove('active');
+        backdrop.classList.remove('active');
+      });
+      if (backdrop) backdrop.addEventListener('click', function() {
+        sidebar.classList.remove('active');
+        backdrop.classList.remove('active');
+      });
+    }
+
+    function loadCategories() {
+      currentCategories = CookMateStorage.getAllCategories().map(function(c) {
+        return Object.assign({}, c);
+      });
+    }
+
+    function saveCategories() {
+      CookMateStorage.setCategories(currentCategories);
+    }
+
+    function renderCategoryTable() {
+      var tbody = document.getElementById('categoryTableBody');
+      var countEl = document.getElementById('totalCatCount');
+      if (!tbody) return;
+
+      var recipes = CookMateStorage.getAllRecipes();
+      if (countEl) countEl.textContent = currentCategories.length;
+
+      tbody.innerHTML = currentCategories.map(function(cat, idx) {
+        var count = recipes.filter(function(r) { return r.categoryId === cat.id; }).length;
+
+        return `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>
+              <div class="user-avatar" style="background-color: var(--primary-light); color: white;">
+                <i class="fa-solid ${cat.icon || 'fa-utensils'}"></i>
+              </div>
+            </td>
+            <td><strong>${escapeHtml(cat.name)}</strong></td>
+            <td class="text-xs text-secondary max-w-xs truncate">${escapeHtml(cat.description || '')}</td>
+            <td>
+              <span class="badge badge-info text-xs">${count} món</span>
+            </td>
+            <td>
+              <div class="flex items-center gap-1">
+                <button type="button" class="btn btn-ghost btn-sm text-info" title="Sửa" onclick="openEditCategoryModal(${cat.id})">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm text-danger" title="Xóa" onclick="deleteCategory(${cat.id}, '${escapeHtml(cat.name).replace(/'/g, "\\'")}')">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function openAddCategoryModal() {
+      var content = `
+        <form id="catForm" class="space-y-4">
+          <div class="form-group">
+            <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+            <input type="text" id="catNameInput" class="form-input" placeholder="Ví dụ: Món lẩu, Đồ nhắm..." required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Icon FontAwesome (Class)</label>
+            <input type="text" id="catIconInput" class="form-input" placeholder="fa-bowl-food, fa-fire..." value="fa-utensils">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mô tả ngắn</label>
+            <textarea id="catDescInput" class="form-textarea" rows="2" placeholder="Mô tả đặc trưng danh mục..."></textarea>
+          </div>
+        </form>
+      `;
+
+      var modalRef = CookMateUI.showModal({
+        title: 'Thêm Danh mục Món ăn Mới',
+        content: content,
+        footer: `
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('cookmate-modal').remove()">Hủy</button>
+          <button type="button" class="btn btn-primary" id="saveCatBtn">Lưu danh mục</button>
+        `,
+        size: 'medium'
+      });
+
+      document.getElementById('saveCatBtn').addEventListener('click', function() {
+        var name = document.getElementById('catNameInput').value.trim();
+        var icon = document.getElementById('catIconInput').value.trim() || 'fa-utensils';
+        var desc = document.getElementById('catDescInput').value.trim();
+
+        if (!name) {
+          CookMateUI.showToast('Vui lòng nhập tên danh mục', 'warning');
+          return;
+        }
+
+        var newCat = {
+          id: Date.now(),
+          name: name,
+          slug: slugify(name),
+          icon: icon,
+          image: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=500&auto=format&fit=crop&q=80',
+          description: desc,
+          recipeCount: 0
+        };
+
+        currentCategories.push(newCat);
+        saveCategories();
+        CookMateUI.showToast('Đã thêm danh mục "' + name + '" thành công!', 'success');
+        document.getElementById('cookmate-modal').remove();
+        renderCategoryTable();
+      });
+    }
+
+    function openEditCategoryModal(id) {
+      var cat = currentCategories.find(function(c) { return c.id === id; });
+      if (!cat) return;
+
+      var content = `
+        <form id="catEditForm" class="space-y-4">
+          <div class="form-group">
+            <label class="form-label">Tên danh mục <span class="text-danger">*</span></label>
+            <input type="text" id="editCatNameInput" class="form-input" value="${escapeHtml(cat.name)}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Icon FontAwesome (Class)</label>
+            <input type="text" id="editCatIconInput" class="form-input" value="${escapeHtml(cat.icon || 'fa-utensils')}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mô tả ngắn</label>
+            <textarea id="editCatDescInput" class="form-textarea" rows="2">${escapeHtml(cat.description || '')}</textarea>
+          </div>
+        </form>
+      `;
+
+      CookMateUI.showModal({
+        title: 'Chỉnh sửa Danh mục: ' + cat.name,
+        content: content,
+        footer: `
+          <button type="button" class="btn btn-secondary" onclick="document.getElementById('cookmate-modal').remove()">Hủy</button>
+          <button type="button" class="btn btn-primary" id="updateCatBtn">Cập nhật</button>
+        `,
+        size: 'medium'
+      });
+
+      document.getElementById('updateCatBtn').addEventListener('click', function() {
+        var name = document.getElementById('editCatNameInput').value.trim();
+        var icon = document.getElementById('editCatIconInput').value.trim() || 'fa-utensils';
+        var desc = document.getElementById('editCatDescInput').value.trim();
+
+        if (!name) {
+          CookMateUI.showToast('Tên danh mục không được để trống', 'warning');
+          return;
+        }
+
+        cat.name = name;
+        cat.slug = slugify(name);
+        cat.icon = icon;
+        cat.description = desc;
+
+        saveCategories();
+        CookMateUI.showToast('Đã cập nhật danh mục thành công!', 'success');
+        document.getElementById('cookmate-modal').remove();
+        renderCategoryTable();
+      });
+    }
+
+    function deleteCategory(id, name) {
+      CookMateUI.showConfirm('Bạn có chắc muốn xóa danh mục "' + name + '"?', function() {
+        currentCategories = currentCategories.filter(function(c) { return c.id !== id; });
+        saveCategories();
+        CookMateUI.showToast('Đã xóa danh mục thành công', 'success');
+        renderCategoryTable();
+      });
+    }
+  </script>
+</body>
+</html>

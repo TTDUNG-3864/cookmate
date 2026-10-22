@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang chủ | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="assets/css/variables.css">
+  <link rel="stylesheet" href="assets/css/reset.css">
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/layout.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+  <link rel="stylesheet" href="assets/css/pages.css">
+  <link rel="stylesheet" href="assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header" id="siteHeader"></header>
+
+  <main>
+    <!-- Hero Banner Section -->
+    <section class="hero" aria-label="Banner chính">
+      <div class="hero-overlay"></div>
+      <div class="hero-content container">
+        <h1 class="hero-title">Hôm nay ăn gì?<br>Nấu ngon chuẩn vị cùng <span class="text-primary">CookMate</span></h1>
+        <p class="hero-subtitle">Hàng ngàn công thức chi tiết, tự động co giãn khẩu phần và tính dinh dưỡng cho mọi bữa ăn.</p>
+        <div class="hero-search" role="search" aria-label="Tìm kiếm công thức">
+          <div class="hero-search-box">
+            <i class="fa-solid fa-magnifying-glass hero-search-icon" aria-hidden="true"></i>
+            <input type="text" id="heroSearchInput" class="hero-search-input" placeholder="Tìm công thức, nguyên liệu..." aria-label="Nhập từ khóa tìm kiếm">
+            <button id="heroSearchBtn" class="btn btn-primary hero-search-btn" aria-label="Tìm kiếm">
+              <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+              <span>Tìm kiếm</span>
+            </button>
+          </div>
+        </div>
+        <div class="hero-keywords" aria-label="Từ khóa gợi ý">
+          <span class="hero-keywords-label">Gợi ý:</span>
+          <button class="tag tag-outline" data-keyword="Ức Gà">#ỨcGà</button>
+          <button class="tag tag-outline" data-keyword="Món Canh">#MónCanh</button>
+          <button class="tag tag-outline" data-keyword="Món Chay">#MónChay</button>
+          <button class="tag tag-outline" data-keyword="Thịt Bò">#ThịtBò</button>
+          <button class="tag tag-outline" data-keyword="Mâm cỗ Tết">🌸 Mâm cỗ Tết</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category Section -->
+    <section class="section" aria-labelledby="categoryHeading">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" id="categoryHeading">
+            <i class="fa-solid fa-layer-group" aria-hidden="true"></i>
+            Danh mục món ăn
+          </h2>
+          <a href="pages/categories.html" class="section-link">
+            Xem tất cả <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="category-grid" id="homeCategoryGrid" role="list" aria-label="Danh mục món ăn">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Recipes Section -->
+    <section class="section" aria-labelledby="featuredHeading">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" id="featuredHeading">
+            <i class="fa-solid fa-fire-flame-curved" aria-hidden="true"></i>
+            Công thức nổi bật
+          </h2>
+        </div>
+        <div class="filter-bar" role="tablist" aria-label="Bộ lọc công thức">
+          <button class="home-filter-btn active" data-filter="all" role="tab" aria-selected="true" onclick="renderHomeRecipes('all')">Tất cả</button>
+          <button class="home-filter-btn" data-filter="featured" role="tab" aria-selected="false" onclick="renderHomeRecipes('featured')">Nổi bật nhất</button>
+          <button class="home-filter-btn" data-filter="newest" role="tab" aria-selected="false" onclick="renderHomeRecipes('newest')">Mới chia sẻ</button>
+        </div>
+        <div class="recipe-grid" id="homeRecipeGrid" role="list" aria-label="Danh sách công thức">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Holiday / Occasion Section -->
+    <section class="section section-warm" aria-labelledby="occasionHeading">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" id="occasionHeading">
+            <i class="fa-solid fa-calendar-star" aria-hidden="true"></i>
+            Thực đơn Đặc sắc theo Dịp lễ
+          </h2>
+          <a href="pages/holiday-recipes.html" class="section-link">
+            Xem tất cả <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+          </a>
+        </div>
+        <div class="pills-container" id="occasionPills" role="tablist" aria-label="Lọc theo dịp lễ">
+          <!-- Populated by JS -->
+        </div>
+        <div class="recipe-grid" id="occasionRecipeGrid" role="list" aria-label="Công thức theo dịp lễ">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="siteFooter"></footer>
+
+  <script src="assets/js/utils.js"></script>
+  <script src="assets/js/data/categories.js"></script>
+  <script src="assets/js/data/ingredients.js"></script>
+  <script src="assets/js/data/users.js"></script>
+  <script src="assets/js/data/recipes.js"></script>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/components.js"></script>
+  <script src="assets/js/navigation.js"></script>
+  <script src="assets/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      renderHomeCategories();
+      renderHomeRecipes('all');
+      renderOccasionSection();
+      setupHeroSearch();
+    });
+
+    function renderHomeCategories() {
+      var grid = document.getElementById('homeCategoryGrid');
+      if (!grid) return;
+      var cats = CookMateStorage.getAllCategories();
+      var recipes = CookMateStorage.getAllRecipes();
+      cats.forEach(function(c) {
+        c.recipeCount = recipes.filter(function(r) { return r.categoryId === c.id; }).length;
+      });
+      grid.innerHTML = cats.map(function(c) { return CookMateUI.createCategoryCard(c, ''); }).join('');
+    }
+
+    var homeFilter = 'all';
+    function renderHomeRecipes(filter) {
+      homeFilter = filter;
+      var grid = document.getElementById('homeRecipeGrid');
+      if (!grid) return;
+
+      document.querySelectorAll('.home-filter-btn').forEach(function(btn) {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+        if (btn.dataset.filter === filter) {
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+        }
+      });
+
+      var recipes = CookMateStorage.getAllRecipes();
+      if (filter === 'featured') {
+        recipes = recipes.filter(function(r) { return r.isFeatured; }).sort(function(a, b) { return (b.views || 0) - (a.views || 0); });
+      } else if (filter === 'newest') {
+        recipes = recipes.filter(function(r) { return r.isNew; }).sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+      } else {
+        recipes = recipes.sort(function(a, b) { return (b.views || 0) - (a.views || 0); });
+      }
+
+      recipes = recipes.slice(0, 6);
+
+      if (recipes.length === 0) {
+        grid.innerHTML = CookMateUI.createEmptyState('fa-book-open', 'Chưa có công thức', 'Hãy quay lại sau nhé!');
+        return;
+      }
+      grid.innerHTML = recipes.map(function(r) { return CookMateUI.createRecipeCard(r, { linkBase: '' }); }).join('');
+    }
+
+    function renderOccasionSection() {
+      var pills = document.getElementById('occasionPills');
+      var grid = document.getElementById('occasionRecipeGrid');
+      if (!pills || !grid) return;
+
+      var recipes = CookMateStorage.getAllRecipes();
+      var occasionSet = {};
+      recipes.forEach(function(r) {
+        if (r.occasion) occasionSet[r.occasion] = true;
+      });
+      var occasions = Object.keys(occasionSet);
+
+      var activeOccasion = occasions[0] || '';
+
+      function renderPills() {
+        pills.innerHTML = occasions.map(function(o) {
+          return '<button class="tag ' + (o === activeOccasion ? 'tag-active' : '') + '" onclick="filterOccasion(\'' + o.replace(/'/g, "\\'") + '\')" aria-pressed="' + (o === activeOccasion) + '">' + o + '</button>';
+        }).join('');
+      }
+
+      window.filterOccasion = function(occ) {
+        activeOccasion = occ;
+        renderPills();
+        var filtered = recipes.filter(function(r) { return r.occasion === occ; });
+        grid.innerHTML = filtered.length > 0
+          ? filtered.map(function(r) { return CookMateUI.createRecipeCard(r, { linkBase: '' }); }).join('')
+          : CookMateUI.createEmptyState('fa-calendar', 'Chưa có công thức cho dịp này', '');
+      };
+
+      renderPills();
+      if (activeOccasion) window.filterOccasion(activeOccasion);
+    }
+
+    function setupHeroSearch() {
+      var input = document.getElementById('heroSearchInput');
+      var btn = document.getElementById('heroSearchBtn');
+      if (input) {
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') doHeroSearch();
+        });
+      }
+      if (btn) btn.addEventListener('click', doHeroSearch);
+
+      document.querySelectorAll('[data-keyword]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          window.location.href = 'pages/search.html?q=' + encodeURIComponent(btn.dataset.keyword);
+        });
+      });
+    }
+
+    function doHeroSearch() {
+      var input = document.getElementById('heroSearchInput');
+      if (input && input.value.trim()) {
+        window.location.href = 'pages/search.html?q=' + encodeURIComponent(input.value.trim());
+      }
+    }
+  </script>
+</body>
+</html>

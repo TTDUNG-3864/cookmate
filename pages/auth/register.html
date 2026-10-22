@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng ký | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/variables.css">
+  <link rel="stylesheet" href="../../assets/css/reset.css">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/pages.css">
+  <link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body>
+
+  <main class="auth-page">
+    <div class="auth-container">
+      <div class="auth-card">
+        <div class="auth-header">
+          <a href="../../index.html" class="auth-logo">
+            <i class="fas fa-utensils"></i>
+            <span>CookMate</span>
+          </a>
+          <h1 class="auth-title">Đăng ký tài khoản</h1>
+          <p class="auth-subtitle">Tạo tài khoản để lưu và chia sẻ công thức nấu ăn.</p>
+        </div>
+
+        <form id="registerForm" class="auth-form" novalidate>
+          <div class="form-group">
+            <label for="regName" class="form-label">
+              <i class="fas fa-user"></i> Họ và tên
+            </label>
+            <input type="text" id="regName" class="form-input" placeholder="Nhập họ và tên" required autocomplete="name">
+            <div class="form-error" id="regNameError"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="regEmail" class="form-label">
+              <i class="fas fa-envelope"></i> Email
+            </label>
+            <input type="email" id="regEmail" class="form-input" placeholder="Nhập email của bạn" required autocomplete="email">
+            <div class="form-error" id="regEmailError"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="regPassword" class="form-label">
+              <i class="fas fa-lock"></i> Mật khẩu
+            </label>
+            <div class="password-input-wrapper">
+              <input type="password" id="regPassword" class="form-input" placeholder="Tối thiểu 6 ký tự" required autocomplete="new-password" minlength="6">
+              <button type="button" class="password-toggle" aria-label="Hiện mật khẩu" onclick="togglePasswordVisibility(this)">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="form-error" id="regPasswordError"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="regConfirmPassword" class="form-label">
+              <i class="fas fa-lock"></i> Xác nhận mật khẩu
+            </label>
+            <div class="password-input-wrapper">
+              <input type="password" id="regConfirmPassword" class="form-input" placeholder="Nhập lại mật khẩu" required autocomplete="new-password">
+              <button type="button" class="password-toggle" aria-label="Hiện mật khẩu" onclick="togglePasswordVisibility(this)">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <div class="form-error" id="regConfirmPasswordError"></div>
+          </div>
+
+          <button type="submit" class="btn btn-primary auth-submit-btn">
+            <i class="fas fa-user-plus"></i> Đăng ký
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          <p>Đã có tài khoản? <a href="login.html" class="auth-link">Đăng nhập</a></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../../assets/js/utils.js"></script>
+  <script src="../../assets/js/data/categories.js"></script>
+  <script src="../../assets/js/data/ingredients.js"></script>
+  <script src="../../assets/js/data/users.js"></script>
+  <script src="../../assets/js/data/recipes.js"></script>
+  <script src="../../assets/js/storage.js"></script>
+  <script src="../../assets/js/components.js"></script>
+  <script src="../../assets/js/navigation.js"></script>
+  <script src="../../assets/js/app.js"></script>
+  <script>
+    function togglePasswordVisibility(btn) {
+      var input = btn.parentElement.querySelector('input');
+      var icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+        btn.setAttribute('aria-label', 'Ẩn mật khẩu');
+      } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+        btn.setAttribute('aria-label', 'Hiện mật khẩu');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof CookMateStorage !== 'undefined' && CookMateStorage.isLoggedIn()) {
+        window.location.href = '../../index.html';
+        return;
+      }
+
+      var form = document.getElementById('registerForm');
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        clearAllErrors(form);
+
+        var name = document.getElementById('regName').value.trim();
+        var email = document.getElementById('regEmail').value.trim();
+        var password = document.getElementById('regPassword').value;
+        var confirmPassword = document.getElementById('regConfirmPassword').value;
+
+        var hasError = false;
+
+        /* Validate name */
+        var nameErr = validateRequired(name, 'Họ và tên');
+        if (nameErr) {
+          showFieldError(document.getElementById('regName'), nameErr);
+          hasError = true;
+        }
+
+        /* Validate email */
+        var emailErr = validateEmail(email);
+        if (emailErr) {
+          showFieldError(document.getElementById('regEmail'), emailErr);
+          hasError = true;
+        }
+
+        /* Validate password */
+        var passErr = validateRequired(password, 'Mật khẩu');
+        if (passErr) {
+          showFieldError(document.getElementById('regPassword'), passErr);
+          hasError = true;
+        } else if (password.length < 6) {
+          showFieldError(document.getElementById('regPassword'), 'Mật khẩu phải có ít nhất 6 ký tự');
+          hasError = true;
+        }
+
+        /* Validate confirm password */
+        var confirmErr = validateRequired(confirmPassword, 'Xác nhận mật khẩu');
+        if (confirmErr) {
+          showFieldError(document.getElementById('regConfirmPassword'), confirmErr);
+          hasError = true;
+        } else if (password !== confirmPassword) {
+          showFieldError(document.getElementById('regConfirmPassword'), 'Mật khẩu xác nhận không khớp');
+          hasError = true;
+        }
+
+        if (hasError) return;
+
+        /* Check if email already exists */
+        var allUsers = CookMateStorage.getAllUsers();
+        var emailExists = allUsers.some(function(u) { return u.email === email; });
+        if (emailExists) {
+          showFieldError(document.getElementById('regEmail'), 'Email này đã được đăng ký');
+          return;
+        }
+
+        /* Register the user */
+        var result = CookMateStorage.registerUser(name, email, password);
+        if (result && result.success !== false) {
+          if (typeof CookMateUI !== 'undefined') {
+            CookMateUI.showToast('Đăng ký thành công! Vui lòng đăng nhập.', 'success');
+          }
+          setTimeout(function() {
+            window.location.href = 'login.html';
+          }, 1500);
+        } else {
+          if (typeof CookMateUI !== 'undefined') {
+            CookMateUI.showToast(result && result.message ? result.message : 'Đăng ký thất bại. Vui lòng thử lại.', 'error');
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

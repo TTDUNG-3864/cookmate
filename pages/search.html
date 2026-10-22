@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tìm kiếm công thức | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../assets/css/variables.css">
+  <link rel="stylesheet" href="../assets/css/reset.css">
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/layout.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/pages.css">
+  <link rel="stylesheet" href="../assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header" id="siteHeader"></header>
+
+  <main class="search-page py-8">
+    <div class="container">
+      
+      <!-- Search Input Header Card -->
+      <div class="search-hero-box">
+        <div class="search-hero-title-area">
+          <span class="badge badge-primary"><i class="fa-solid fa-magnifying-glass"></i> Tra cứu ẩm thực CookMate</span>
+          <h1 class="search-hero-title">Tìm kiếm công thức món ngon</h1>
+          <p class="search-hero-desc">Tra cứu nhanh theo tên món ăn hoặc nguyên liệu có sẵn trong tủ lạnh nhà bạn.</p>
+        </div>
+
+        <form class="search-main-form" id="searchForm" onsubmit="handleSearchSubmit(event)">
+          <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="searchInput" class="search-input" placeholder="Nhập tên món ăn hoặc nguyên liệu (vd: thịt bò, gà, cà chua, bún)..." autocomplete="off">
+            <button type="button" class="btn-clear-search" id="clearSearchBtn" onclick="clearSearchInput()" style="display:none;" title="Xóa từ khóa">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <button type="submit" class="btn btn-primary search-submit-btn">
+            <i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm
+          </button>
+          <button type="button" class="btn btn-secondary search-reset-btn" onclick="resetAllFilters()">
+            <i class="fa-solid fa-rotate-left"></i> Đặt lại
+          </button>
+        </form>
+
+        <!-- Luồng rẽ nhánh: Thông báo kiểm tra từ khóa -->
+        <div id="searchNotice" class="search-notice mt-4" style="display:none;"></div>
+      </div>
+
+      <!-- Main Search Layout: Filters + Results -->
+      <div class="search-layout">
+        
+        <!-- Left: Filters Sidebar -->
+        <aside class="search-sidebar" id="searchSidebar">
+          <div class="filter-card">
+            <div class="filter-card-header">
+              <h3><i class="fa-solid fa-sliders text-primary"></i> Bộ lọc nâng cao</h3>
+              <button type="button" class="btn-link text-xs text-secondary" onclick="resetAllFilters()">Xóa lọc</button>
+            </div>
+
+            <!-- Filter: Danh mục -->
+            <div class="filter-group">
+              <label for="filterCategory" class="filter-label">Danh mục món ăn</label>
+              <select id="filterCategory" class="form-select" onchange="applyFilters()">
+                <option value="all">Tất cả danh mục</option>
+              </select>
+            </div>
+
+            <!-- Filter: Dịp lễ -->
+            <div class="filter-group">
+              <label for="filterOccasion" class="filter-label">Dịp lễ / Sự kiện</label>
+              <select id="filterOccasion" class="form-select" onchange="applyFilters()">
+                <option value="all">Tất cả dịp lễ</option>
+              </select>
+            </div>
+
+            <!-- Filter: Độ khó -->
+            <div class="filter-group">
+              <label for="filterDifficulty" class="filter-label">Độ khó thực hiện</label>
+              <select id="filterDifficulty" class="form-select" onchange="applyFilters()">
+                <option value="all">Mọi cấp độ</option>
+                <option value="Dễ">Dễ</option>
+                <option value="Trung bình">Trung bình</option>
+                <option value="Khó">Khó</option>
+              </select>
+            </div>
+
+            <!-- Filter: Thời gian nấu -->
+            <div class="filter-group">
+              <label for="filterTime" class="filter-label">Thời gian chế biến</label>
+              <select id="filterTime" class="form-select" onchange="applyFilters()">
+                <option value="all">Mọi thời gian</option>
+                <option value="25">Nhanh (≤ 25 phút)</option>
+                <option value="45">Vừa phải (≤ 45 phút)</option>
+                <option value="long">Món hầm / Công phu (> 45 phút)</option>
+              </select>
+            </div>
+
+            <!-- Test Shortcuts Box -->
+            <div class="filter-test-box">
+              <span class="text-xs font-bold text-secondary uppercase block mb-2">Thử nghiệm luồng rẽ nhánh:</span>
+              <div class="flex flex-col gap-1.5">
+                <button type="button" class="btn btn-ghost btn-sm text-left justify-start" onclick="testEmptySearch()">
+                  <i class="fa-solid fa-circle-exclamation text-warning mr-1"></i> 1. Thử bỏ trống từ khóa
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm text-left justify-start" onclick="testNoResultSearch()">
+                  <i class="fa-solid fa-circle-question text-info mr-1"></i> 2. Thử từ khóa không tồn tại
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </aside>
+
+        <!-- Right: Results Grid -->
+        <section class="search-results-area">
+          <div class="search-results-header flex-between mb-4">
+            <div id="resultsCountSummary" class="text-secondary font-medium">
+              Đang tải kết quả...
+            </div>
+            <div class="search-sort-wrapper">
+              <label for="searchSort" class="text-xs text-secondary mr-2">Sắp xếp:</label>
+              <select id="searchSort" class="form-select form-select-sm" onchange="applyFilters()">
+                <option value="relevance">Phù hợp nhất</option>
+                <option value="newest">Mới nhất</option>
+                <option value="views">Xem nhiều nhất</option>
+                <option value="rating">Đánh giá cao</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="recipe-grid" id="searchResultsGrid">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="site-footer" id="siteFooter"></footer>
+
+  <script src="../assets/js/utils.js"></script>
+  <script src="../assets/js/data/categories.js"></script>
+  <script src="../assets/js/data/ingredients.js"></script>
+  <script src="../assets/js/data/users.js"></script>
+  <script src="../assets/js/data/recipes.js"></script>
+  <script src="../assets/js/storage.js"></script>
+  <script src="../assets/js/components.js"></script>
+  <script src="../assets/js/navigation.js"></script>
+  <script src="../assets/js/app.js"></script>
+
+  <script>
+    var currentKeyword = '';
+
+    document.addEventListener('DOMContentLoaded', function() {
+      populateCategoryOptions();
+      populateOccasionOptions();
+
+      // Check query param from URL (e.g. ?q=bò)
+      var urlQuery = getQueryParam('q');
+      var urlCat = getQueryParam('cat');
+      var urlOcc = getQueryParam('occasion');
+
+      var input = document.getElementById('searchInput');
+      if (urlQuery && input) {
+        input.value = decodeURIComponent(urlQuery);
+        currentKeyword = input.value.trim();
+        updateClearButton();
+      }
+
+      if (urlCat) {
+        var catSelect = document.getElementById('filterCategory');
+        if (catSelect) catSelect.value = urlCat;
+      }
+
+      if (urlOcc) {
+        var occSelect = document.getElementById('filterOccasion');
+        if (occSelect) occSelect.value = urlOcc;
+      }
+
+      // Input listener to toggle clear button
+      if (input) {
+        input.addEventListener('input', updateClearButton);
+      }
+
+      applyFilters();
+    });
+
+    function updateClearButton() {
+      var input = document.getElementById('searchInput');
+      var clearBtn = document.getElementById('clearSearchBtn');
+      if (input && clearBtn) {
+        clearBtn.style.display = input.value.length > 0 ? 'block' : 'none';
+      }
+    }
+
+    function clearSearchInput() {
+      var input = document.getElementById('searchInput');
+      if (input) {
+        input.value = '';
+        currentKeyword = '';
+        updateClearButton();
+        input.focus();
+        applyFilters();
+      }
+    }
+
+    function populateCategoryOptions() {
+      var select = document.getElementById('filterCategory');
+      if (!select) return;
+      var cats = CookMateStorage.getAllCategories();
+      cats.forEach(function(c) {
+        var opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        select.appendChild(opt);
+      });
+    }
+
+    function populateOccasionOptions() {
+      var select = document.getElementById('filterOccasion');
+      if (!select) return;
+      var recipes = CookMateStorage.getAllRecipes();
+      var occasions = {};
+      recipes.forEach(function(r) {
+        if (r.occasion) occasions[r.occasion] = true;
+      });
+      Object.keys(occasions).forEach(function(o) {
+        var opt = document.createElement('option');
+        opt.value = o;
+        opt.textContent = o;
+        select.appendChild(opt);
+      });
+    }
+
+    function handleSearchSubmit(e) {
+      if (e) e.preventDefault();
+      var input = document.getElementById('searchInput');
+      currentKeyword = input ? input.value.trim() : '';
+
+      var notice = document.getElementById('searchNotice');
+
+      if (!currentKeyword) {
+        // Luồng rẽ nhánh 1: Bỏ trống từ khóa
+        if (notice) {
+          notice.className = 'search-notice alert alert-warning';
+          notice.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i> Bạn chưa nhập từ khóa tìm kiếm. Hệ thống đang hiển thị tất cả công thức theo bộ lọc hiện tại.';
+          notice.style.display = 'block';
+        }
+      } else {
+        if (notice) notice.style.display = 'none';
+      }
+
+      applyFilters();
+    }
+
+    function applyFilters() {
+      var input = document.getElementById('searchInput');
+      var keyword = input ? input.value.toLowerCase().trim() : '';
+      var catVal = document.getElementById('filterCategory').value;
+      var occVal = document.getElementById('filterOccasion').value;
+      var diffVal = document.getElementById('filterDifficulty').value;
+      var timeVal = document.getElementById('filterTime').value;
+      var sortVal = document.getElementById('searchSort').value;
+
+      var recipes = CookMateStorage.getAllRecipes();
+      var notice = document.getElementById('searchNotice');
+
+      // 1. Lọc theo từ khóa (Tìm gần đúng trên tên món hoặc nguyên liệu)
+      if (keyword) {
+        recipes = recipes.filter(function(r) {
+          var titleMatch = r.title && r.title.toLowerCase().includes(keyword);
+          var descMatch = r.description && r.description.toLowerCase().includes(keyword);
+          var ingredientMatch = r.ingredients && r.ingredients.some(function(ing) {
+            return ing.name && ing.name.toLowerCase().includes(keyword);
+          });
+          return titleMatch || descMatch || ingredientMatch;
+        });
+      }
+
+      // 2. Lọc theo danh mục
+      if (catVal !== 'all') {
+        var catId = parseInt(catVal, 10);
+        recipes = recipes.filter(function(r) { return r.categoryId === catId; });
+      }
+
+      // 3. Lọc theo dịp lễ
+      if (occVal !== 'all') {
+        recipes = recipes.filter(function(r) { return r.occasion === occVal; });
+      }
+
+      // 4. Lọc theo độ khó
+      if (diffVal !== 'all') {
+        recipes = recipes.filter(function(r) { return r.difficulty === diffVal; });
+      }
+
+      // 5. Lọc theo thời gian nấu
+      if (timeVal !== 'all') {
+        recipes = recipes.filter(function(r) {
+          var total = (r.prepTime || 0) + (r.cookTime || 0);
+          if (timeVal === '25') return total <= 25;
+          if (timeVal === '45') return total <= 45;
+          if (timeVal === 'long') return total > 45;
+          return true;
+        });
+      }
+
+      // 6. Sắp xếp kết quả
+      if (sortVal === 'newest') {
+        recipes.sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
+      } else if (sortVal === 'views') {
+        recipes.sort(function(a, b) { return (b.views || 0) - (a.views || 0); });
+      } else if (sortVal === 'rating') {
+        recipes.sort(function(a, b) { return (b.rating || 0) - (a.rating || 0); });
+      }
+
+      // 7. Hiển thị tóm tắt và kết quả
+      var summaryEl = document.getElementById('resultsCountSummary');
+      var grid = document.getElementById('searchResultsGrid');
+
+      if (summaryEl) {
+        summaryEl.innerHTML = `Tìm thấy <strong>${recipes.length}</strong> công thức phù hợp ${keyword ? `cho từ khóa "<em>${escapeHtml(keyword)}</em>"` : ''}`;
+      }
+
+      if (recipes.length === 0) {
+        // Luồng rẽ nhánh 2: Không tìm thấy kết quả
+        if (notice && keyword) {
+          notice.className = 'search-notice alert alert-info';
+          notice.innerHTML = `<i class="fa-solid fa-circle-info mr-1"></i> Không tìm thấy công thức nào khớp với từ khóa "<strong>${escapeHtml(keyword)}</strong>". Vui lòng thử từ khóa khác hoặc bấm "Đặt lại" để xem toàn bộ món ăn.`;
+          notice.style.display = 'block';
+        }
+
+        grid.innerHTML = CookMateUI.createEmptyState(
+          'fa-magnifying-glass',
+          'Không tìm thấy công thức phù hợp',
+          'Hãy thử thay đổi từ khóa tìm kiếm hoặc bỏ bớt các tiêu chí lọc.',
+          '<button class="btn btn-secondary mt-4" onclick="resetAllFilters()"><i class="fa-solid fa-rotate-left"></i> Đặt lại bộ lọc</button>'
+        );
+      } else {
+        grid.innerHTML = recipes.map(function(r) {
+          return CookMateUI.createRecipeCard(r);
+        }).join('');
+      }
+    }
+
+    function resetAllFilters() {
+      var input = document.getElementById('searchInput');
+      if (input) input.value = '';
+      currentKeyword = '';
+      updateClearButton();
+
+      document.getElementById('filterCategory').value = 'all';
+      document.getElementById('filterOccasion').value = 'all';
+      document.getElementById('filterDifficulty').value = 'all';
+      document.getElementById('filterTime').value = 'all';
+      document.getElementById('searchSort').value = 'relevance';
+
+      var notice = document.getElementById('searchNotice');
+      if (notice) notice.style.display = 'none';
+
+      applyFilters();
+      CookMateUI.showToast('Đã đặt lại toàn bộ bộ lọc', 'info');
+    }
+
+    // Các hàm test luồng rẽ nhánh
+    function testEmptySearch() {
+      var input = document.getElementById('searchInput');
+      if (input) input.value = '';
+      handleSearchSubmit();
+    }
+
+    function testNoResultSearch() {
+      var input = document.getElementById('searchInput');
+      if (input) input.value = 'Món ăn vũ trụ sao hỏa 12345';
+      updateClearButton();
+      handleSearchSubmit();
+    }
+  </script>
+</body>
+</html>

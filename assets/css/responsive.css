@@ -1,0 +1,682 @@
+/* ============================================
+   CookMate Responsive Breakpoints & Overrides
+   ============================================ */
+
+/* ============================================
+   MOBILE: max-width 639px
+   ============================================ */
+@media (max-width: 639px) {
+
+  /* Typography scale down */
+  h1 {
+    font-size: var(--text-2xl);
+  }
+
+  h2 {
+    font-size: var(--text-xl);
+  }
+
+  h3 {
+    font-size: var(--text-lg);
+  }
+
+  /* Container tighter padding */
+  .container {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+
+  /* Section spacing */
+  .section-header {
+    margin-bottom: var(--space-6);
+  }
+
+  .section-header__title {
+    font-size: var(--text-xl);
+  }
+
+  .page-header {
+    padding: var(--space-6) 0;
+    margin-bottom: var(--space-6);
+  }
+
+  .page-header__title {
+    font-size: var(--text-2xl);
+  }
+
+  /* Stack grids to single column */
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .grid-6 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  /* Recipe grid single column */
+  .recipe-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  /* Larger touch targets for buttons */
+  .btn {
+    min-height: 44px;
+    padding: var(--space-3) var(--space-5);
+  }
+
+  .btn-sm {
+    min-height: 36px;
+  }
+
+  .btn-icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .btn-icon.btn-sm {
+    width: 36px;
+    height: 36px;
+  }
+
+  /* Header compact */
+  .site-header__inner,
+  .header-inner {
+    padding: 0 var(--space-4);
+  }
+
+  .site-header__logo,
+  .logo {
+    font-size: var(--text-lg);
+  }
+
+  .site-header__nav,
+  .main-nav {
+    display: none !important;
+  }
+
+  /* Hero mobile */
+  .hero {
+    padding: var(--space-8) 0 var(--space-10);
+  }
+
+  .hero__title {
+    font-size: var(--text-2xl);
+  }
+
+  .hero__description {
+    font-size: var(--text-base);
+  }
+
+  .hero__stats {
+    gap: var(--space-6);
+  }
+
+  .hero__image {
+    max-width: 100%;
+  }
+
+  .hero__image-decoration {
+    width: 56px;
+    height: 56px;
+    font-size: var(--text-2xl);
+  }
+
+  .hero__image-decoration--top {
+    top: -8px;
+    right: -4px;
+  }
+
+  .hero__image-decoration--bottom {
+    bottom: 12px;
+    left: -8px;
+  }
+
+  .hero__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero__actions .btn {
+    width: 100%;
+  }
+
+  /* Category cards compact */
+  .home-categories {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  /* Featured recipe stacked */
+  .featured-recipe {
+    grid-template-columns: 1fr;
+  }
+
+  .featured-recipe__content {
+    padding: var(--space-5);
+  }
+
+  .featured-recipe__title {
+    font-size: var(--text-xl);
+  }
+
+  /* Recipe detail */
+  .recipe-detail__title {
+    font-size: var(--text-2xl);
+  }
+
+  .recipe-detail__body {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-detail__hero-image {
+    border-radius: var(--radius-lg);
+    aspect-ratio: 3/2;
+  }
+
+  /* Search page stacked */
+  .search-page__layout,
+  .search-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .search-page__results-header,
+  .search-results-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  /* Auth card compact */
+  .auth-card {
+    padding: var(--space-6);
+  }
+
+  /* Profile compact */
+  .profile-header {
+    padding: var(--space-6);
+  }
+
+  .profile-header__avatar {
+    width: 72px;
+    height: 72px;
+  }
+
+  .profile-header__stats {
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Recipe form */
+  .dynamic-row {
+    flex-direction: column;
+  }
+
+  .dynamic-row__fields {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .dynamic-row__fields .form-group {
+    min-width: 100%;
+  }
+
+  /* Footer stacked */
+  .site-footer__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+
+  /* Toast full width */
+  .toast-container {
+    left: var(--space-4);
+    right: var(--space-4);
+    bottom: var(--space-4);
+  }
+
+  .toast {
+    min-width: auto;
+    max-width: none;
+    width: 100%;
+  }
+
+  /* Pagination compact */
+  .pagination {
+    gap: 0;
+  }
+
+  .pagination__item {
+    min-width: 36px;
+    height: 36px;
+    font-size: var(--text-xs);
+  }
+
+  /* Tables scroll horizontally */
+  .table-responsive {
+    border-radius: var(--radius);
+  }
+
+  /* Modal full width mobile */
+  .modal__content {
+    max-width: none;
+    max-height: 100vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    margin-top: auto;
+  }
+
+  .modal {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  /* Admin layout */
+  .admin-content {
+    padding: var(--space-4);
+  }
+
+  .admin-header {
+    padding: var(--space-3) var(--space-4);
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .admin-header__title {
+    font-size: var(--text-base);
+    min-width: 0;
+    flex: 1;
+  }
+
+  .admin-content__title {
+    font-size: var(--text-xl);
+  }
+
+  .admin-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-toolbar__search {
+    max-width: none;
+  }
+
+  .admin-form__row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-form__row--3 {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stat card compact */
+  .stat-card {
+    padding: var(--space-4);
+  }
+
+  .stat-card__icon {
+    width: 40px;
+    height: 40px;
+    font-size: var(--text-lg);
+  }
+
+  /* Tabs scrollable */
+  .tabs {
+    gap: 0;
+  }
+
+  .tab-item {
+    padding: var(--space-3);
+    font-size: var(--text-xs);
+  }
+
+  /* Spacing reduction on mobile */
+  .home-section {
+    padding: var(--space-8) 0;
+  }
+
+  .site-footer {
+    padding-top: var(--space-10);
+    margin-top: var(--space-10);
+  }
+}
+
+
+/* ============================================
+   TABLET: 640px - 1023px
+   ============================================ */
+@media (min-width: 640px) and (max-width: 1023px) {
+
+  /* 2-column grids */
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .recipe-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Home categories 3 columns */
+  .home-categories {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Adjusted spacing */
+  .section-header__title {
+    font-size: var(--text-2xl);
+  }
+
+  .hero__inner {
+    gap: var(--space-10);
+  }
+
+  /* Recipe detail 1 column still, but sidebar card goes horizontal */
+  .recipe-detail__body {
+    grid-template-columns: 1fr;
+  }
+
+  .recipe-sidebar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+  }
+
+  /* Search page 1 column still */
+  .search-page__layout {
+    grid-template-columns: 1fr;
+  }
+
+  /* Profile header horizontal */
+  .profile-header {
+    flex-direction: row;
+    text-align: left;
+    gap: var(--space-6);
+  }
+
+  /* Dashboard stats 2 columns */
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Admin form */
+  .admin-form__row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Footer 2 columns */
+  .site-footer__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Admin sidebar stays hidden */
+  .admin-sidebar {
+    width: 280px;
+  }
+}
+
+
+/* ============================================
+   DESKTOP: 1024px+
+   ============================================ */
+@media (min-width: 1150px) {
+  /* Full header nav visible */
+  .site-header__nav,
+  .main-nav {
+    display: flex !important;
+  }
+
+  .menu-toggle {
+    display: none !important;
+  }
+}
+
+/* header-search hidden */
+
+@media (min-width: 1024px) {
+
+  /* 3-4 column grids */
+  .grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .grid-4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .recipe-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  /* Home categories 6 columns */
+  .home-categories {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  /* Hero side-by-side */
+  .hero__inner {
+    flex-direction: row;
+    text-align: left;
+  }
+
+  /* Recipe detail sidebar layout */
+  .recipe-detail__body {
+    grid-template-columns: 320px 1fr;
+  }
+
+  .recipe-sidebar {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Search page with sidebar */
+  .search-page__layout,
+  .search-layout {
+    grid-template-columns: 290px 1fr;
+    gap: var(--space-8);
+  }
+
+  /* Admin sidebar visible */
+  .admin-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    transform: translateX(0);
+  }
+
+  .admin-header__toggle {
+    display: none;
+  }
+
+  /* Dashboard stats 4 columns */
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  /* Footer 4 columns */
+  .site-footer__grid {
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+  }
+}
+
+
+/* ============================================
+   LARGE: 1280px+
+   ============================================ */
+@media (min-width: 1280px) {
+
+  /* Max container width */
+  .container {
+    max-width: var(--container);
+  }
+
+  /* 4 column grids */
+  .grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .grid-6 {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .recipe-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Dashboard 4 columns */
+  .dashboard-stats {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* Hero larger text */
+  .hero__title {
+    font-size: 3rem;
+  }
+
+  /* Section titles */
+  .section-header__title {
+    font-size: var(--text-2xl);
+  }
+}
+
+
+/* ============================================
+   EXTRA LARGE: 1536px+
+   ============================================ */
+@media (min-width: 1536px) {
+
+  .container {
+    max-width: 1400px;
+  }
+
+  .admin-content {
+    padding: var(--space-10);
+  }
+}
+
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+  .site-header,
+  .site-footer,
+  .menu-toggle,
+  .mobile-nav,
+  .mobile-nav__backdrop,
+  .toast-container,
+  .btn,
+  .recipe-card__favorite,
+  .admin-sidebar,
+  .admin-header,
+  .pagination {
+    display: none !important;
+  }
+
+  body {
+    background-color: #fff;
+    color: #000;
+    font-size: 12pt;
+  }
+
+  .container {
+    max-width: none;
+    padding: 0;
+  }
+
+  .recipe-detail__body {
+    grid-template-columns: 1fr;
+  }
+
+  a {
+    color: #000;
+    text-decoration: underline;
+  }
+
+  img {
+    max-width: 100% !important;
+  }
+
+  .recipe-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
+
+
+/* ============================================
+   MOTION PREFERENCES (Global)
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+
+  .recipe-card:hover {
+    transform: none;
+  }
+
+  .recipe-card:hover .recipe-card__image img {
+    transform: none;
+  }
+
+  .category-card:hover {
+    transform: none;
+  }
+
+  .site-footer__social-link:hover {
+    transform: none;
+  }
+
+  .btn:active {
+    transform: none;
+  }
+
+  .recipe-card__favorite:hover {
+    transform: none;
+  }
+
+  .modal__content {
+    transform: none;
+  }
+
+  .modal.active .modal__content {
+    transform: none;
+  }
+
+  .mobile-nav {
+    transition: none;
+  }
+
+  .nav-dropdown__menu {
+    transition: none;
+  }
+
+  .toast {
+    animation: none;
+    opacity: 1;
+  }
+
+  .toast.toast-exit {
+    animation: none;
+  }
+
+  .spinner {
+    animation-duration: 1.5s;
+  }
+}

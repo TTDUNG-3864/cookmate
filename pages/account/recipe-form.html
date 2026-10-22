@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Đăng công thức | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/variables.css">
+  <link rel="stylesheet" href="../../assets/css/reset.css">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/pages.css">
+  <link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header" id="siteHeader"></header>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="page-header">
+        <h1 class="page-title" id="formPageTitle">
+          <i class="fas fa-plus-circle"></i> Đăng công thức mới
+        </h1>
+      </div>
+
+      <form id="recipeForm" class="recipe-form" novalidate>
+        <!-- Section 1: Basic Info -->
+        <div class="form-section">
+          <h2 class="form-section-title"><i class="fas fa-info-circle"></i> Thông tin cơ bản</h2>
+
+          <div class="form-group">
+            <label for="recipeName" class="form-label">Tên món ăn <span class="required">*</span></label>
+            <input type="text" id="recipeName" class="form-input" placeholder="VD: Phở bò Hà Nội" required>
+            <div class="form-error" id="recipeNameError"></div>
+          </div>
+
+          <div class="form-group">
+            <label for="recipeDesc" class="form-label">Mô tả</label>
+            <textarea id="recipeDesc" class="form-input form-textarea" rows="3" placeholder="Mô tả ngắn về món ăn..."></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="recipeCategory" class="form-label">Danh mục</label>
+              <select id="recipeCategory" class="form-input form-select">
+                <option value="">-- Chọn danh mục --</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="recipeOccasion" class="form-label">Dịp lễ</label>
+              <select id="recipeOccasion" class="form-input form-select">
+                <option value="">Không có</option>
+                <option value="tet">Tết cổ truyền</option>
+                <option value="ram">Rằm</option>
+                <option value="giangsinh">Giáng sinh</option>
+                <option value="tiecgiadinh">Tiệc gia đình</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="recipeImage" class="form-label">URL ảnh</label>
+            <input type="text" id="recipeImage" class="form-input" placeholder="https://example.com/image.jpg">
+            <div class="image-preview" id="imagePreview" style="display: none;">
+              <img id="imagePreviewImg" src="" alt="Xem trước ảnh" onerror="this.parentElement.style.display='none'">
+            </div>
+          </div>
+
+          <div class="form-row form-row-4">
+            <div class="form-group">
+              <label for="recipePrepTime" class="form-label">Thời gian chuẩn bị (phút)</label>
+              <input type="number" id="recipePrepTime" class="form-input" min="0" placeholder="15">
+            </div>
+
+            <div class="form-group">
+              <label for="recipeCookTime" class="form-label">Thời gian nấu (phút)</label>
+              <input type="number" id="recipeCookTime" class="form-input" min="0" placeholder="30">
+            </div>
+
+            <div class="form-group">
+              <label for="recipeDifficulty" class="form-label">Độ khó</label>
+              <select id="recipeDifficulty" class="form-input form-select">
+                <option value="Dễ">Dễ</option>
+                <option value="Trung bình" selected>Trung bình</option>
+                <option value="Khó">Khó</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="recipeServings" class="form-label">Số khẩu phần</label>
+              <input type="number" id="recipeServings" class="form-input" min="1" value="4" placeholder="4">
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Ingredients -->
+        <div class="form-section">
+          <h2 class="form-section-title"><i class="fas fa-carrot"></i> Nguyên liệu <span class="required">*</span></h2>
+          <div id="ingredientsList">
+            <!-- Dynamic rows rendered by JS -->
+          </div>
+          <div class="form-error" id="ingredientsError" style="margin-bottom: 0.5rem;"></div>
+          <button type="button" class="btn btn-outline btn-sm" id="addIngredientBtn">
+            <i class="fas fa-plus"></i> Thêm nguyên liệu
+          </button>
+        </div>
+
+        <!-- Section 3: Steps -->
+        <div class="form-section">
+          <h2 class="form-section-title"><i class="fas fa-list-ol"></i> Các bước chế biến <span class="required">*</span></h2>
+          <div id="stepsList">
+            <!-- Dynamic rows rendered by JS -->
+          </div>
+          <div class="form-error" id="stepsError" style="margin-bottom: 0.5rem;"></div>
+          <button type="button" class="btn btn-outline btn-sm" id="addStepBtn">
+            <i class="fas fa-plus"></i> Thêm bước
+          </button>
+        </div>
+
+        <!-- Submit -->
+        <div class="form-section form-submit-section">
+          <button type="submit" class="btn btn-primary btn-lg" id="submitRecipeBtn">
+            <i class="fas fa-paper-plane"></i> Đăng công thức
+          </button>
+          <a href="my-recipes.html" class="btn btn-outline btn-lg">
+            <i class="fas fa-arrow-left"></i> Quay lại
+          </a>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="site-footer" id="siteFooter"></footer>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="../../assets/js/utils.js"></script>
+  <script src="../../assets/js/data/categories.js"></script>
+  <script src="../../assets/js/data/ingredients.js"></script>
+  <script src="../../assets/js/data/users.js"></script>
+  <script src="../../assets/js/data/recipes.js"></script>
+  <script src="../../assets/js/storage.js"></script>
+  <script src="../../assets/js/components.js"></script>
+  <script src="../../assets/js/navigation.js"></script>
+  <script src="../../assets/js/app.js"></script>
+  <script>
+    var isEditMode = false;
+    var editRecipeId = null;
+    var ingredientIndex = 0;
+    var stepIndex = 0;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof CookMateStorage === 'undefined' || !CookMateStorage.isLoggedIn()) {
+        window.location.href = '../auth/login.html';
+        return;
+      }
+
+      populateCategories();
+      setupImagePreview();
+
+      /* Check if editing */
+      var params = new URLSearchParams(window.location.search);
+      var recipeId = params.get('id');
+
+      if (recipeId) {
+        isEditMode = true;
+        editRecipeId = recipeId;
+        document.getElementById('formPageTitle').innerHTML = '<i class="fas fa-edit"></i> Chỉnh sửa công thức';
+        document.getElementById('submitRecipeBtn').innerHTML = '<i class="fas fa-save"></i> Lưu thay đổi';
+        document.title = 'Chỉnh sửa công thức | CookMate';
+        loadRecipeForEdit(recipeId);
+      } else {
+        /* Start with one empty ingredient row and one step row */
+        addIngredientRow();
+        addStepRow();
+      }
+
+      /* Event listeners */
+      document.getElementById('addIngredientBtn').addEventListener('click', function() {
+        addIngredientRow();
+      });
+
+      document.getElementById('addStepBtn').addEventListener('click', function() {
+        addStepRow();
+      });
+
+      document.getElementById('recipeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        handleSubmit();
+      });
+    });
+
+    function populateCategories() {
+      var select = document.getElementById('recipeCategory');
+      var cats = typeof CATEGORIES !== 'undefined' ? CATEGORIES : [];
+      cats.forEach(function(cat) {
+        var option = document.createElement('option');
+        option.value = cat.id || cat.slug || cat.name;
+        option.textContent = cat.name;
+        select.appendChild(option);
+      });
+    }
+
+    function setupImagePreview() {
+      var input = document.getElementById('recipeImage');
+      var preview = document.getElementById('imagePreview');
+      var img = document.getElementById('imagePreviewImg');
+
+      input.addEventListener('input', function() {
+        var url = input.value.trim();
+        if (url) {
+          img.src = url;
+          preview.style.display = 'block';
+        } else {
+          preview.style.display = 'none';
+        }
+      });
+    }
+
+    function addIngredientRow(data) {
+      data = data || {};
+      var container = document.getElementById('ingredientsList');
+      var idx = ingredientIndex++;
+      var row = document.createElement('div');
+      row.className = 'dynamic-row ingredient-row';
+      row.setAttribute('data-index', idx);
+      row.innerHTML =
+        '<div class="dynamic-row-fields">' +
+          '<input type="text" class="form-input ingredient-name" placeholder="Tên nguyên liệu" value="' + escapeAttr(data.name || '') + '">' +
+          '<input type="number" class="form-input ingredient-amount" placeholder="Số lượng" min="0" step="any" value="' + escapeAttr(String(data.amount || data.quantity || '')) + '">' +
+          '<input type="text" class="form-input ingredient-unit" placeholder="Đơn vị (g, ml, ...)" value="' + escapeAttr(data.unit || '') + '">' +
+        '</div>' +
+        '<button type="button" class="btn btn-icon btn-danger-icon dynamic-row-delete" title="Xóa nguyên liệu" onclick="removeIngredientRow(this)">' +
+          '<i class="fas fa-trash"></i>' +
+        '</button>';
+      container.appendChild(row);
+    }
+
+    function removeIngredientRow(btn) {
+      var row = btn.closest('.ingredient-row');
+      var container = document.getElementById('ingredientsList');
+      if (container.querySelectorAll('.ingredient-row').length <= 1) {
+        if (typeof CookMateUI !== 'undefined') {
+          CookMateUI.showToast('Cần ít nhất 1 nguyên liệu', 'warning');
+        }
+        return;
+      }
+      row.remove();
+    }
+
+    function addStepRow(data) {
+      data = data || {};
+      var container = document.getElementById('stepsList');
+      var currentCount = container.querySelectorAll('.step-row').length;
+      var stepNum = currentCount + 1;
+      var idx = stepIndex++;
+      var row = document.createElement('div');
+      row.className = 'dynamic-row step-row';
+      row.setAttribute('data-index', idx);
+      row.innerHTML =
+        '<div class="step-number">' + stepNum + '</div>' +
+        '<div class="dynamic-row-fields step-fields">' +
+          '<textarea class="form-input form-textarea step-desc" rows="2" placeholder="Mô tả bước thực hiện...">' + escapeHtml(data.description || data.text || '') + '</textarea>' +
+        '</div>' +
+        '<button type="button" class="btn btn-icon btn-danger-icon dynamic-row-delete" title="Xóa bước" onclick="removeStepRow(this)">' +
+          '<i class="fas fa-trash"></i>' +
+        '</button>';
+      container.appendChild(row);
+    }
+
+    function removeStepRow(btn) {
+      var row = btn.closest('.step-row');
+      var container = document.getElementById('stepsList');
+      if (container.querySelectorAll('.step-row').length <= 1) {
+        if (typeof CookMateUI !== 'undefined') {
+          CookMateUI.showToast('Cần ít nhất 1 bước chế biến', 'warning');
+        }
+        return;
+      }
+      row.remove();
+      renumberSteps();
+    }
+
+    function renumberSteps() {
+      var rows = document.querySelectorAll('#stepsList .step-row');
+      rows.forEach(function(row, i) {
+        var numEl = row.querySelector('.step-number');
+        if (numEl) numEl.textContent = i + 1;
+      });
+    }
+
+    function escapeAttr(str) {
+      return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function loadRecipeForEdit(recipeId) {
+      var allRecipes = CookMateStorage.getAllRecipes ? CookMateStorage.getAllRecipes() : [];
+      var numId = parseInt(recipeId, 10);
+      var recipe = allRecipes.find(function(r) { return r.id === numId || r.id == recipeId; });
+
+      if (!recipe) {
+        if (typeof CookMateUI !== 'undefined') {
+          CookMateUI.showToast('Không tìm thấy công thức', 'error');
+        }
+        setTimeout(function() { window.location.href = 'my-recipes.html'; }, 1500);
+        return;
+      }
+
+      /* Verify ownership */
+      var currentUser = CookMateStorage.getCurrentUser();
+      if (recipe.authorId !== currentUser.id && currentUser.role !== 'admin') {
+        if (typeof CookMateUI !== 'undefined') {
+          CookMateUI.showToast('Bạn không có quyền chỉnh sửa công thức này', 'error');
+        }
+        setTimeout(function() { window.location.href = 'my-recipes.html'; }, 1500);
+        return;
+      }
+
+      /* Fill form */
+      document.getElementById('recipeName').value = recipe.title || recipe.name || '';
+      document.getElementById('recipeDesc').value = recipe.description || '';
+      document.getElementById('recipeCategory').value = recipe.categoryId || recipe.category || '';
+      document.getElementById('recipeOccasion').value = recipe.occasion || '';
+      document.getElementById('recipeImage').value = recipe.image || recipe.imageUrl || '';
+      document.getElementById('recipePrepTime').value = recipe.prepTime || '';
+      document.getElementById('recipeCookTime').value = recipe.cookTime || '';
+      document.getElementById('recipeDifficulty').value = recipe.difficulty || 'Trung bình';
+      document.getElementById('recipeServings').value = recipe.servings || 4;
+
+      /* Trigger image preview */
+      var imgUrl = recipe.image || recipe.imageUrl || '';
+      if (imgUrl) {
+        document.getElementById('imagePreviewImg').src = imgUrl;
+        document.getElementById('imagePreview').style.display = 'block';
+      }
+
+      /* Ingredients */
+      var ingredients = recipe.ingredients || [];
+      if (ingredients.length > 0) {
+        ingredients.forEach(function(ing) {
+          addIngredientRow(ing);
+        });
+      } else {
+        addIngredientRow();
+      }
+
+      /* Steps */
+      var steps = recipe.steps || recipe.instructions || [];
+      if (steps.length > 0) {
+        steps.forEach(function(step) {
+          if (typeof step === 'string') {
+            addStepRow({ description: step });
+          } else {
+            addStepRow(step);
+          }
+        });
+      } else {
+        addStepRow();
+      }
+    }
+
+    function handleSubmit() {
+      var form = document.getElementById('recipeForm');
+      clearAllErrors(form);
+
+      var name = document.getElementById('recipeName').value.trim();
+      var description = document.getElementById('recipeDesc').value.trim();
+      var categoryId = document.getElementById('recipeCategory').value;
+      var occasion = document.getElementById('recipeOccasion').value;
+      var imageUrl = document.getElementById('recipeImage').value.trim();
+      var prepTime = parseInt(document.getElementById('recipePrepTime').value) || 0;
+      var cookTime = parseInt(document.getElementById('recipeCookTime').value) || 0;
+      var difficulty = document.getElementById('recipeDifficulty').value;
+      var servings = parseInt(document.getElementById('recipeServings').value) || 4;
+
+      var hasError = false;
+
+      /* Validate name */
+      var nameErr = validateRequired(name, 'Tên món ăn');
+      if (nameErr) {
+        showFieldError(document.getElementById('recipeName'), nameErr);
+        hasError = true;
+      }
+
+      /* Collect ingredients */
+      var ingredients = [];
+      var ingredientRows = document.querySelectorAll('#ingredientsList .ingredient-row');
+      ingredientRows.forEach(function(row) {
+        var ingName = row.querySelector('.ingredient-name').value.trim();
+        var ingAmount = row.querySelector('.ingredient-amount').value.trim();
+        var ingUnit = row.querySelector('.ingredient-unit').value.trim();
+        if (ingName) {
+          ingredients.push({
+            name: ingName,
+            amount: ingAmount ? parseFloat(ingAmount) : '',
+            unit: ingUnit
+          });
+        }
+      });
+
+      if (ingredients.length === 0) {
+        document.getElementById('ingredientsError').textContent = 'Vui lòng thêm ít nhất 1 nguyên liệu';
+        document.getElementById('ingredientsError').style.display = 'block';
+        hasError = true;
+      }
+
+      /* Collect steps */
+      var steps = [];
+      var stepRows = document.querySelectorAll('#stepsList .step-row');
+      stepRows.forEach(function(row, i) {
+        var desc = row.querySelector('.step-desc').value.trim();
+        if (desc) {
+          steps.push({
+            step: i + 1,
+            description: desc
+          });
+        }
+      });
+
+      if (steps.length === 0) {
+        document.getElementById('stepsError').textContent = 'Vui lòng thêm ít nhất 1 bước chế biến';
+        document.getElementById('stepsError').style.display = 'block';
+        hasError = true;
+      }
+
+      if (hasError) {
+        /* Scroll to first error */
+        var firstErr = form.querySelector('.form-error[style*="block"], .form-error:not(:empty)');
+        if (firstErr) {
+          firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+
+      var currentUser = CookMateStorage.getCurrentUser();
+      var parsedCatId = parseInt(categoryId, 10) || 1;
+
+      var recipeData = {
+        title: name,
+        name: name,
+        slug: slugify(name),
+        description: description,
+        categoryId: parsedCatId,
+        category: parsedCatId,
+        occasion: occasion || null,
+        image: imageUrl || '../../assets/images/placeholders/recipe-placeholder.svg',
+        imageUrl: imageUrl || '../../assets/images/placeholders/recipe-placeholder.svg',
+        prepTime: prepTime,
+        cookTime: cookTime,
+        difficulty: difficulty,
+        servings: servings,
+        ingredients: ingredients,
+        steps: steps,
+        authorId: currentUser.id,
+        authorName: currentUser.name,
+        views: 0,
+        rating: 5.0,
+        isNew: true
+      };
+
+      if (isEditMode && editRecipeId) {
+        /* Update existing recipe */
+        recipeData.id = editRecipeId;
+        if (CookMateStorage.updateRecipe) {
+          CookMateStorage.updateRecipe(editRecipeId, recipeData);
+        } else {
+          var allRecipes = CookMateStorage.getAllRecipes();
+          var idx = allRecipes.findIndex(function(r) { return r.id === editRecipeId; });
+          if (idx !== -1) {
+            recipeData.createdAt = allRecipes[idx].createdAt;
+            recipeData.updatedAt = new Date().toISOString();
+            allRecipes[idx] = Object.assign(allRecipes[idx], recipeData);
+          }
+          CookMateStorage.set('cookmate_recipes', allRecipes);
+        }
+
+        if (typeof CookMateUI !== 'undefined') {
+          CookMateUI.showToast('Cập nhật công thức thành công!', 'success');
+        }
+      } else {
+        /* Add new recipe */
+        recipeData.id = 'recipe_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+        recipeData.createdAt = new Date().toISOString();
+        recipeData.ratings = [];
+        recipeData.comments = [];
+        recipeData.averageRating = 0;
+
+        if (CookMateStorage.addRecipe) {
+          CookMateStorage.addRecipe(recipeData);
+        } else {
+          var allRecipes = CookMateStorage.getAllRecipes();
+          allRecipes.push(recipeData);
+          CookMateStorage.set('cookmate_recipes', allRecipes);
+        }
+
+        if (typeof CookMateUI !== 'undefined') {
+          CookMateUI.showToast('Đăng công thức thành công!', 'success');
+        }
+      }
+
+      setTimeout(function() {
+        window.location.href = 'my-recipes.html';
+      }, 1200);
+    }
+  </script>
+</body>
+</html>

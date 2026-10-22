@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hồ sơ cá nhân | CookMate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/variables.css">
+  <link rel="stylesheet" href="../../assets/css/reset.css">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/pages.css">
+  <link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body>
+  <header class="site-header" id="siteHeader"></header>
+
+  <main class="main-content">
+    <div class="container">
+      <div class="page-header">
+        <h1 class="page-title"><i class="fas fa-user-circle"></i> Hồ sơ cá nhân</h1>
+      </div>
+
+      <div class="profile-page" id="profilePage">
+        <!-- Profile Display -->
+        <div class="profile-card" id="profileDisplay">
+          <div class="profile-top">
+            <div class="profile-avatar" id="profileAvatar"></div>
+            <div class="profile-info">
+              <h2 class="profile-name" id="profileName"></h2>
+              <p class="profile-email" id="profileEmail"></p>
+              <span class="profile-role-badge" id="profileRole"></span>
+              <p class="profile-join-date" id="profileJoinDate"></p>
+            </div>
+          </div>
+          <div class="profile-bio-section">
+            <h3><i class="fas fa-pen-fancy"></i> Giới thiệu</h3>
+            <p class="profile-bio" id="profileBio">Chưa có thông tin giới thiệu.</p>
+          </div>
+          <div class="profile-stats">
+            <div class="profile-stat-item">
+              <i class="fas fa-book-open"></i>
+              <span class="profile-stat-value" id="statRecipes">0</span>
+              <span class="profile-stat-label">Công thức</span>
+            </div>
+            <div class="profile-stat-item">
+              <i class="fas fa-heart"></i>
+              <span class="profile-stat-value" id="statFavorites">0</span>
+              <span class="profile-stat-label">Yêu thích</span>
+            </div>
+            <div class="profile-stat-item">
+              <i class="fas fa-comments"></i>
+              <span class="profile-stat-value" id="statComments">0</span>
+              <span class="profile-stat-label">Bình luận</span>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="editProfileBtn">
+            <i class="fas fa-edit"></i> Chỉnh sửa hồ sơ
+          </button>
+        </div>
+
+        <!-- Edit Form (hidden by default) -->
+        <div class="profile-card profile-edit-card" id="profileEditForm" style="display: none;">
+          <h2 class="profile-edit-title"><i class="fas fa-edit"></i> Chỉnh sửa hồ sơ</h2>
+          <form id="editForm" novalidate>
+            <div class="form-group">
+              <label for="editName" class="form-label">Họ và tên</label>
+              <input type="text" id="editName" class="form-input" required>
+              <div class="form-error" id="editNameError"></div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Email</label>
+              <p class="form-static-text" id="editEmailDisplay"></p>
+            </div>
+
+            <div class="form-group">
+              <label for="editBio" class="form-label">Giới thiệu bản thân</label>
+              <textarea id="editBio" class="form-input form-textarea" rows="4" placeholder="Chia sẻ đôi nét về bản thân bạn..."></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Lưu thay đổi
+              </button>
+              <button type="button" class="btn btn-outline" id="cancelEditBtn">
+                <i class="fas fa-times"></i> Hủy
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" id="siteFooter"></footer>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="../../assets/js/utils.js"></script>
+  <script src="../../assets/js/data/categories.js"></script>
+  <script src="../../assets/js/data/ingredients.js"></script>
+  <script src="../../assets/js/data/users.js"></script>
+  <script src="../../assets/js/data/recipes.js"></script>
+  <script src="../../assets/js/storage.js"></script>
+  <script src="../../assets/js/components.js"></script>
+  <script src="../../assets/js/navigation.js"></script>
+  <script src="../../assets/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof CookMateStorage === 'undefined' || !CookMateStorage.isLoggedIn()) {
+        window.location.href = '../auth/login.html';
+        return;
+      }
+
+      var currentUser = CookMateStorage.getCurrentUser();
+      if (!currentUser) {
+        window.location.href = '../auth/login.html';
+        return;
+      }
+
+      renderProfile(currentUser);
+
+      document.getElementById('editProfileBtn').addEventListener('click', function() {
+        showEditForm(currentUser);
+      });
+
+      document.getElementById('cancelEditBtn').addEventListener('click', function() {
+        hideEditForm();
+      });
+
+      document.getElementById('editForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        saveProfile(currentUser);
+      });
+    });
+
+    function renderProfile(user) {
+      /* Avatar */
+      var avatarEl = document.getElementById('profileAvatar');
+      var firstLetter = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+      if (user.avatar) {
+        avatarEl.innerHTML = '<img src="' + user.avatar + '" alt="' + user.name + '">';
+      } else {
+        avatarEl.textContent = firstLetter;
+        avatarEl.classList.add('avatar-letter');
+      }
+
+      /* Info */
+      document.getElementById('profileName').textContent = user.name;
+      document.getElementById('profileEmail').textContent = user.email;
+
+      var roleEl = document.getElementById('profileRole');
+      if (user.role === 'admin') {
+        roleEl.textContent = 'Quản trị viên';
+        roleEl.classList.add('badge-admin');
+      } else {
+        roleEl.textContent = 'Người dùng';
+        roleEl.classList.add('badge-user');
+      }
+
+      var joinDate = user.joinDate || user.createdAt || '';
+      if (joinDate) {
+        var date = new Date(joinDate);
+        document.getElementById('profileJoinDate').innerHTML = '<i class="fas fa-calendar-alt"></i> Tham gia: ' + date.toLocaleDateString('vi-VN');
+      }
+
+      /* Bio */
+      var bio = user.bio || '';
+      document.getElementById('profileBio').textContent = bio || 'Chưa có thông tin giới thiệu.';
+
+      /* Stats */
+      var allRecipes = CookMateStorage.getAllRecipes ? CookMateStorage.getAllRecipes() : [];
+      var userRecipes = allRecipes.filter(function(r) { return r.authorId === user.id; });
+      document.getElementById('statRecipes').textContent = userRecipes.length;
+
+      var favorites = CookMateStorage.getFavorites ? CookMateStorage.getFavorites() : [];
+      document.getElementById('statFavorites').textContent = favorites.length;
+
+      var commentCount = 0;
+      allRecipes.forEach(function(r) {
+        if (r.comments && Array.isArray(r.comments)) {
+          r.comments.forEach(function(c) {
+            if (c.userId === user.id) commentCount++;
+          });
+        }
+      });
+      document.getElementById('statComments').textContent = commentCount;
+    }
+
+    function showEditForm(user) {
+      document.getElementById('profileDisplay').style.display = 'none';
+      document.getElementById('profileEditForm').style.display = 'block';
+      document.getElementById('editName').value = user.name || '';
+      document.getElementById('editEmailDisplay').textContent = user.email;
+      document.getElementById('editBio').value = user.bio || '';
+    }
+
+    function hideEditForm() {
+      document.getElementById('profileEditForm').style.display = 'none';
+      document.getElementById('profileDisplay').style.display = 'block';
+    }
+
+    function saveProfile(user) {
+      var form = document.getElementById('editForm');
+      clearAllErrors(form);
+
+      var name = document.getElementById('editName').value.trim();
+      var bio = document.getElementById('editBio').value.trim();
+
+      var nameErr = validateRequired(name, 'Họ và tên');
+      if (nameErr) {
+        showFieldError(document.getElementById('editName'), nameErr);
+        return;
+      }
+
+      user.name = name;
+      user.bio = bio;
+
+      CookMateStorage.setCurrentUser(user);
+
+      /* Also update in users list if possible */
+      if (CookMateStorage.updateUser) {
+        CookMateStorage.updateUser(user);
+      }
+
+      renderProfile(user);
+      hideEditForm();
+
+      if (typeof CookMateUI !== 'undefined') {
+        CookMateUI.showToast('Cập nhật hồ sơ thành công!', 'success');
+      }
+    }
+  </script>
+</body>
+</html>

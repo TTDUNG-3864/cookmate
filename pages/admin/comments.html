@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý Bình luận | CookMate Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/variables.css">
+  <link rel="stylesheet" href="../../assets/css/reset.css">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/pages.css">
+  <link rel="stylesheet" href="../../assets/css/admin.css">
+  <link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body data-admin-page="comments">
+
+  <div class="admin-layout">
+    
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-sidebar__header">
+        <a href="index.html" class="admin-sidebar__logo">
+          <i class="fa-solid fa-utensils"></i>
+          <span>CookMate</span>
+        </a>
+        <span class="admin-sidebar__badge">Admin</span>
+        <button class="admin-sidebar__close" id="sidebarCloseBtn" aria-label="Đóng menu">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <nav class="admin-sidebar__nav">
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Hệ thống</div>
+          <a href="index.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Tổng quan</span>
+          </a>
+          <a href="statistics.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Thống kê & Báo cáo</span>
+          </a>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Nội dung ẩm thực</div>
+          <a href="recipes.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Quản lý Công thức</span>
+          </a>
+          <a href="categories.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Quản lý Danh mục</span>
+          </a>
+          <a href="ingredients.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-carrot"></i>
+            <span>Quản lý Nguyên liệu</span>
+          </a>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Người dùng & Tương tác</div>
+          <a href="accounts.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-users"></i>
+            <span>Quản lý Tài khoản</span>
+          </a>
+          <a href="comments.html" class="admin-sidebar__link active">
+            <i class="fa-solid fa-comments"></i>
+            <span>Quản lý Bình luận</span>
+          </a>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Điều hướng</div>
+          <a href="../../index.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-house"></i>
+            <span>Về trang chủ CookMate</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="admin-sidebar__footer">
+        <div class="admin-sidebar__user">
+          <div class="user-avatar" id="adminUserAvatar">A</div>
+          <div>
+            <div class="admin-sidebar__user-name" id="adminUserName">Admin</div>
+            <div class="admin-sidebar__user-role">Quản trị viên</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="admin-sidebar__backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="admin-header__toggle" id="sidebarToggleBtn" aria-label="Mở menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <h1 class="admin-header__title">Quản lý Bình luận & Phản hồi (BINHLUAN)</h1>
+      </header>
+
+      <div class="admin-content">
+        
+        <div class="admin-card">
+          <div class="admin-card__header">
+            <div class="flex items-center gap-3 flex-1 max-w-md">
+              <div class="search-input-wrapper w-full">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" id="commentSearchInput" class="search-input" placeholder="Tìm theo người gửi hoặc nội dung..." oninput="renderCommentsTable()">
+              </div>
+            </div>
+            <span class="text-xs text-secondary">Tổng cộng: <strong id="totalCommentsCount">0</strong> bình luận</span>
+          </div>
+
+          <div class="admin-card__body admin-card__body--flush">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Người gửi</th>
+                    <th>Món ăn liên quan</th>
+                    <th>Nội dung bình luận</th>
+                    <th>Thời gian</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody id="commentsTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="../../assets/js/utils.js"></script>
+  <script src="../../assets/js/data/categories.js"></script>
+  <script src="../../assets/js/data/ingredients.js"></script>
+  <script src="../../assets/js/data/users.js"></script>
+  <script src="../../assets/js/data/recipes.js"></script>
+  <script src="../../assets/js/storage.js"></script>
+  <script src="../../assets/js/components.js"></script>
+  <script src="../../assets/js/navigation.js"></script>
+  <script src="../../assets/js/app.js"></script>
+
+  <script>
+    var deletedCommentIds = JSON.parse(localStorage.getItem('cookmate_deleted_comments') || '[]');
+
+    document.addEventListener('DOMContentLoaded', function() {
+      setupSidebar();
+      renderCommentsTable();
+    });
+
+    function setupSidebar() {
+      var toggleBtn = document.getElementById('sidebarToggleBtn');
+      var closeBtn = document.getElementById('sidebarCloseBtn');
+      var sidebar = document.getElementById('adminSidebar');
+      var backdrop = document.getElementById('sidebarBackdrop');
+
+      if (toggleBtn) toggleBtn.addEventListener('click', function() {
+        sidebar.classList.add('active');
+        backdrop.classList.add('active');
+      });
+      if (closeBtn) closeBtn.addEventListener('click', function() {
+        sidebar.classList.remove('active');
+        backdrop.classList.remove('active');
+      });
+      if (backdrop) backdrop.addEventListener('click', function() {
+        sidebar.classList.remove('active');
+        backdrop.classList.remove('active');
+      });
+    }
+
+    function renderCommentsTable() {
+      var tbody = document.getElementById('commentsTableBody');
+      var searchInput = document.getElementById('commentSearchInput');
+      var countEl = document.getElementById('totalCommentsCount');
+      if (!tbody) return;
+
+      var keyword = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+      var comments = CookMateStorage.getAllComments();
+      var recipes = CookMateStorage.getAllRecipes();
+
+      // Lọc các bình luận bị xóa trong demo
+      comments = comments.filter(function(c) {
+        return !deletedCommentIds.includes(c.id);
+      });
+
+      if (keyword) {
+        comments = comments.filter(function(c) {
+          var userMatch = c.userName && c.userName.toLowerCase().includes(keyword);
+          var contentMatch = c.content && c.content.toLowerCase().includes(keyword);
+          return userMatch || contentMatch;
+        });
+      }
+
+      if (countEl) countEl.textContent = comments.length;
+
+      if (comments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-secondary">Không tìm thấy bình luận nào</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = comments.map(function(c, idx) {
+        var recipe = recipes.find(function(r) { return r.id === c.recipeId; });
+        var recipeTitle = recipe ? recipe.title : 'Công thức #' + c.recipeId;
+
+        return `
+          <tr>
+            <td>${idx + 1}</td>
+            <td>
+              <div class="flex items-center gap-2">
+                <div class="user-avatar" style="width: 28px; height: 28px; font-size: 12px;">
+                  ${(c.userName || 'U').charAt(0).toUpperCase()}
+                </div>
+                <strong>${escapeHtml(c.userName || 'Người dùng')}</strong>
+              </div>
+            </td>
+            <td>
+              <a href="../recipe-detail.html?id=${c.recipeId}" class="text-primary font-semibold text-xs" target="_blank">
+                ${escapeHtml(recipeTitle)}
+              </a>
+            </td>
+            <td class="text-xs text-secondary max-w-md">"${escapeHtml(c.content)}"</td>
+            <td class="text-xs text-secondary">${timeAgo(c.createdAt)}</td>
+            <td>
+              <div class="flex items-center gap-1">
+                <a href="../recipe-detail.html?id=${c.recipeId}" class="btn btn-ghost btn-sm text-primary" title="Xem trên trang chi tiết" target="_blank">
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+                <button type="button" class="btn btn-ghost btn-sm text-danger" title="Xóa bình luận" onclick="deleteAdminComment(${c.id})">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function deleteAdminComment(id) {
+      CookMateUI.showConfirm('Bạn có chắc muốn xóa bình luận này?', function() {
+        CookMateStorage.deleteComment(id);
+        deletedCommentIds.push(id);
+        localStorage.setItem('cookmate_deleted_comments', JSON.stringify(deletedCommentIds));
+
+        CookMateUI.showToast('Đã xóa bình luận thành công', 'success');
+        renderCommentsTable();
+      });
+    }
+  </script>
+</body>
+</html>

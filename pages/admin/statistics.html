@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thống kê & Báo cáo | CookMate Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/variables.css">
+  <link rel="stylesheet" href="../../assets/css/reset.css">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/pages.css">
+  <link rel="stylesheet" href="../../assets/css/admin.css">
+  <link rel="stylesheet" href="../../assets/css/responsive.css">
+</head>
+<body data-admin-page="statistics">
+
+  <div class="admin-layout">
+    
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-sidebar__header">
+        <a href="index.html" class="admin-sidebar__logo">
+          <i class="fa-solid fa-utensils"></i>
+          <span>CookMate</span>
+        </a>
+        <span class="admin-sidebar__badge">Admin</span>
+        <button class="admin-sidebar__close" id="sidebarCloseBtn" aria-label="Đóng menu">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <nav class="admin-sidebar__nav">
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Hệ thống</div>
+          <a href="index.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Tổng quan</span>
+          </a>
+          <a href="statistics.html" class="admin-sidebar__link active">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Thống kê & Báo cáo</span>
+          </a>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Nội dung ẩm thực</div>
+          <a href="recipes.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Quản lý Công thức</span>
+          </a>
+          <a href="categories.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Quản lý Danh mục</span>
+          </a>
+          <a href="ingredients.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-carrot"></i>
+            <span>Quản lý Nguyên liệu</span>
+          </a>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Người dùng & Tương tác</div>
+          <a href="accounts.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-users"></i>
+            <span>Quản lý Tài khoản</span>
+          </a>
+          <a href="comments.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-comments"></i>
+            <span>Quản lý Bình luận</span>
+          </a>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Điều hướng</div>
+          <a href="../../index.html" class="admin-sidebar__link">
+            <i class="fa-solid fa-house"></i>
+            <span>Về trang chủ CookMate</span>
+          </a>
+        </div>
+      </nav>
+
+      <div class="admin-sidebar__footer">
+        <div class="admin-sidebar__user">
+          <div class="user-avatar" id="adminUserAvatar">A</div>
+          <div>
+            <div class="admin-sidebar__user-name" id="adminUserName">Admin</div>
+            <div class="admin-sidebar__user-role">Quản trị viên</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="admin-sidebar__backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <button class="admin-header__toggle" id="sidebarToggleBtn" aria-label="Mở menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <h1 class="admin-header__title">Báo cáo & Thống kê Dữ liệu CookMate</h1>
+      </header>
+
+      <div class="admin-content">
+        
+        <div class="mb-6 flex-between flex-wrap gap-3">
+          <div>
+            <h2 class="admin-content__title">Phân tích hệ sinh thái</h2>
+            <p class="admin-content__subtitle">Báo cáo tổng hợp số liệu công thức, phân bố độ khó và tương tác người dùng.</p>
+          </div>
+          <span class="badge badge-primary text-xs">
+            <i class="fa-solid fa-rotate mr-1"></i> Cập nhật thời gian thực
+          </span>
+        </div>
+
+        <!-- 4 KPI Metrics -->
+        <div class="dashboard-stats">
+          <div class="stat-card">
+            <div class="stat-card__icon" style="background-color: var(--primary); color: white;">
+              <i class="fa-solid fa-fire"></i>
+            </div>
+            <div class="stat-card__content">
+              <span class="stat-card__label">Tổng lượt xem món</span>
+              <span class="stat-card__value" id="kpiTotalViews">0</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card__icon" style="background-color: #2E7D4F; color: white;">
+              <i class="fa-solid fa-heart"></i>
+            </div>
+            <div class="stat-card__content">
+              <span class="stat-card__label">Lượt yêu thích</span>
+              <span class="stat-card__value" id="kpiFavorites">0</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card__icon" style="background-color: #3B82F6; color: white;">
+              <i class="fa-solid fa-comments"></i>
+            </div>
+            <div class="stat-card__content">
+              <span class="stat-card__label">Tổng bình luận</span>
+              <span class="stat-card__value" id="kpiComments">0</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card__icon" style="background-color: #EAB308; color: white;">
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <div class="stat-card__content">
+              <span class="stat-card__label">Đánh giá trung bình</span>
+              <span class="stat-card__value" id="kpiAvgRating">4.8 / 5</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Grid (2 columns: Category distribution + Difficulty distribution) -->
+        <div class="grid grid-2 gap-6 mb-8">
+          
+          <!-- Category Breakdown Bar Chart -->
+          <div class="admin-card">
+            <div class="admin-card__header">
+              <h3 class="admin-card__title">
+                <i class="fa-solid fa-chart-column text-primary mr-1"></i> Phân bố Công thức theo Danh mục
+              </h3>
+            </div>
+            <div class="admin-card__body space-y-4" id="categoryBarsContainer">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Difficulty Breakdown Bar Chart -->
+          <div class="admin-card">
+            <div class="admin-card__header">
+              <h3 class="admin-card__title">
+                <i class="fa-solid fa-signal text-primary mr-1"></i> Phân bố theo Cấp độ Thực hiện
+              </h3>
+            </div>
+            <div class="admin-card__body space-y-5" id="difficultyBarsContainer">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Top Ranking Tables (2 columns: Most viewed & Most commented) -->
+        <div class="grid grid-2 gap-6">
+          
+          <!-- Top 5 Most Viewed -->
+          <div class="admin-card">
+            <div class="admin-card__header">
+              <h3 class="admin-card__title">
+                <i class="fa-solid fa-trophy text-warning mr-1"></i> Top 5 Công thức Xem nhiều nhất
+              </h3>
+            </div>
+            <div class="admin-card__body admin-card__body--flush">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Tên món ăn</th>
+                      <th>Lượt xem</th>
+                      <th>Độ khó</th>
+                    </tr>
+                  </thead>
+                  <tbody id="topViewsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top 5 Most Commented -->
+          <div class="admin-card">
+            <div class="admin-card__header">
+              <h3 class="admin-card__title">
+                <i class="fa-solid fa-comment-dots text-info mr-1"></i> Top 5 Món Thảo luận Sôi nổi nhất
+              </h3>
+            </div>
+            <div class="admin-card__body admin-card__body--flush">
+              <div class="table-responsive">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Tên món ăn</th>
+                      <th>Bình luận</th>
+                      <th>Đánh giá</th>
+                    </tr>
+                  </thead>
+                  <tbody id="topCommentsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+  </div>
+
+  <script src="../../assets/js/utils.js"></script>
+  <script src="../../assets/js/data/categories.js"></script>
+  <script src="../../assets/js/data/ingredients.js"></script>
+  <script src="../../assets/js/data/users.js"></script>
+  <script src="../../assets/js/data/recipes.js"></script>
+  <script src="../../assets/js/storage.js"></script>
+  <script src="../../assets/js/components.js"></script>
+  <script src="../../assets/js/navigation.js"></script>
+  <script src="../../assets/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      setupSidebar();
+      renderStatistics();
+    });
+
+    function setupSidebar() {
+      var toggleBtn = document.getElementById('sidebarToggleBtn');
+      var closeBtn = document.getElementById('sidebarCloseBtn');
+      var sidebar = document.getElementById('adminSidebar');
+      var backdrop = document.getElementById('sidebarBackdrop');
+
+      if (toggleBtn) toggleBtn.addEventListener('click', function() {
+        sidebar.classList.add('active');
+        backdrop.classList.add('active');
+      });
+      if (closeBtn) closeBtn.addEventListener('click', function() {
+        sidebar.classList.remove('active');
+        backdrop.classList.remove('active');
+      });
+      if (backdrop) backdrop.addEventListener('click', function() {
+        sidebar.classList.remove('active');
+        backdrop.classList.remove('active');
+      });
+    }
+
+    function renderStatistics() {
+      var recipes = CookMateStorage.getAllRecipes();
+      var categories = CookMateStorage.getAllCategories();
+      var comments = CookMateStorage.getAllComments();
+      var favorites = CookMateStorage.getFavorites();
+
+      // 1. KPI
+      var totalViews = recipes.reduce(function(acc, r) { return acc + (r.views || 0); }, 0);
+      var avgRating = (recipes.reduce(function(acc, r) { return acc + (r.rating || 4.8); }, 0) / (recipes.length || 1)).toFixed(1);
+
+      document.getElementById('kpiTotalViews').textContent = formatNumber(totalViews);
+      document.getElementById('kpiFavorites').textContent = favorites.length + 18; // demo count
+      document.getElementById('kpiComments').textContent = comments.length;
+      document.getElementById('kpiAvgRating').textContent = avgRating + ' / 5.0';
+
+      // 2. Phân bố theo Danh mục
+      var catContainer = document.getElementById('categoryBarsContainer');
+      var totalRecipes = recipes.length || 1;
+
+      catContainer.innerHTML = categories.map(function(cat) {
+        var count = recipes.filter(function(r) { return r.categoryId === cat.id; }).length;
+        var percent = Math.round((count / totalRecipes) * 100);
+
+        return `
+          <div class="stat-progress-item">
+            <div class="flex-between text-xs font-semibold mb-1">
+              <span><i class="fa-solid ${cat.icon || 'fa-utensils'} mr-1 text-primary"></i> ${escapeHtml(cat.name)}</span>
+              <span><strong>${count} món</strong> (${percent}%)</span>
+            </div>
+            <div class="w-full bg-light rounded-full h-2.5 overflow-hidden">
+              <div class="h-full rounded-full transition-all" style="width: ${percent}%; background-color: var(--primary);"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 3. Phân bố theo Độ khó
+      var diffContainer = document.getElementById('difficultyBarsContainer');
+      var easyCount = recipes.filter(function(r) { return r.difficulty === 'Dễ'; }).length;
+      var medCount = recipes.filter(function(r) { return r.difficulty === 'Trung bình'; }).length;
+      var hardCount = recipes.filter(function(r) { return r.difficulty === 'Khó'; }).length;
+
+      var diffs = [
+        { name: 'Dễ thực hiện', count: easyCount, color: '#16A34A', percent: Math.round((easyCount / totalRecipes) * 100) },
+        { name: 'Trung bình', count: medCount, color: '#F59E0B', percent: Math.round((medCount / totalRecipes) * 100) },
+        { name: 'Khó / Công phu', count: hardCount, color: '#DC2626', percent: Math.round((hardCount / totalRecipes) * 100) }
+      ];
+
+      diffContainer.innerHTML = diffs.map(function(d) {
+        return `
+          <div class="stat-progress-item">
+            <div class="flex-between text-xs font-semibold mb-1">
+              <span>${d.name}</span>
+              <span><strong>${d.count} món</strong> (${d.percent}%)</span>
+            </div>
+            <div class="w-full bg-light rounded-full h-3 overflow-hidden">
+              <div class="h-full rounded-full transition-all" style="width: ${d.percent}%; background-color: ${d.color};"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 4. Top 5 xem nhiều nhất
+      var topViews = recipes.slice().sort(function(a, b) {
+        return (b.views || 0) - (a.views || 0);
+      }).slice(0, 5);
+
+      document.getElementById('topViewsTable').innerHTML = topViews.map(function(r, idx) {
+        return `
+          <tr>
+            <td><strong>#${idx + 1}</strong></td>
+            <td>
+              <a href="../recipe-detail.html?id=${r.id}" class="text-primary font-bold text-xs" target="_blank">
+                ${escapeHtml(r.title)}
+              </a>
+            </td>
+            <td><strong>${formatNumber(r.views || 0)}</strong></td>
+            <td>
+              <span class="badge ${r.difficulty === 'Dễ' ? 'badge-success' : (r.difficulty === 'Khó' ? 'badge-danger' : 'badge-warning')} text-[10px]">
+                ${escapeHtml(r.difficulty || 'Dễ')}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // 5. Top 5 bình luận nhiều nhất
+      var topComments = recipes.slice().map(function(r) {
+        var commentCount = (r.comments ? r.comments.length : 0) + CookMateStorage.getCommentsForRecipe(r.id).length;
+        return Object.assign({}, r, { commentTotal: commentCount });
+      }).sort(function(a, b) {
+        return b.commentTotal - a.commentTotal;
+      }).slice(0, 5);
+
+      document.getElementById('topCommentsTable').innerHTML = topComments.map(function(r, idx) {
+        return `
+          <tr>
+            <td><strong>#${idx + 1}</strong></td>
+            <td>
+              <a href="../recipe-detail.html?id=${r.id}" class="text-primary font-bold text-xs" target="_blank">
+                ${escapeHtml(r.title)}
+              </a>
+            </td>
+            <td><strong>${r.commentTotal}</strong> bình luận</td>
+            <td class="text-xs text-warning">
+              <i class="fa-solid fa-star"></i> ${r.rating || 4.8}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>
