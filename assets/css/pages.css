@@ -1475,11 +1475,15 @@ body.kitchen-mode-active .step-badge {
 /* Results Area */
 .search-results-area {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .search-results-area .recipe-grid {
+  display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-5);
+  width: 100%;
 }
 
 @media (min-width: 640px) {
@@ -1492,6 +1496,25 @@ body.kitchen-mode-active .step-badge {
   .search-results-area .recipe-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* Căn giữa trạng thái không tìm thấy công thức trên desktop & mobile (Lỗi D) */
+.search-results-area .recipe-grid > .empty-state,
+.recipe-grid > .empty-state {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 520px;
+  margin: 40px auto;
+  align-self: center;
+  justify-self: center;
+  text-align: center;
+}
+
+.search-results-area .recipe-grid:has(.empty-state) {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 360px;
 }
 
 .search-results-header {

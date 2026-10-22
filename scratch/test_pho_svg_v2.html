@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pho Hanoi SVG V2 Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      background: #FFF9F2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+    .pho-stage {
+      width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .pho-svg-wrapper {
+      width: 100%;
+      height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .pho-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 14px 28px rgba(120, 60, 20, 0.1));
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .pho-stage:hover .pho-svg {
+      transform: scale(1.02);
+    }
+
+    /* Ambient Warm Glow */
+    .pho-ambient-glow {
+      opacity: 0.25;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      transform-origin: 230px 220px;
+    }
+    .pho-stage.is-lifted .pho-ambient-glow {
+      opacity: 0.85;
+      transform: scale(1.15);
+    }
+
+    /* Steam */
+    .pho-steam-path {
+      opacity: 0.35;
+      stroke-dasharray: 120;
+      stroke-dashoffset: 120;
+      animation: steam-drift 4s linear infinite;
+    }
+    .steam-1 { animation-delay: 0s; }
+    .steam-2 { animation-delay: 1.3s; }
+    .steam-3 { animation-delay: 2.6s; }
+
+    @keyframes steam-drift {
+      0% { stroke-dashoffset: 120; opacity: 0; transform: translateY(6px); }
+      30% { opacity: 0.55; }
+      70% { opacity: 0.35; }
+      100% { stroke-dashoffset: -120; opacity: 0; transform: translateY(-24px); }
+    }
+    .pho-stage.is-lifted .pho-steam-path {
+      animation-duration: 2.4s;
+      opacity: 0.75;
+    }
+
+    /* Chopsticks Animation */
+    .pho-chopsticks {
+      transform-origin: 385px 45px;
+      transition: transform 0.75s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+    .pho-stage.is-lifted .pho-chopsticks {
+      transform: translate(-10px, -70px) rotate(-8deg);
+    }
+
+    /* Lifted Noodles Animation - Perfectly anchored at chopstick tips! */
+    .pho-lifted-noodles {
+      opacity: 0;
+      transform-origin: 200px 150px;
+      transform: translateY(32px) scaleY(0.2);
+      transition: transform 0.75s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.4s ease;
+      pointer-events: none;
+    }
+    .pho-stage.is-lifted .pho-lifted-noodles {
+      opacity: 1;
+      transform: translateY(0) scaleY(1);
+    }
+
+    /* Droplet */
+    .noodle-drop {
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .pho-stage.is-lifted .noodle-drop {
+      opacity: 1;
+      animation: noodle-droplet-fall 2.2s ease-in infinite 0.8s;
+    }
+    @keyframes noodle-droplet-fall {
+      0% { transform: translateY(0); opacity: 0.9; }
+      65% { transform: translateY(45px); opacity: 0.7; }
+      100% { transform: translateY(60px); opacity: 0; }
+    }
+
+    .pho-cta-pill {
+      margin-top: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 20px;
+      background: #FFFFFF;
+      border: 1.5px solid #FED7AA;
+      border-radius: 9999px;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #E85D2A;
+      box-shadow: 0 4px 14px rgba(232, 93, 42, 0.1);
+      transition: all 0.25s ease;
+    }
+    .pho-stage.is-lifted .pho-cta-pill {
+      background: #F0FDF4;
+      border-color: #86EFAC;
+      color: #166534;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="pho-stage" id="phoStage" onclick="this.classList.toggle('is-lifted')">
+    <div class="pho-svg-wrapper">
+      <svg class="pho-svg" viewBox="0 0 460 380" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="phoGlowGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#FF9E66" stop-opacity="0.45" />
+            <stop offset="55%" stop-color="#FFD6A5" stop-opacity="0.2" />
+            <stop offset="100%" stop-color="#FFF9F2" stop-opacity="0" />
+          </radialGradient>
+
+          <!-- Bowl Porcelain Shading (Deep Bowl) -->
+          <linearGradient id="bowlShading" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#FFFFFF" />
+            <stop offset="35%" stop-color="#FAF7F2" />
+            <stop offset="75%" stop-color="#EDE5D8" />
+            <stop offset="100%" stop-color="#D8CCBB" />
+          </linearGradient>
+
+          <!-- Broth Gradient -->
+          <radialGradient id="brothGrad" cx="50%" cy="45%" r="52%">
+            <stop offset="0%" stop-color="#C8752D" />
+            <stop offset="45%" stop-color="#A5541B" />
+            <stop offset="85%" stop-color="#7A390E" />
+            <stop offset="100%" stop-color="#552407" />
+          </radialGradient>
+
+          <!-- Chopstick Wood Gradients -->
+          <linearGradient id="chopstickGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#6F3F1B" />
+            <stop offset="40%" stop-color="#935728" />
+            <stop offset="85%" stop-color="#542B0F" />
+            <stop offset="100%" stop-color="#D4AF37" />
+          </linearGradient>
+
+          <!-- Beef Gradient -->
+          <linearGradient id="beefGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#9C3A28" />
+            <stop offset="60%" stop-color="#7B291A" />
+            <stop offset="100%" stop-color="#581B10" />
+          </linearGradient>
+
+          <!-- Filters -->
+          <filter id="steamBlur" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="2.5" />
+          </filter>
+          <filter id="shadowBlur" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="6" />
+          </filter>
+
+          <!-- Clip path to keep submerged chopsticks inside broth -->
+          <clipPath id="brothClip">
+            <ellipse cx="230" cy="148" rx="142" ry="36" />
+          </clipPath>
+        </defs>
+
+        <!-- 1. Ambient Warm Glow -->
+        <circle class="pho-ambient-glow" cx="230" cy="205" r="165" fill="url(#phoGlowGrad)" />
+
+        <!-- 2. Soft Table Shadow Under Deep Bowl Base -->
+        <ellipse cx="230" cy="308" rx="135" ry="18" fill="rgba(80, 40, 15, 0.12)" filter="url(#shadowBlur)" />
+
+        <!-- 3. Base Ring / Đế bát sứ vững chãi -->
+        <path d="M 166 288 C 166 306, 294 306, 294 288 L 290 274 L 170 274 Z" fill="#EAE4DC" stroke="#CEC4B5" stroke-width="1.5" />
+
+        <!-- 4. Deep Porcelain Bowl Body (Thành bát sâu lòng, thuôn mượt mà về đáy) -->
+        <path d="M 75 145 C 75 240, 152 290, 230 290 C 308 290, 385 240, 385 145 C 385 110, 75 110, 75 145 Z" fill="url(#bowlShading)" stroke="#D4C9BA" stroke-width="2" />
+
+        <!-- 5. Blue Porcelain Oriental Pattern on Upper Rim (Họa tiết men lam truyền thống) -->
+        <path d="M 88 152 Q 120 163, 155 168 Q 192 173, 230 173 Q 268 173, 305 168 Q 340 163, 372 152" fill="none" stroke="#2563EB" stroke-width="2" stroke-dasharray="6,4" opacity="0.65" />
+        <circle cx="155" cy="168" r="2.5" fill="#1D4ED8" opacity="0.75" />
+        <circle cx="230" cy="173" r="3" fill="#1D4ED8" opacity="0.75" />
+        <circle cx="305" cy="168" r="2.5" fill="#1D4ED8" opacity="0.75" />
+
+        <!-- 6. IN DÒNG CHỮ "PHỞ HÀ NỘI" LÊN MẶT TRƯỚC BÁT (Chính xác yêu cầu Lỗi 2) -->
+        <g class="pho-brand-text" opacity="0.95">
+          <!-- Họa tiết hoa văn 2 bên -->
+          <path d="M 132 238 Q 150 234, 164 238" stroke="#9A3412" stroke-width="1.5" fill="none" opacity="0.75" />
+          <circle cx="128" cy="238" r="2" fill="#9A3412" />
+          <path d="M 296 238 Q 310 234, 328 238" stroke="#9A3412" stroke-width="1.5" fill="none" opacity="0.75" />
+          <circle cx="332" cy="238" r="2" fill="#9A3412" />
+          <!-- Chữ PHỞ HÀ NỘI sắc nét, cân đối trên mặt cong thân bát -->
+          <text x="230" y="243" text-anchor="middle" font-family="'Be Vietnam Pro', sans-serif" font-weight="800" font-size="14" letter-spacing="3.5" fill="#9A3412">PHỞ HÀ NỘI</text>
+        </g>
+
+        <!-- 7. Bowl Ceramic Rim (Viền miệng bát có chiều sâu 3D) -->
+        <ellipse cx="230" cy="142" rx="155" ry="40" fill="#FCFAF7" stroke="#DBD2C3" stroke-width="3" />
+
+        <!-- 8. Lòng bát & Nước dùng phở bò (Amber Broth) -->
+        <ellipse cx="230" cy="145" rx="142" ry="34" fill="url(#brothGrad)" />
+
+        <!-- 9. Glistening Broth Shimmer & Golden Oil Droplets -->
+        <ellipse cx="195" cy="138" rx="40" ry="10" fill="rgba(255, 235, 180, 0.18)" />
+        <circle cx="168" cy="135" r="4.5" fill="#FDE047" opacity="0.5" />
+        <circle cx="280" cy="146" r="3.5" fill="#FBBF24" opacity="0.45" />
+        <circle cx="215" cy="158" r="5" fill="#F59E0B" opacity="0.4" />
+        <circle cx="260" cy="134" r="3" fill="#FEF08A" opacity="0.55" />
+
+        <!-- 10. Pho Noodles in Broth (Swirling ribbons) -->
+        <g stroke-linecap="round" fill="none">
+          <path d="M 135 142 Q 168 165, 210 156 T 275 160 Q 310 155, 325 144" stroke="#FFFDF8" stroke-width="6.5" />
+          <path d="M 148 152 Q 182 172, 232 165 T 310 150" stroke="#F5ECE0" stroke-width="6" />
+          <path d="M 172 144 Q 202 164, 248 158 T 292 147" stroke="#FFFFFF" stroke-width="5.5" />
+        </g>
+
+        <!-- 11. Thinly Sliced Beef (Thịt bò chín/tái) -->
+        <g class="pho-beef">
+          <path d="M 152 138 C 147 126, 180 120, 204 130 C 218 136, 212 150, 194 154 C 174 158, 156 150, 152 138 Z" fill="url(#beefGrad)" stroke="#581B10" stroke-width="1.2" />
+          <path d="M 162 134 Q 185 130, 199 138" stroke="#E07A6B" stroke-width="1.4" fill="none" opacity="0.8" />
+          <path d="M 235 132 C 230 122, 268 118, 290 128 C 302 134, 298 146, 278 150 C 258 153, 240 146, 235 132 Z" fill="url(#beefGrad)" stroke="#581B10" stroke-width="1.2" />
+          <path d="M 245 128 Q 268 126, 284 135" stroke="#E07A6B" stroke-width="1.4" fill="none" opacity="0.8" />
+        </g>
+
+        <!-- 12. Fresh Scallions & Herbs (Hành lá, hành tây, ngò gai, ớt tươi) -->
+        <g class="pho-herbs">
+          <ellipse cx="215" cy="135" rx="14" ry="6" fill="none" stroke="#FFFFFF" stroke-width="2.2" opacity="0.9" />
+          <ellipse cx="255" cy="142" rx="12" ry="5" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.85" />
+          <ellipse cx="140" cy="140" rx="5" ry="3" fill="#2E7D4F" />
+          <ellipse cx="178" cy="154" rx="4.5" ry="2.5" fill="#16A34A" />
+          <ellipse cx="195" cy="138" rx="5" ry="3" fill="#22C55E" />
+          <ellipse cx="230" cy="150" rx="5.5" ry="3" fill="#15803D" />
+          <ellipse cx="270" cy="138" rx="4" ry="2.5" fill="#2E7D4F" />
+          <ellipse cx="295" cy="152" rx="5" ry="3" fill="#16A34A" />
+          <ellipse cx="205" cy="146" rx="6.5" ry="3.5" fill="#DC2626" stroke="#FEF08A" stroke-width="1.4" />
+        </g>
+
+        <!-- 13. Hot Steam Wisps -->
+        <g class="pho-steam" filter="url(#steamBlur)">
+          <path class="pho-steam-path steam-1" d="M 180 125 Q 165 85, 190 45 T 175 5" stroke="rgba(255,255,255,0.7)" stroke-width="5" fill="none" stroke-linecap="round" />
+          <path class="pho-steam-path steam-2" d="M 230 120 Q 250 78, 225 35 T 245 2" stroke="rgba(255,255,255,0.8)" stroke-width="6" fill="none" stroke-linecap="round" />
+          <path class="pho-steam-path steam-3" d="M 285 125 Q 305 85, 280 45 T 290 8" stroke="rgba(255,255,255,0.7)" stroke-width="5" fill="none" stroke-linecap="round" />
+        </g>
+
+        <!-- 14. LIFTED NOODLES (ĐẦU SỢI PHỞ MÓC CHÍNH XÁC VÀO ĐẦU GẮP ĐÔI ĐŨA TẠI X: 198, Y: 88) -->
+        <g class="pho-lifted-noodles" id="liftedNoodles">
+          <!-- Dải sợi phở 1 (Sợi chính vắt qua đũa) -->
+          <path d="M 168 152 C 172 120, 184 96, 198 88 C 204 84, 210 88, 212 100 C 216 118, 222 142, 226 155" fill="none" stroke="#FFFFFF" stroke-width="6.5" stroke-linecap="round" filter="drop-shadow(0 2px 4px rgba(100, 50, 10, 0.18))" />
+          <!-- Dải sợi phở 2 (Sợi sau ôm đỉnh gắp) -->
+          <path d="M 178 155 C 182 125, 190 94, 202 84 C 208 80, 216 85, 218 98 C 224 122, 230 145, 235 158" fill="none" stroke="#FFFDF8" stroke-width="6" stroke-linecap="round" filter="drop-shadow(0 2px 4px rgba(100, 50, 10, 0.15))" />
+          <!-- Dải sợi phở 3 (Sợi trong uốn mềm) -->
+          <path d="M 188 158 C 190 132, 196 102, 204 86 C 208 82, 214 86, 216 98 C 220 120, 224 146, 228 160" fill="none" stroke="#F5ECE0" stroke-width="5" stroke-linecap="round" />
+          <!-- Dải sợi phở 4 (Sợi rủ dài tự nhiên) -->
+          <path d="M 198 160 C 200 138, 204 105, 208 90 C 212 87, 218 92, 222 105 C 226 128, 234 150, 238 162" fill="none" stroke="#FFFFFF" stroke-width="4.5" stroke-linecap="round" />
+
+          <!-- Vết hành hoa nhỏ dính vào sợi phở -->
+          <ellipse cx="190" cy="118" rx="3.5" ry="2" fill="#16A34A" />
+          <!-- Giọt nước dùng vàng óng nhỏ giọt từ sợi phở -->
+          <circle class="noodle-drop" cx="206" cy="115" r="3" fill="#F59E0B" />
+        </g>
+
+        <!-- 15. ĐÔI ĐŨA (CHOPSTICKS) - CẮM XIÊN TỰ NHIÊN, ĐẦU GẮP TẠI (198, 158) KHI NẰM YÊN; KHI NHẤC LÊN ĐẠT (198, 88) -->
+        <g class="pho-chopsticks" id="phoChopsticks">
+          <!-- Rear Chopstick (Đũa sau) -->
+          <path d="M 206 152 L 388 28 C 390 26, 393 28, 391 31 L 213 158 C 211 159, 205 155, 206 152 Z" fill="url(#chopstickGrad)" filter="drop-shadow(0 3px 5px rgba(0,0,0,0.25))" />
+          <path d="M 374 38 L 383 31 L 386 35 L 377 42 Z" fill="#EAB308" />
+
+          <!-- Front Chopstick (Đũa trước) -->
+          <path d="M 194 158 L 376 34 C 378 32, 381 34, 379 37 L 201 164 C 199 165, 193 161, 194 158 Z" fill="url(#chopstickGrad)" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.3))" />
+          <path d="M 362 44 L 371 37 L 374 41 L 365 48 Z" fill="#FACC15" />
+        </g>
+
+      </svg>
+    </div>
+
+    <!-- Interaction Hint CTA -->
+    <div class="pho-cta-pill" id="phoCta">
+      <i class="fa-solid fa-hand-pointer"></i>
+      <span>Chạm vào đôi đũa để khám phá CookMate</span>
+    </div>
+  </div>
+
+</body>
+</html>

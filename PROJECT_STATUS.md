@@ -221,6 +221,121 @@ Trong quá trình rà soát độc lập, kiểm thử đa tầng và đối chi
      - Cách ly an toàn Desktop: Tại `@media (min-width: 1150px)`, thiết lập `.mobile-nav, .mobile-nav-overlay { display: none !important; }` bảo vệ tuyệt đối Header Desktop đã ổn định.
      - Nâng cấp tương tác: Hỗ trợ đóng menu bằng 4 cách (nút X, chạm overlay, phím Escape, click liên kết/nút bấm bên trong drawer); tự động khóa cuộn trang (`body, html { overflow: hidden; }`) khi mở menu và phục hồi khi đóng; đồng bộ badge yêu thích giữa desktop `#favCountBadge` và mobile `#mobileFavBadge`.
    - *Kết quả kiểm thử thực tế qua Chrome Headless CDP:* 100% đạt chuẩn trên tất cả các viewport (360x740, 375x812, 390x844, 430x932, 768x1024), 0 lỗi tràn ngang, drawer trượt mượt mà mở full màn hình điện thoại, overlay phủ kín toàn bộ trang web.
+15. **Tích hợp Giao diện Xác thực CookMate với Hiệu ứng Bát Phở Hà Nội:**
+   - *Mục tiêu:* Thay thế giao diện đăng nhập/đăng ký cũ và loại bỏ hoàn toàn ý tưởng bóng đèn / nền vũ trụ tối màu từ file mẫu (`index-mau.html`, `style-mau.css`, `script-mau.js`). Tích hợp trải nghiệm ẩm thực đặc sắc mang đậm bản sắc CookMate: Người dùng chạm vào Bát Phở Hà Nội, đôi đũa nhấc lên kéo theo những sợi phở mềm mại, rồi thẻ Đăng nhập / Đăng ký nhẹ nhàng mở ra trên nền kem ấm áp.
+   - *File mới triển khai:*
+     - `assets/css/auth.css`: Namespace `.cookmate-auth`, thiết kế vector SVG Bát Phở Hà Nội, hiệu ứng nhấc đũa, kéo sợi phở, hơi nước bốc lên, hào quang ấm áp, sliding views, ripple buttons, password strength bar và responsive mobile/desktop.
+     - `assets/js/auth-ui.js`: Module điều khiển tương tác `CookMateAuthUI`, kết nối trực tiếp với `CookMateStorage` và `CookMateUI.showToast()`.
+     - `scratch/test_pho_auth.js`: Kịch bản kiểm thử tự động toàn diện qua Chrome Headless CDP.
+   - *File cập nhật:*
+     - `pages/auth/login.html`: Trang Đăng nhập tích hợp Bát phở Hà Nội (mặc định view Đăng nhập).
+     - `pages/auth/register.html`: Trang Đăng ký tích hợp Bát phở Hà Nội (mặc định view Đăng ký).
+     - `assets/js/storage.js`: Hỗ trợ nạp tham số linh hoạt cho `registerUser` (cả object và 3 tham số riêng lẻ).
+   - *Đặc điểm kỹ thuật & Trải nghiệm tương tác:*
+     - **Bát phở Hà Nội vector SVG:** Tô sứ men lam truyền thống, nước dùng màu nâu hổ phách trong veo, lát thịt bò nạm/tái vân hoa, hành hoa, hành tây, ngò gai và lát ớt đỏ tươi.
+     - **Đôi đũa & Sợi phở:** Đôi đũa cắm xiên tự nhiên; khi chạm (Click / Tap / phím Enter / Space), đôi đũa nhấc lên (`translate(-14px, -68px) rotate(-8deg)`), kéo theo 4 dải sợi phở trắng ngà uốn lượn mềm mại theo trọng lực, kèm giọt nước dùng thơm lừng nhỏ giọt.
+     - **Chuyển đổi View linh hoạt:** Hỗ trợ trượt mượt mà giữa Đăng nhập ↔ Đăng ký ngay trong một trang mà không bị giật bố cục hoặc mất dữ liệu đã nhập, đồng thời bảo đảm cả 2 URL `login.html` và `register.html` đều hoạt động trực tiếp độc lập.
+     - **Nghiệp vụ tài khoản thật:** Sử dụng 100% logic demo của CookMate (`CookMateStorage`, `DEMO_CREDENTIALS`), có kiểm tra rỗng, kiểm tra định dạng email, kiểm tra trùng email, mật khẩu xác nhận, bảng đánh giá độ mạnh mật khẩu 4 cấp độ và nút bật/tắt mật khẩu.
+     - **Tính năng 1-Click Demo Accounts:** Hộp tài khoản mẫu cho phép nhấn 1 click để điền nhanh tài khoản Quản trị viên (`admin@cookmate.vn`) hoặc Thành viên (`giang@cookmate.vn`).
+   - *Kết quả kiểm thử tự động qua Chrome Headless CDP:* 100% đạt chuẩn trên 6 kích thước viewport (360x740, 375x812, 390x844, 430x932, 768x1024, 1280x800), 0 lỗi tràn ngang (`hasOverflow: false`), thẻ Auth hiển thị hoàn hảo, đăng nhập và đăng ký thành công.
+16. **COOKMATE AUTH UI V2 — Hoàn thiện Bát Phở Hà Nội Sâu Lòng, Tách Độc Lập Đăng Nhập / Đăng Ký và Tối Ưu Laptop/Mobile:**
+    - *Bối cảnh & Yêu cầu nâng cấp:* Sau phiên bản tích hợp ban đầu, khi chạy thực tế trên laptop và mobile xuất hiện 8 vấn đề cần tinh chỉnh: hình dạng bát phở còn giống đĩa dẹt, thiếu dòng chữ "PHỞ HÀ NỘI" in trên thân bát sứ, đũa và sợi phở chưa ăn khớp hình học, card còn chứa 2 tab chuyển đổi, thiếu phương thức tiếp tục Google/Facebook, form hơi dài trên laptop khiến phải cuộn dọc, header auth chưa căn lề chuẩn 1120px và responsive di động cần tối ưu.
+    - *Các hạng mục đã xử lý dứt điểm (8/8 lỗi):*
+      1. **Lỗi 1 — Vẽ lại Bát phở Hà Nội sâu lòng:** Thay thế đường cong đĩa dẹt cũ bằng vector SVG chiếc bát sứ sâu lòng (deep porcelain bowl) với gradient đổ bóng thanh thoát (`#bowlShading`), thành bát vuốt cong mượt mà từ miệng xuống đáy (`M 75 145 C 75 240, 152 290, 230 290 C 308 290, 385 240, 385 145...`), chân đế sứ vững chãi (`M 166 288...`), bóng đổ mềm mại trên bàn gỗ.
+      2. **Lỗi 2 — In dòng chữ "PHỞ HÀ NỘI" lên mặt trước thân bát sứ:** Dòng chữ in rõ nét, thanh thoát ngay trên mặt cong thân bát sứ (`letter-spacing: 3.5px`, màu đỏ nâu/cam đất nung Bát Tràng `#9A3412`, font `Be Vietnam Pro` 800), kèm họa tiết gốm trang trí đối xứng 2 bên.
+      3. **Lỗi 3 — Đôi đũa và Sợi phở gắn kết hình học chính xác:**
+         - Ở trạng thái ban đầu, đôi đũa cắm xiên tự nhiên vào lòng bát, hoàn toàn không có sợi phở lơ lửng ngoài đũa (`opacity: 0; transform: translateY(34px) scaleY(0.2)`).
+         - Khi chạm (Click / phím Enter / Space), đôi đũa nhấc lên (`translate(-14px, -86px) rotate(-9deg)`), và đỉnh của 4 dải sợi phở kéo lên **gắn chặt chính xác vào đầu gắp đũa** tại tọa độ `(X: 198, Y: 88)`, rủ xuống mềm mại theo trọng lực kèm giọt nước dùng nhỏ giọt.
+      4. **Lỗi 4 — Tách riêng Đăng nhập và Đăng ký (Loại bỏ hoàn toàn 2 tab trên card):**
+         - Đã xóa sạch thẻ tab và CSS tab khỏi cả 2 trang.
+         - `pages/auth/login.html` CHỈ chứa duy nhất form Đăng nhập + link chuyển sang `register.html`.
+         - `pages/auth/register.html` CHỈ chứa duy nhất form Đăng ký + link chuyển sang `login.html`.
+      5. **Lỗi 5 — Phương thức tiếp tục với Google và Facebook:**
+         - Bổ sung 2 nút UI hiện đại với icon SVG Google và Facebook chuẩn xác.
+         - Xử lý trung thực: khi click, hiển thị Toast Notification thông báo tính năng đang phát triển và sẽ sớm ra mắt (không giả lập đăng nhập thành công khi chưa có OAuth).
+      6. **Lỗi 6 — Thu gọn form trên Laptop (Hạn chế cuộn dọc thừa):**
+         - Tối ưu padding (`26px 30px`), khoảng cách trường (`margin-bottom: 13px`), input (`10px 38px`), tổng chiều cao giao diện vừa vặn hoàn hảo trong ~620px trên các màn hình laptop chuẩn (1366x768, 1440x900, 1920x1080) mà không bị cắt xén nội dung.
+      7. **Lỗi 7 — Thiết kế lại thanh đầu trang Auth:**
+         - Chiều cao cố định chuẩn 60px, nền mờ kính `backdrop-filter: blur(10px)`.
+         - Container căn lề `max-width: 1120px` đồng bộ tuyệt đối với khối form chính bên dưới.
+         - Logo CookMate bên trái, nút "Về trang chủ" viên thuốc bo tròn tinh tế bên phải.
+      8. **Lỗi 8 — Tối ưu di động (0% tràn ngang):**
+         - Bố cục xếp chồng dọc tự nhiên, Bát phở co giãn mượt mà theo tỷ lệ viewBox SVG, 0% lỗi tràn ngang (`hasHorizontalScroll: false`) trên toàn bộ dải kích thước màn hình: 360px, 375px, 390px, 430px, 768px.
+    - *File cập nhật:*
+      - `assets/css/auth.css`: Viết lại hoàn toàn theo chuẩn Auth V2, tối ưu chiều cao laptop, responsive di động, animation đũa và phở.
+      - `assets/js/auth-ui.js`: Bỏ logic tab switching, thêm event listener cho Google/Facebook, tối ưu chuyển động bát phở, quản lý form độc lập cho login & register.
+      - `pages/auth/login.html`: Bát phở V2 sâu lòng in chữ `PHỞ HÀ NỘI`, form đăng nhập đơn lẻ, nút Google/Facebook, 1-click demo accounts.
+      - `pages/auth/register.html`: Bát phở V2 sâu lòng in chữ `PHỞ HÀ NỘI`, form đăng ký đơn lẻ, nút Google/Facebook, password strength meter.
+    - *Kết quả kiểm thử tự động toàn diện qua Chrome Headless CDP (`scratch/test_pho_v2_cdp.js`):*
+      - **27/27 kiểm thử PASSED (100%)**:
+        - ✅ Không còn tabs trên cả Login & Register
+        - ✅ Bát phở sâu lòng, chân đế sứ, in chữ PHỞ HÀ NỘI sắc nét
+        - ✅ Header cao 60px căn lề 1120px đồng bộ
+        - ✅ Đũa và sợi phở gắn kết hình học chính xác khi nhấc lên
+        - ✅ Thông báo trung thực khi click nút Google & Facebook
+        - ✅ Ẩn/hiện mật khẩu qua eye toggle
+        - ✅ Điền nhanh tài khoản demo 1-click
+        - ✅ Xử lý báo lỗi đăng nhập sai mật khẩu
+        - ✅ Thanh đo độ mạnh mật khẩu 4 cấp độ
+        - ✅ 0% tràn ngang trên cả 5 kích thước mobile (360px, 375px, 390px, 430px, 768px)
+      - Ảnh chụp màn hình kiểm chứng lưu trữ tại `scratch/screenshots/`:
+        - `auth_v2_login_laptop_1366.png`
+        - `auth_v2_login_laptop_lifted.png`
+        - `auth_v2_login_mobile_375.png`
+        - `auth_v2_login_mobile_430.png`
+        - `auth_v2_register_laptop_1366.png`
+        - `auth_v2_register_mobile_375.png`
+17. **COOKMATE — Sửa Responsive Bát Phở, Footer Mobile và Empty State Trang Tìm Kiếm:**
+    - *Bối cảnh:* Dựa trên ảnh chụp màn hình kiểm tra thực tế, giải quyết triệt để 4 vấn đề bố cục giao diện:
+      1. **Lỗi A — Ẩn Bát phở trên Mobile và Tablet (< 1024px):**
+         - *Khắc phục:* Trong `assets/css/auth.css`, đặt quy tắc `@media (max-width: 1023px) { .pho-stage { display: none !important; } }`.
+         - Khi ẩn: Bát phở bị loại bỏ 100% khỏi luồng layout (`width: 0, height: 0`), không giữ khoảng trống dư thừa, không để animation chạy nền vô ích.
+         - Form card trên mobile/tablet được đưa lên sát ngay dưới header 60px (`top: 73px`), người dùng tiếp cận trường nhập liệu tức thì. Form đăng ký cho phép cuộn dọc tự nhiên không bị cắt xén.
+         - Trên Desktop/Laptop (>= 1024px): Bát phở sâu lòng in chữ "PHỞ HÀ NỘI" và hiệu ứng đũa gắp phở hoạt động hoàn toàn nguyên vẹn.
+      2. **Lỗi B — Sửa Footer trên Mobile không xuống dòng:**
+         - *Nguyên nhân:* Trước đó trong `components.css`, CSS chỉ định nghĩa cho class `.site-footer__nav-list` mà không hỗ trợ `.footer-links` từ `navigation.js`, khiến các thẻ `<a>` trở thành inline và dính liền thành chuỗi text dài.
+         - *Khắc phục:* Bổ sung hệ thống CSS chuẩn hóa hỗ trợ kép trong `components.css` và `responsive.css`:
+           - `.footer-links, .site-footer__nav-list { display: flex; flex-direction: column; gap: 10px; }`
+           - `.footer-links a, .site-footer__nav-link { display: inline-flex; align-items: center; padding: 4px 0; word-break: break-word; }`
+           - Trên Mobile: `.footer-grid, .site-footer__grid { display: flex; flex-direction: column; gap: 28px; }` chia 4 nhóm rõ ràng (Thương hiệu, Khám phá, Tài khoản, Thông tin), mỗi liên kết nằm trên một dòng riêng biệt với khoảng cách tap thuận tiện, 0% tràn ngang.
+      3. **Lỗi C — Sửa màu chữ "Cook" trong Logo Footer:**
+         - *Nguyên nhân:* Thuộc tính `.logo-name` dùng màu `var(--text)` (#292524) giống màu nền tối của footer (#292524), khiến chữ "Cook" bị chìm vào bóng tối.
+         - *Khắc phục:* Thiết lập quy tắc CSS chuyên biệt trong `components.css`:
+           - `.site-footer .logo-name { color: #FFF9F2 !important; }` (Màu kem sáng ấm áp, tương phản rõ nét trên nền tối).
+           - `.site-footer .logo-accent { color: #E85D2A !important; }` (Màu cam thương hiệu sáng rõ).
+           - Giữ nguyên màu chữ `.site-header .logo-name` ở Header chính (màu tối trên nền sáng).
+      4. **Lỗi D — Căn giữa trạng thái không tìm thấy công thức trên Desktop (pages/search.html):**
+         - *Nguyên nhân:* Container kết quả `#searchResultsGrid` là một 3-column CSS Grid (`grid-template-columns: repeat(3, 1fr)`). Thẻ con duy nhất `.empty-state` mặc định chiếm cột 1 (1/3 độ rộng bên trái), khiến toàn bộ icon, tiêu đề, mô tả và nút đặt lại bị lệch sang trái.
+         - *Khắc phục:*
+           - Trong `components.css` và `pages.css`, thiết lập:
+             - `.recipe-grid > .empty-state, .search-results-area .empty-state { grid-column: 1 / -1; width: 100%; max-width: 520px; margin: 40px auto; justify-self: center; align-self: center; text-align: center; }`
+             - `.search-results-area .recipe-grid:has(.empty-state) { display: flex; justify-content: center; align-items: center; min-height: 360px; }`
+           - Sidebar bộ lọc 280px bên trái giữ nguyên vị trí độc lập. Cụm empty state căn giữa cân đối tuyệt đối trong vùng kết quả (`leftGap: 187px, rightGap: 187px, diff: 0px`). Nút "Đặt lại bộ lọc" nằm giữa cụm. Toàn bộ logic tìm kiếm và lọc dữ liệu được bảo toàn 100%.
+    - *Kết quả kiểm thử tự động toàn diện qua Chrome Headless CDP (`scratch/test_responsive_fixes.js`):*
+      - **14/14 kiểm thử PASSED (100%)**:
+        - ✅ Login Desktop 1366px: Bát phở hiển thị (display: flex)
+        - ✅ Login Tablet 768px: Bát phở ẩn (display: none, size: 0x0)
+        - ✅ Login Mobile 375px: Bát phở ẩn (display: none), form ở đầu trang (top: 73px), không tràn ngang
+        - ✅ Register Desktop 1366px: Bát phở hiển thị
+        - ✅ Register Tablet 768px: Bát phở ẩn
+        - ✅ Register Mobile 390px: Bát phở ẩn, không tràn ngang
+        - ✅ Logo Footer: Chữ "Cook" màu #FFF9F2 sáng rõ trên nền tối
+        - ✅ Logo Header: Giữ nguyên màu chữ chuẩn #292524 trên nền sáng
+        - ✅ Footer Mobile: Toàn bộ liên kết xuống dòng theo cột dọc, không dính liền
+        - ✅ Footer Mobile: Không tràn ngang (scrollWidth = clientWidth = 375px)
+        - ✅ Search Desktop 1366px: Empty state căn giữa hoàn hảo trong vùng kết quả (diff = 0px)
+        - ✅ Search Desktop 1366px: Nút đặt lại bộ lọc căn giữa trong cụm
+        - ✅ Search Mobile 375px: Empty state căn giữa, 0% tràn ngang
+        - ✅ Search Logic: Nút đặt lại phục hồi 16/16 công thức
+      - Ảnh chụp màn hình kiểm chứng lưu trữ tại `scratch/screenshots/`:
+        - `fix_login_desktop_1366.png`
+        - `fix_login_tablet_768.png`
+        - `fix_login_mobile_375.png`
+        - `fix_register_mobile_390.png`
+        - `fix_footer_mobile_375.png`
+        - `fix_footer_desktop_1366.png`
+        - `fix_search_empty_desktop_1366.png`
+        - `fix_search_empty_mobile_375.png`
 
 ---
 

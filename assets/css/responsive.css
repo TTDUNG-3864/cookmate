@@ -225,8 +225,10 @@
   }
 
   /* Footer stacked */
-  .site-footer__grid {
-    grid-template-columns: 1fr;
+  .site-footer__grid,
+  .footer-grid {
+    display: flex;
+    flex-direction: column;
     gap: var(--space-8);
   }
 
@@ -418,7 +420,8 @@
   }
 
   /* Footer 2 columns */
-  .site-footer__grid {
+  .site-footer__grid,
+  .footer-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -511,7 +514,8 @@
   }
 
   /* Footer 4 columns */
-  .site-footer__grid {
+  .site-footer__grid,
+  .footer-grid {
     grid-template-columns: 2fr 1fr 1fr 1fr;
   }
 }

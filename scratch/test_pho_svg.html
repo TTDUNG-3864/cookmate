@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pho Interaction Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --primary: #E85D2A;
+      --primary-light: #FF7A45;
+      --primary-dark: #C74E22;
+      --secondary: #2E7D4F;
+      --bg: #FFF9F2;
+      --bg-white: #FFFFFF;
+      --text: #292524;
+      --text-secondary: #78716C;
+      --border: #E7E5E4;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      background: radial-gradient(circle at 50% 30%, #FFF5EB 0%, #FFF9F2 60%, #FBF3E8 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      color: var(--text);
+    }
+
+    .preview-container {
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 48px;
+    }
+
+    /* PHO INTERACTION AREA */
+    .pho-stage {
+      position: relative;
+      width: 440px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .pho-svg-wrapper {
+      position: relative;
+      width: 100%;
+      height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pho-svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 14px 28px rgba(120, 60, 20, 0.12));
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .pho-stage:hover .pho-svg {
+      transform: scale(1.02);
+    }
+
+    .pho-stage:active .pho-svg {
+      transform: scale(0.98);
+    }
+
+    /* AMBIENT GLOW */
+    .pho-ambient-glow {
+      opacity: 0.25;
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      transform-origin: 230px 220px;
+    }
+
+    .pho-stage.is-lifted .pho-ambient-glow {
+      opacity: 0.85;
+      transform: scale(1.15);
+    }
+
+    /* STEAM ANIMATION */
+    .pho-steam-path {
+      opacity: 0.35;
+      stroke-dasharray: 120;
+      stroke-dashoffset: 120;
+      animation: steam-drift 4s linear infinite;
+    }
+
+    .steam-1 { animation-delay: 0s; }
+    .steam-2 { animation-delay: 1.3s; }
+    .steam-3 { animation-delay: 2.6s; }
+
+    @keyframes steam-drift {
+      0% {
+        stroke-dashoffset: 120;
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      30% {
+        opacity: 0.55;
+      }
+      70% {
+        opacity: 0.35;
+      }
+      100% {
+        stroke-dashoffset: -120;
+        opacity: 0;
+        transform: translateY(-24px);
+      }
+    }
+
+    .pho-stage.is-lifted .pho-steam-path {
+      animation-duration: 2.5s;
+      opacity: 0.7;
+    }
+
+    /* CHOPSTICKS ANIMATION */
+    .pho-chopsticks {
+      transform-origin: 380px 60px;
+      transition: transform 0.75s cubic-bezier(0.2, 1, 0.3, 1);
+    }
+
+    .pho-stage.is-lifted .pho-chopsticks {
+      transform: translate(-14px, -68px) rotate(-9deg);
+    }
+
+    /* LIFTED NOODLES ANIMATION */
+    .pho-lifted-noodles {
+      opacity: 0;
+      transform-origin: 230px 220px;
+      transform: translateY(30px) scaleY(0.2);
+      transition: transform 0.75s cubic-bezier(0.2, 1, 0.3, 1), opacity 0.45s ease;
+    }
+
+    .pho-stage.is-lifted .pho-lifted-noodles {
+      opacity: 1;
+      transform: translateY(0) scaleY(1);
+    }
+
+    /* NOODLE DRIP / DROPLET */
+    .noodle-drop {
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .pho-stage.is-lifted .noodle-drop {
+      opacity: 1;
+      animation: droplet-fall 2.2s ease-in infinite 0.8s;
+    }
+    @keyframes droplet-fall {
+      0% { transform: translateY(0); opacity: 0.9; }
+      70% { transform: translateY(50px); opacity: 0.7; }
+      100% { transform: translateY(65px); opacity: 0; }
+    }
+
+    /* INTERACTION HINT CTA */
+    .pho-cta-pill {
+      margin-top: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      background: var(--bg-white);
+      border: 1.5px solid #FED7AA;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+      box-shadow: 0 4px 14px rgba(232, 93, 42, 0.12);
+      transition: all 0.3s ease;
+    }
+
+    .pho-cta-pill:hover {
+      background: #FFF7ED;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(232, 93, 42, 0.2);
+      border-color: var(--primary);
+    }
+
+    .pho-cta-pill i.fa-hand-pointer {
+      animation: cta-bounce 1.6s ease-in-out infinite;
+    }
+
+    @keyframes cta-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    .pho-stage.is-lifted .pho-cta-pill {
+      background: #F0FDF4;
+      border-color: #86EFAC;
+      color: #166534;
+    }
+
+    /* CARD DUMMY PREVIEW */
+    .dummy-card {
+      width: 400px;
+      padding: 36px 32px;
+      background: #FFFFFF;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 40px rgba(80, 50, 30, 0.08);
+      opacity: 0;
+      transform: translateY(30px) scale(0.95);
+      filter: blur(8px);
+      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dummy-card.is-active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: blur(0);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="preview-container">
+
+    <!-- BÁT PHỞ HÀ NỘI STAGE -->
+    <div class="pho-stage" id="phoStage" role="button" tabindex="0" aria-label="Chạm vào đôi đũa để khám phá CookMate">
+      <div class="pho-svg-wrapper">
+        <svg class="pho-svg" viewBox="0 0 460 380" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <!-- Glow Radial Gradient -->
+            <radialGradient id="phoGlowGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#FF9E66" stop-opacity="0.45" />
+              <stop offset="50%" stop-color="#FFD6A5" stop-opacity="0.2" />
+              <stop offset="100%" stop-color="#FFF9F2" stop-opacity="0" />
+            </radialGradient>
+
+            <!-- Bowl Outer Shading -->
+            <linearGradient id="bowlGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#FFFFFF" />
+              <stop offset="40%" stop-color="#FAF6F0" />
+              <stop offset="85%" stop-color="#EFE7DC" />
+              <stop offset="100%" stop-color="#DFD4C5" />
+            </linearGradient>
+
+            <!-- Broth Gradient -->
+            <radialGradient id="brothGrad" cx="50%" cy="45%" r="52%">
+              <stop offset="0%" stop-color="#C8752D" />
+              <stop offset="45%" stop-color="#A5541B" />
+              <stop offset="85%" stop-color="#7A390E" />
+              <stop offset="100%" stop-color="#5B2909" />
+            </radialGradient>
+
+            <!-- Chopstick Wood Gradients -->
+            <linearGradient id="chopstick1Grad" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#804E27" />
+              <stop offset="50%" stop-color="#A06738" />
+              <stop offset="90%" stop-color="#5D3517" />
+              <stop offset="100%" stop-color="#D4AF37" />
+            </linearGradient>
+            <linearGradient id="chopstick2Grad" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#6B3F1D" />
+              <stop offset="50%" stop-color="#8D5529" />
+              <stop offset="90%" stop-color="#4E2B11" />
+              <stop offset="100%" stop-color="#C59E2B" />
+            </linearGradient>
+
+            <!-- Beef Slice Gradient -->
+            <linearGradient id="beefGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#9C3A28" />
+              <stop offset="60%" stop-color="#802B1B" />
+              <stop offset="100%" stop-color="#5C1D12" />
+            </linearGradient>
+
+            <!-- Noodle Gradient -->
+            <linearGradient id="noodleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#FFFFFF" />
+              <stop offset="50%" stop-color="#FFFDF8" />
+              <stop offset="100%" stop-color="#F5ECE0" />
+            </linearGradient>
+
+            <!-- Soft Blur Filter for Steam & Glow -->
+            <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="8" result="blur" />
+            </filter>
+            <filter id="steamBlur" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="2.5" />
+            </filter>
+            <filter id="shadowBlur" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="6" />
+            </filter>
+          </defs>
+
+          <!-- 1. Ambient Glow Backing -->
+          <circle class="pho-ambient-glow" cx="230" cy="225" r="165" fill="url(#phoGlowGrad)" />
+
+          <!-- 2. Table Shadow & Wooden Coaster Base -->
+          <ellipse cx="230" cy="336" rx="145" ry="22" fill="rgba(80, 40, 15, 0.14)" filter="url(#shadowBlur)" />
+          <ellipse cx="230" cy="328" rx="88" ry="14" fill="#D3C0AD" stroke="#B8A38E" stroke-width="1.5" />
+
+          <!-- 3. Bowl Base Ring -->
+          <path d="M 175 315 C 175 328, 285 328, 285 315 L 280 295 L 180 295 Z" fill="#E6DFD5" stroke="#CEC2B3" stroke-width="1.5" />
+
+          <!-- 4. Ceramic Bowl Body -->
+          <path d="M 60 205 C 60 300, 150 318, 230 318 C 310 318, 400 205, 400 205 C 400 170, 60 170, 60 205 Z" fill="url(#bowlGrad)" stroke="#D8CFC2" stroke-width="2" />
+
+          <!-- 5. Blue Floral Oriental Pattern on Porcelain Rim -->
+          <path d="M 72 204 Q 105 214, 140 219 Q 185 224, 230 224 Q 275 224, 320 219 Q 355 214, 388 204" fill="none" stroke="#2563EB" stroke-width="2" stroke-dasharray="6,4" opacity="0.6" />
+          <circle cx="140" cy="219" r="2.5" fill="#1D4ED8" opacity="0.7" />
+          <circle cx="230" cy="224" r="3" fill="#1D4ED8" opacity="0.7" />
+          <circle cx="320" cy="219" r="2.5" fill="#1D4ED8" opacity="0.7" />
+
+          <!-- 6. Bowl Rim & Inner Broth -->
+          <ellipse cx="230" cy="192" rx="170" ry="46" fill="#FDFBF7" stroke="#DBD2C4" stroke-width="3" />
+          <ellipse cx="230" cy="195" rx="155" ry="40" fill="url(#brothGrad)" />
+
+          <!-- 7. Glistening Broth Shimmer & Golden Oil Droplets -->
+          <ellipse cx="190" cy="188" rx="45" ry="12" fill="rgba(255, 235, 180, 0.18)" />
+          <circle cx="165" cy="185" r="4.5" fill="#FDE047" opacity="0.5" />
+          <circle cx="280" cy="198" r="3.5" fill="#FBBF24" opacity="0.45" />
+          <circle cx="215" cy="212" r="5" fill="#F59E0B" opacity="0.4" />
+          <circle cx="260" cy="182" r="3" fill="#FEF08A" opacity="0.55" />
+
+          <!-- 8. Pho Noodles in Broth (Swirling ribbons) -->
+          <g class="pho-noodles-in-broth" stroke-linecap="round" fill="none">
+            <path d="M 130 190 Q 165 215, 210 205 T 270 210 Q 310 205, 330 192" stroke="#FFFDF8" stroke-width="6.5" />
+            <path d="M 145 200 Q 180 222, 230 215 T 315 198" stroke="#F5ECE0" stroke-width="6" />
+            <path d="M 170 192 Q 200 212, 245 206 T 295 195" stroke="#FFFFFF" stroke-width="5.5" />
+            <path d="M 120 196 Q 155 210, 190 202 T 250 208" stroke="#FFFBF2" stroke-width="5" />
+          </g>
+
+          <!-- 9. Thinly Sliced Beef (Thịt bò nạm/tái) -->
+          <g class="pho-beef">
+            <!-- Slice 1 -->
+            <path d="M 150 186 C 145 174, 180 168, 205 178 C 220 184, 215 198, 195 202 C 175 206, 155 198, 150 186 Z" fill="url(#beefGrad)" stroke="#5A1A10" stroke-width="1.2" />
+            <path d="M 160 182 Q 185 178, 200 186" stroke="#E07A6B" stroke-width="1.4" fill="none" opacity="0.8" />
+            <path d="M 168 190 Q 188 185, 202 195" stroke="#E07A6B" stroke-width="1.2" fill="none" opacity="0.75" />
+
+            <!-- Slice 2 -->
+            <path d="M 235 180 C 230 170, 270 166, 292 176 C 305 182, 300 195, 280 198 C 260 201, 240 194, 235 180 Z" fill="url(#beefGrad)" stroke="#5A1A10" stroke-width="1.2" />
+            <path d="M 245 176 Q 268 174, 285 183" stroke="#E07A6B" stroke-width="1.4" fill="none" opacity="0.8" />
+          </g>
+
+          <!-- 10. Fresh Scallions & Herbs (Hành lá, ngò gai, hành tây) -->
+          <g class="pho-herbs">
+            <!-- Onion rings -->
+            <ellipse cx="215" cy="182" rx="14" ry="6" fill="none" stroke="#FFFFFF" stroke-width="2.2" opacity="0.9" />
+            <ellipse cx="255" cy="190" rx="12" ry="5" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.85" />
+            <!-- Green scallion rings & herbs -->
+            <ellipse cx="140" cy="188" rx="5" ry="3" fill="#2E7D4F" stroke="#1B4D30" stroke-width="1" />
+            <ellipse cx="178" cy="202" rx="4.5" ry="2.5" fill="#16A34A" />
+            <ellipse cx="195" cy="186" rx="5" ry="3" fill="#22C55E" />
+            <ellipse cx="230" cy="198" rx="5.5" ry="3" fill="#15803D" />
+            <ellipse cx="270" cy="186" rx="4" ry="2.5" fill="#2E7D4F" />
+            <ellipse cx="295" cy="200" rx="5" ry="3" fill="#16A34A" />
+            <ellipse cx="320" cy="192" rx="4.5" ry="2.5" fill="#22C55E" />
+            <!-- Fresh red chili slice -->
+            <ellipse cx="205" cy="194" rx="6.5" ry="3.5" fill="#DC2626" stroke="#FEF08A" stroke-width="1.4" />
+            <ellipse cx="265" cy="198" rx="5.5" ry="3" fill="#EF4444" stroke="#FEF08A" stroke-width="1.2" />
+          </g>
+
+          <!-- 11. Wisps of Hot Steam (Làn hơi nóng) -->
+          <g class="pho-steam" filter="url(#steamBlur)">
+            <path class="pho-steam-path steam-1" d="M 180 170 Q 165 125, 190 85 T 175 25" stroke="rgba(255,255,255,0.7)" stroke-width="5" fill="none" stroke-linecap="round" />
+            <path class="pho-steam-path steam-2" d="M 230 165 Q 250 120, 225 75 T 245 15" stroke="rgba(255,255,255,0.8)" stroke-width="6" fill="none" stroke-linecap="round" />
+            <path class="pho-steam-path steam-3" d="M 285 170 Q 305 125, 280 80 T 290 20" stroke="rgba(255,255,255,0.7)" stroke-width="5" fill="none" stroke-linecap="round" />
+          </g>
+
+          <!-- 12. LIFTED NOODLES (Connected between bowl & lifted chopsticks) -->
+          <g class="pho-lifted-noodles" id="liftedNoodles">
+            <!-- Thick, silky Pho noodle ribbons draped over chopsticks -->
+            <!-- Strand 1 (Outer left drape) -->
+            <path d="M 180 205 C 182 175, 192 125, 206 108 C 212 100, 218 102, 222 112 C 228 126, 232 170, 235 205" fill="none" stroke="url(#noodleGrad)" stroke-width="6" stroke-linecap="round" filter="drop-shadow(0 2px 4px rgba(100, 50, 10, 0.15))" />
+            <!-- Strand 2 (Main central ribbon) -->
+            <path d="M 195 210 C 196 170, 205 118, 216 98 C 222 88, 230 92, 235 106 C 242 124, 248 168, 250 210" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" filter="drop-shadow(0 2px 6px rgba(100, 50, 10, 0.2))" />
+            <!-- Strand 3 (Inner ribbon) -->
+            <path d="M 205 212 C 208 178, 215 130, 224 104 C 228 96, 236 98, 240 114 C 246 138, 252 176, 258 212" fill="none" stroke="#FFFDF8" stroke-width="5.5" stroke-linecap="round" />
+            <!-- Strand 4 (Right drape ribbon) -->
+            <path d="M 218 215 C 222 185, 228 138, 234 116 C 238 108, 246 110, 250 125 C 256 150, 264 185, 268 215" fill="none" stroke="#F5ECE0" stroke-width="5" stroke-linecap="round" />
+            <!-- Little scallion fleck clinging to noodle -->
+            <ellipse cx="212" cy="142" rx="3.5" ry="2" fill="#16A34A" />
+            <!-- Droplet of golden broth dripping down -->
+            <circle class="noodle-drop" cx="225" cy="148" r="3" fill="#F59E0B" />
+          </g>
+
+          <!-- 13. CHOPSTICKS (Resting diagonally into the bowl, lifting up on click) -->
+          <g class="pho-chopsticks" id="phoChopsticks">
+            <!-- Rear Chopstick -->
+            <path d="M 200 198 L 398 62 C 400 60, 403 62, 401 65 L 207 203 C 205 204, 199 201, 200 198 Z" fill="url(#chopstick2Grad)" filter="drop-shadow(0 3px 5px rgba(0,0,0,0.25))" />
+            <!-- Rear Chopstick Gold Band -->
+            <path d="M 382 73 L 392 66 L 395 70 L 385 77 Z" fill="#EAB308" />
+
+            <!-- Front Chopstick -->
+            <path d="M 188 206 L 386 70 C 388 68, 391 70, 389 73 L 195 211 C 193 212, 187 209, 188 206 Z" fill="url(#chopstick1Grad)" filter="drop-shadow(0 4px 8px rgba(0,0,0,0.3))" />
+            <!-- Front Chopstick Gold Band -->
+            <path d="M 370 81 L 380 74 L 383 78 L 373 85 Z" fill="#FACC15" />
+          </g>
+
+        </svg>
+      </div>
+
+      <!-- INTERACTION HINT CTA -->
+      <div class="pho-cta-pill" id="phoCta">
+        <i class="fa-solid fa-hand-pointer"></i>
+        <span>Chạm vào đôi đũa để khám phá CookMate</span>
+      </div>
+    </div>
+
+    <!-- AUTH CARD DUMMY -->
+    <div class="dummy-card" id="dummyCard">
+      <h2 style="color: var(--primary); margin-bottom: 8px;">Đăng nhập CookMate</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 24px;">Giao diện đã sẵn sàng nhận tương tác!</p>
+      <div style="padding: 12px; background: #FFF7ED; border-radius: 8px; font-size: 14px; color: #9A3412;">
+        Pho animation completed successfully!
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const stage = document.getElementById('phoStage');
+    const card = document.getElementById('dummyCard');
+    const cta = document.getElementById('phoCta');
+    let isLifted = false;
+
+    function togglePho() {
+      isLifted = !isLifted;
+      if (isLifted) {
+        stage.classList.add('is-lifted');
+        card.classList.add('is-active');
+        cta.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Mời bạn thưởng thức & Đăng nhập!</span>';
+      } else {
+        stage.classList.remove('is-lifted');
+        card.classList.remove('is-active');
+        cta.innerHTML = '<i class="fa-solid fa-hand-pointer"></i> <span>Chạm vào đôi đũa để khám phá CookMate</span>';
+      }
+    }
+
+    stage.addEventListener('click', togglePho);
+    stage.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        togglePho();
+      }
+    });
+  </script>
+</body>
+</html>

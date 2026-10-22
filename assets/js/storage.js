@@ -217,7 +217,11 @@ var CookMateStorage = {
     return this.get(this.KEYS.REGISTERED_USERS) || [];
   },
 
-  registerUser: function (userData) {
+  registerUser: function (userData, emailArg, passArg) {
+    if (typeof userData === 'string') {
+      userData = { name: userData, email: emailArg, password: passArg };
+    }
+    userData = userData || {};
     var users = this.getRegisteredUsers();
     var emailExists = users.some(function (u) { return u.email === userData.email; });
 
