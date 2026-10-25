@@ -28,62 +28,51 @@
       </div>
 
       <form id="recipeForm" class="recipe-form" novalidate>
-        <!-- Section 1: Basic Info -->
-        <div class="form-section">
-          <h2 class="form-section-title"><i class="fas fa-info-circle"></i> Thông tin cơ bản</h2>
+        
+        <!-- SECTION 1: THÔNG TIN CƠ BẢN -->
+        <div class="form-section recipe-form__section">
+          <div class="form-section-header">
+            <div class="form-section-icon"><i class="fa-solid fa-utensils"></i></div>
+            <div>
+              <h2 class="form-section-title recipe-form__section-title">1. Thông tin cơ bản</h2>
+              <p class="form-section-desc">Tên món ăn, phân loại danh mục, dịp lễ và mức độ chế biến</p>
+            </div>
+          </div>
 
-          <div class="form-group">
-            <label for="recipeName" class="form-label">Tên món ăn <span class="required">*</span></label>
-            <input type="text" id="recipeName" class="form-input" placeholder="VD: Phở bò Hà Nội" required>
+          <div class="form-group mb-4">
+            <label for="recipeName" class="form-label font-bold">Tên món ăn <span class="required text-danger">*</span></label>
+            <input type="text" id="recipeName" class="form-input" placeholder="VD: Phở bò Hà Nội truyền thống" required>
             <div class="form-error" id="recipeNameError"></div>
           </div>
 
-          <div class="form-group">
-            <label for="recipeDesc" class="form-label">Mô tả</label>
-            <textarea id="recipeDesc" class="form-input form-textarea" rows="3" placeholder="Mô tả ngắn về món ăn..."></textarea>
+          <div class="form-group mb-4">
+            <label for="recipeDesc" class="form-label font-bold">Mô tả ngắn</label>
+            <textarea id="recipeDesc" class="form-input form-textarea" rows="3" placeholder="Chia sẻ đôi nét về nguồn gốc, hương vị đặc trưng hoặc kỷ niệm gắn liền với món ăn..."></textarea>
           </div>
 
-          <div class="form-row">
+          <div class="form-grid-2 mb-4">
             <div class="form-group">
-              <label for="recipeCategory" class="form-label">Danh mục</label>
-              <select id="recipeCategory" class="form-input form-select">
+              <label for="recipeCategory" class="form-label font-bold">Danh mục món ăn <span class="required text-danger">*</span></label>
+              <select id="recipeCategory" class="form-input form-select" required>
                 <option value="">-- Chọn danh mục --</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="recipeOccasion" class="form-label">Dịp lễ</label>
+              <label for="recipeOccasion" class="form-label font-bold">Dịp lễ phù hợp</label>
               <select id="recipeOccasion" class="form-input form-select">
-                <option value="">Không có</option>
+                <option value="">Không có dịp lễ đặc biệt</option>
                 <option value="tet">Tết cổ truyền</option>
-                <option value="ram">Rằm</option>
+                <option value="ram">Rằm & Lễ Vu Lan</option>
                 <option value="giangsinh">Giáng sinh</option>
-                <option value="tiecgiadinh">Tiệc gia đình</option>
+                <option value="tiecgiadinh">Tiệc gia đình & Cuối tuần</option>
               </select>
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="recipeImage" class="form-label">URL ảnh</label>
-            <input type="text" id="recipeImage" class="form-input" placeholder="https://example.com/image.jpg">
-            <div class="image-preview" id="imagePreview" style="display: none;">
-              <img id="imagePreviewImg" src="" alt="Xem trước ảnh" onerror="this.parentElement.style.display='none'">
-            </div>
-          </div>
-
-          <div class="form-row form-row-4">
+          <div class="form-grid-3">
             <div class="form-group">
-              <label for="recipePrepTime" class="form-label">Thời gian chuẩn bị (phút)</label>
-              <input type="number" id="recipePrepTime" class="form-input" min="0" placeholder="15">
-            </div>
-
-            <div class="form-group">
-              <label for="recipeCookTime" class="form-label">Thời gian nấu (phút)</label>
-              <input type="number" id="recipeCookTime" class="form-input" min="0" placeholder="30">
-            </div>
-
-            <div class="form-group">
-              <label for="recipeDifficulty" class="form-label">Độ khó</label>
+              <label for="recipeDifficulty" class="form-label font-bold">Độ khó</label>
               <select id="recipeDifficulty" class="form-input form-select">
                 <option value="Dễ">Dễ</option>
                 <option value="Trung bình" selected>Trung bình</option>
@@ -92,45 +81,128 @@
             </div>
 
             <div class="form-group">
-              <label for="recipeServings" class="form-label">Số khẩu phần</label>
-              <input type="number" id="recipeServings" class="form-input" min="1" value="4" placeholder="4">
+              <label for="recipePrepTime" class="form-label font-bold">Thời gian chuẩn bị (phút)</label>
+              <input type="number" id="recipePrepTime" class="form-input" min="0" placeholder="15">
+            </div>
+
+            <div class="form-group">
+              <label for="recipeCookTime" class="form-label font-bold">Thời gian nấu (phút)</label>
+              <input type="number" id="recipeCookTime" class="form-input" min="0" placeholder="30">
             </div>
           </div>
         </div>
 
-        <!-- Section 2: Ingredients -->
-        <div class="form-section">
-          <h2 class="form-section-title"><i class="fas fa-carrot"></i> Nguyên liệu <span class="required">*</span></h2>
+        <!-- SECTION 2: HÌNH ẢNH & KHẨU PHẦN -->
+        <div class="form-section recipe-form__section">
+          <div class="form-section-header">
+            <div class="form-section-icon"><i class="fa-solid fa-image"></i></div>
+            <div>
+              <h2 class="form-section-title recipe-form__section-title">2. Hình ảnh & Khẩu phần</h2>
+              <p class="form-section-desc">Hình ảnh bắt mắt và số khẩu phần gốc làm căn cứ co giãn tự động</p>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div>
+              <div class="form-group mb-2">
+                <label for="recipeImage" class="form-label font-bold">URL Hình ảnh món ăn</label>
+                <input type="text" id="recipeImage" class="form-input" placeholder="https://images.unsplash.com/photo-...">
+                <div class="text-xs text-secondary mt-1">Dán liên kết ảnh trực tiếp (JPG, PNG, WebP) để hiển thị sắc nét</div>
+              </div>
+
+              <div class="recipe-image-preview-card" id="imagePreview" style="display: none;">
+                <img id="imagePreviewImg" src="" alt="Xem trước ảnh món ăn" onerror="this.parentElement.style.display='none'">
+              </div>
+            </div>
+
+            <div>
+              <div class="form-group">
+                <label for="recipeServings" class="form-label font-bold">Số khẩu phần gốc (người ăn) <span class="required text-danger">*</span></label>
+                <input type="number" id="recipeServings" class="form-input" min="1" value="4" placeholder="4" required>
+                <div class="alert alert-info mt-3" style="background: #FFF9F2; border: 1px solid rgba(232, 93, 42, 0.2); border-radius: 10px; padding: 12px; color: #9A3412; font-size: 13px;">
+                  <i class="fa-solid fa-calculator text-primary mr-1"></i>
+                  <strong>Tính năng độc quyền CookMate:</strong> Định lượng nguyên liệu và calo sẽ được tự động co giãn chính xác khi người nấu tăng hoặc giảm số khẩu phần trên trang chi tiết món ăn.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECTION 3: ĐỊNH LƯỢNG NGUYÊN LIỆU -->
+        <div class="form-section recipe-form__section">
+          <div class="form-section-header">
+            <div class="form-section-icon"><i class="fa-solid fa-carrot"></i></div>
+            <div>
+              <h2 class="form-section-title recipe-form__section-title">3. Định lượng nguyên liệu <span class="required text-danger">*</span></h2>
+              <p class="form-section-desc">Liệt kê tên nguyên liệu, khối lượng và đơn vị đo tương ứng với khẩu phần gốc</p>
+            </div>
+          </div>
+
+          <div class="ingredients-header-row">
+            <div style="flex: 2;">Tên nguyên liệu</div>
+            <div style="flex: 1;">Số lượng</div>
+            <div style="flex: 1;">Đơn vị đo</div>
+            <div style="width: 38px; text-align: center;">Xóa</div>
+          </div>
+
           <div id="ingredientsList">
             <!-- Dynamic rows rendered by JS -->
           </div>
-          <div class="form-error" id="ingredientsError" style="margin-bottom: 0.5rem;"></div>
+          <div class="form-error" id="ingredientsError" style="margin-bottom: 0.75rem;"></div>
+
           <button type="button" class="btn btn-outline btn-sm" id="addIngredientBtn">
-            <i class="fas fa-plus"></i> Thêm nguyên liệu
+            <i class="fa-solid fa-plus"></i> Thêm nguyên liệu
           </button>
         </div>
 
-        <!-- Section 3: Steps -->
-        <div class="form-section">
-          <h2 class="form-section-title"><i class="fas fa-list-ol"></i> Các bước chế biến <span class="required">*</span></h2>
-          <div id="stepsList">
-            <!-- Dynamic rows rendered by JS -->
+        <!-- SECTION 4: CÁC BƯỚC CHẾ BIẾN -->
+        <div class="form-section recipe-form__section">
+          <div class="form-section-header">
+            <div class="form-section-icon"><i class="fa-solid fa-list-ol"></i></div>
+            <div>
+              <h2 class="form-section-title recipe-form__section-title">4. Các bước chế biến <span class="required text-danger">*</span></h2>
+              <p class="form-section-desc">Hướng dẫn từng bước rõ ràng, mạch lạc giúp người xem dễ dàng nấu theo thành công</p>
+            </div>
           </div>
-          <div class="form-error" id="stepsError" style="margin-bottom: 0.5rem;"></div>
+
+          <div id="stepsList">
+            <!-- Dynamic step cards rendered by JS -->
+          </div>
+          <div class="form-error" id="stepsError" style="margin-bottom: 0.75rem;"></div>
+
           <button type="button" class="btn btn-outline btn-sm" id="addStepBtn">
-            <i class="fas fa-plus"></i> Thêm bước
+            <i class="fa-solid fa-plus"></i> Thêm bước thực hiện
           </button>
         </div>
 
-        <!-- Submit -->
-        <div class="form-section form-submit-section">
-          <button type="submit" class="btn btn-primary btn-lg" id="submitRecipeBtn">
-            <i class="fas fa-paper-plane"></i> Đăng công thức
-          </button>
-          <a href="my-recipes.html" class="btn btn-outline btn-lg">
-            <i class="fas fa-arrow-left"></i> Quay lại
-          </a>
+        <!-- SECTION 5: KIỂM TRA & GỬI CÔNG THỨC -->
+        <div class="form-section recipe-form__section">
+          <div class="form-section-header">
+            <div class="form-section-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <div>
+              <h2 class="form-section-title recipe-form__section-title">5. Kiểm tra & Gửi duyệt</h2>
+              <p class="form-section-desc">Rà soát lại thông tin trước khi chuyển vào hệ thống CookMate</p>
+            </div>
+          </div>
+
+          <div class="recipe-submit-notice">
+            <div class="recipe-submit-notice__icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="recipe-submit-notice__content">
+              <strong>Quy trình kiểm duyệt công thức:</strong>
+              <p>Để đảm bảo món ăn chuẩn định lượng và hữu ích cho cộng đồng, bài viết của bạn sẽ được chuyển vào hàng đợi kiểm duyệt của Ban Quản Trị trước khi xuất bản công khai trên website CookMate.</p>
+            </div>
+          </div>
+
+          <div class="form-submit-actions">
+            <button type="submit" class="btn btn-primary btn-lg" id="submitRecipeBtn">
+              <i class="fa-solid fa-paper-plane"></i> <span>Gửi công thức chờ duyệt</span>
+            </button>
+            <a href="my-recipes.html" class="btn btn-ghost btn-lg">
+              <i class="fa-solid fa-arrow-left"></i> <span>Hủy & Quay lại</span>
+            </a>
+          </div>
         </div>
+
       </form>
     </div>
   </main>
@@ -156,7 +228,12 @@
 
     document.addEventListener('DOMContentLoaded', function() {
       if (typeof CookMateStorage === 'undefined' || !CookMateStorage.isLoggedIn()) {
-        window.location.href = '../auth/login.html';
+        if (typeof CookMateUI !== 'undefined') {
+          CookMateUI.showToast('Vui lòng đăng nhập để đăng công thức nấu ăn', 'info');
+        }
+        setTimeout(function() {
+          window.location.href = '../auth/login.html?redirect=' + encodeURIComponent('pages/account/recipe-form.html');
+        }, 300);
         return;
       }
 
@@ -260,16 +337,18 @@
       var stepNum = currentCount + 1;
       var idx = stepIndex++;
       var row = document.createElement('div');
-      row.className = 'dynamic-row step-row';
+      row.className = 'dynamic-row step-row step-card';
       row.setAttribute('data-index', idx);
       row.innerHTML =
-        '<div class="step-number">' + stepNum + '</div>' +
-        '<div class="dynamic-row-fields step-fields">' +
-          '<textarea class="form-input form-textarea step-desc" rows="2" placeholder="Mô tả bước thực hiện...">' + escapeHtml(data.description || data.text || '') + '</textarea>' +
+        '<div class="step-card__header">' +
+          '<span class="step-card__badge"><i class="fa-solid fa-list-check"></i> Bước ' + stepNum + '</span>' +
+          '<button type="button" class="btn btn-icon btn-danger-icon dynamic-row-delete" title="Xóa bước" onclick="removeStepRow(this)">' +
+            '<i class="fa-solid fa-trash"></i>' +
+          '</button>' +
         '</div>' +
-        '<button type="button" class="btn btn-icon btn-danger-icon dynamic-row-delete" title="Xóa bước" onclick="removeStepRow(this)">' +
-          '<i class="fas fa-trash"></i>' +
-        '</button>';
+        '<div class="step-card__body">' +
+          '<textarea class="form-input form-textarea step-desc" rows="3" placeholder="Mô tả chi tiết cách sơ chế, thời gian nấu, mức lửa và mẹo thực hiện bước này...">' + escapeHtml(data.description || data.text || '') + '</textarea>' +
+        '</div>';
       container.appendChild(row);
     }
 
@@ -289,6 +368,10 @@
     function renumberSteps() {
       var rows = document.querySelectorAll('#stepsList .step-row');
       rows.forEach(function(row, i) {
+        var badge = row.querySelector('.step-card__badge');
+        if (badge) {
+          badge.innerHTML = '<i class="fa-solid fa-list-check"></i> Bước ' + (i + 1);
+        }
         var numEl = row.querySelector('.step-number');
         if (numEl) numEl.textContent = i + 1;
       });
@@ -303,7 +386,7 @@
     }
 
     function loadRecipeForEdit(recipeId) {
-      var allRecipes = CookMateStorage.getAllRecipes ? CookMateStorage.getAllRecipes() : [];
+      var allRecipes = CookMateStorage.getAllRecipes ? CookMateStorage.getAllRecipes(true) : [];
       var numId = parseInt(recipeId, 10);
       var recipe = allRecipes.find(function(r) { return r.id === numId || r.id == recipeId; });
 
@@ -370,6 +453,10 @@
 
     function handleSubmit() {
       var form = document.getElementById('recipeForm');
+      var submitBtn = document.getElementById('submitRecipeBtn');
+      if (submitBtn && submitBtn.disabled) return;
+      var originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
       clearAllErrors(form);
 
       var name = document.getElementById('recipeName').value.trim();
@@ -441,6 +528,11 @@
         return;
       }
 
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Đang lưu công thức...</span>';
+      }
+
       var currentUser = CookMateStorage.getCurrentUser();
       var parsedCatId = parseInt(categoryId, 10) || 1;
 
@@ -470,46 +562,55 @@
       if (isEditMode && editRecipeId) {
         /* Update existing recipe */
         recipeData.id = editRecipeId;
-        if (CookMateStorage.updateRecipe) {
-          CookMateStorage.updateRecipe(editRecipeId, recipeData);
-        } else {
-          var allRecipes = CookMateStorage.getAllRecipes();
-          var idx = allRecipes.findIndex(function(r) { return r.id === editRecipeId; });
-          if (idx !== -1) {
-            recipeData.createdAt = allRecipes[idx].createdAt;
-            recipeData.updatedAt = new Date().toISOString();
-            allRecipes[idx] = Object.assign(allRecipes[idx], recipeData);
-          }
-          CookMateStorage.set('cookmate_recipes', allRecipes);
+        var existing = CookMateStorage.getRecipeById ? CookMateStorage.getRecipeById(editRecipeId, true) : null;
+        var wasRejected = existing && existing.status === 'rejected';
+        if (wasRejected) {
+          recipeData.resubmit = true;
         }
 
-        if (typeof CookMateUI !== 'undefined') {
-          CookMateUI.showToast('Cập nhật công thức thành công!', 'success');
+        CookMateStorage.updateRecipe(editRecipeId, recipeData, currentUser);
+
+        if (wasRejected) {
+          if (typeof CookMateUI !== 'undefined') {
+            CookMateUI.showToast('Công thức đã được gửi lại và đang chờ Admin duyệt!', 'success');
+          }
+          setTimeout(function() {
+            window.location.href = 'my-recipes.html?tab=pending';
+          }, 800);
+        } else {
+          if (typeof CookMateUI !== 'undefined') {
+            CookMateUI.showToast('Cập nhật công thức thành công!', 'success');
+          }
+          setTimeout(function() {
+            window.location.href = 'my-recipes.html';
+          }, 800);
         }
       } else {
         /* Add new recipe */
-        recipeData.id = 'recipe_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+        recipeData.id = Date.now();
         recipeData.createdAt = new Date().toISOString();
         recipeData.ratings = [];
         recipeData.comments = [];
         recipeData.averageRating = 0;
 
-        if (CookMateStorage.addRecipe) {
-          CookMateStorage.addRecipe(recipeData);
-        } else {
-          var allRecipes = CookMateStorage.getAllRecipes();
-          allRecipes.push(recipeData);
-          CookMateStorage.set('cookmate_recipes', allRecipes);
-        }
+        CookMateStorage.addRecipe(recipeData, currentUser);
 
-        if (typeof CookMateUI !== 'undefined') {
-          CookMateUI.showToast('Đăng công thức thành công!', 'success');
+        if (currentUser.role === 'admin') {
+          if (typeof CookMateUI !== 'undefined') {
+            CookMateUI.showToast('Công thức đã được xuất bản công khai ngay!', 'success');
+          }
+          setTimeout(function() {
+            window.location.href = 'my-recipes.html?tab=approved';
+          }, 800);
+        } else {
+          if (typeof CookMateUI !== 'undefined') {
+            CookMateUI.showToast('Công thức của bạn đã được gửi và đang chờ Admin duyệt!', 'success');
+          }
+          setTimeout(function() {
+            window.location.href = 'my-recipes.html?tab=pending';
+          }, 800);
         }
       }
-
-      setTimeout(function() {
-        window.location.href = 'my-recipes.html';
-      }, 1200);
     }
   </script>
 </body>

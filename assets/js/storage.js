@@ -5,6 +5,7 @@
 var CookMateStorage = {
   KEYS: {
     USER: 'cookmate_current_user',
+    ADMIN_SESSION: 'cookmate_admin_session',
     FAVORITES: 'cookmate_favorites',
     USER_RECIPES: 'cookmate_user_recipes',
     USER_COMMENTS: 'cookmate_user_comments',
@@ -43,7 +44,7 @@ var CookMateStorage = {
   },
 
   // ---------------------------------------------------------------
-  // Current user session
+  // Current user session & Admin session isolation
   // ---------------------------------------------------------------
   getCurrentUser: function () {
     return this.get(this.KEYS.USER);
@@ -57,11 +58,66 @@ var CookMateStorage = {
         safeUser[k] = user[k];
       }
     });
-    return this.set(this.KEYS.USER, safeUser);
+
+    var result = this.set(this.KEYS.USER, safeUser);
+
+    // Synchronize or isolate Admin Session:
+    if (safeUser.role === 'admin') {
+      this.setAdminSession(safeUser);
+    } else {
+      // If a non-admin logs in at top level, invalidate any stale admin session
+      if (window.self === window.top) {
+        this.clearAdminSession();
+      }
+    }
+
+    return result;
   },
 
   clearCurrentUser: function () {
     this.remove(this.KEYS.USER);
+  },
+
+  getAdminSession: function () {
+    var session = this.get(this.KEYS.ADMIN_SESSION);
+    if (session && session.role === 'admin') {
+      return session;
+    }
+    // Fallback: Check if current active user is admin
+    var user = this.getCurrentUser();
+    if (user && user.role === 'admin') {
+      var adminSess = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: 'admin',
+        loginTime: Date.now()
+      };
+      this.set(this.KEYS.ADMIN_SESSION, adminSess);
+      return adminSess;
+    }
+    return null;
+  },
+
+  setAdminSession: function (user) {
+    if (user && user.role === 'admin') {
+      return this.set(this.KEYS.ADMIN_SESSION, {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: 'admin',
+        loginTime: Date.now()
+      });
+    }
+    return false;
+  },
+
+  clearAdminSession: function () {
+    this.remove(this.KEYS.ADMIN_SESSION);
+  },
+
+  isAdminSessionValid: function () {
+    return this.getAdminSession() !== null;
   },
 
   isLoggedIn: function () {
@@ -97,29 +153,65 @@ var CookMateStorage = {
   },
 
   // ---------------------------------------------------------------
-  // User-created recipes
+  // User-created recipes & Approval Workflow
   // ---------------------------------------------------------------
   getUserRecipes: function () {
     return this.get(this.KEYS.USER_RECIPES) || [];
   },
 
-  addUserRecipe: function (recipe) {
+  addUserRecipe: function (recipe, user) {
     var recipes = this.getUserRecipes();
-    recipe.id = Date.now();
-    recipe.createdAt = new Date().toISOString();
+    var currentUser = user || this.getCurrentUser();
+
+    if (!recipe.id) {
+      recipe.id = Date.now();
+    }
+    recipe.createdAt = recipe.createdAt || new Date().toISOString();
     recipe.isNew = true;
+
+    if (currentUser) {
+      recipe.authorId = recipe.authorId || currentUser.id;
+      recipe.authorName = recipe.authorName || currentUser.name;
+    }
+
+    // Role-based status: Admin directly approves, Member is pending
+    if (currentUser && currentUser.role === 'admin') {
+      recipe.status = 'approved';
+      recipe.approvedAt = new Date().toISOString();
+      recipe.approvedBy = currentUser.name;
+      recipe.rejectionReason = null;
+    } else {
+      recipe.status = recipe.status || 'pending';
+      recipe.rejectionReason = null;
+    }
+
     recipes.push(recipe);
     this.set(this.KEYS.USER_RECIPES, recipes);
     return recipe;
   },
 
-  updateUserRecipe: function (id, updates) {
+  updateUserRecipe: function (id, updates, user) {
     var recipes = this.getUserRecipes();
-    var index = recipes.findIndex(function (r) { return r.id === id; });
+    var index = recipes.findIndex(function (r) {
+      return r.id === id || r.id == id || String(r.id) === String(id);
+    });
     if (index > -1) {
+      var current = recipes[index];
+      var currentUser = user || this.getCurrentUser();
+
+      // If resubmitting a previously rejected recipe
+      if (updates.resubmit || (current.status === 'rejected' && (!currentUser || currentUser.role !== 'admin'))) {
+        updates.status = 'pending';
+        updates.rejectionReason = null;
+        updates.resubmittedAt = new Date().toISOString();
+      }
+
       Object.keys(updates).forEach(function (k) {
-        recipes[index][k] = updates[k];
+        if (k !== 'resubmit') {
+          recipes[index][k] = updates[k];
+        }
       });
+      recipes[index].updatedAt = new Date().toISOString();
       this.set(this.KEYS.USER_RECIPES, recipes);
       return recipes[index];
     }
@@ -128,30 +220,94 @@ var CookMateStorage = {
 
   deleteUserRecipe: function (id) {
     var recipes = this.getUserRecipes();
-    var numId = parseInt(id, 10);
-    var filtered = recipes.filter(function (r) { return r.id !== id && r.id !== numId; });
+    var filtered = recipes.filter(function (r) {
+      return r.id !== id && r.id != id && String(r.id) !== String(id);
+    });
     this.set(this.KEYS.USER_RECIPES, filtered);
     return filtered.length < recipes.length;
   },
 
   // Aliases for recipe operations
-  addRecipe: function (recipe) {
-    return this.addUserRecipe(recipe);
+  addRecipe: function (recipe, user) {
+    return this.addUserRecipe(recipe, user);
   },
 
-  updateRecipe: function (id, updates) {
-    return this.updateUserRecipe(id, updates);
+  updateRecipe: function (id, updates, user) {
+    return this.updateUserRecipe(id, updates, user);
   },
 
   deleteRecipe: function (id) {
     return this.deleteUserRecipe(id);
   },
 
-  getRecipeById: function (id) {
-    var numId = parseInt(id, 10);
-    return this.getAllRecipes().find(function (r) {
-      return r.id === numId || r.id == id;
+  // Recipe Approval Lifecycle Methods
+  getPendingRecipes: function () {
+    return this.getUserRecipes().filter(function (r) {
+      return r.status === 'pending';
     });
+  },
+
+  getRejectedRecipes: function () {
+    return this.getUserRecipes().filter(function (r) {
+      return r.status === 'rejected';
+    });
+  },
+
+  getApprovedRecipes: function () {
+    return this.getAllRecipes(false);
+  },
+
+  approveRecipe: function (id, adminUser) {
+    var recipes = this.getUserRecipes();
+    var index = recipes.findIndex(function (r) {
+      return r.id === id || r.id == id || String(r.id) === String(id);
+    });
+    if (index > -1) {
+      var admin = adminUser || this.getCurrentUser();
+      recipes[index].status = 'approved';
+      recipes[index].approvedAt = new Date().toISOString();
+      recipes[index].approvedBy = admin ? admin.name : 'Quản trị viên';
+      recipes[index].rejectionReason = null;
+      this.set(this.KEYS.USER_RECIPES, recipes);
+      return recipes[index];
+    }
+    return null;
+  },
+
+  rejectRecipe: function (id, reason, adminUser) {
+    var recipes = this.getUserRecipes();
+    var index = recipes.findIndex(function (r) {
+      return r.id === id || r.id == id || String(r.id) === String(id);
+    });
+    if (index > -1) {
+      var admin = adminUser || this.getCurrentUser();
+      recipes[index].status = 'rejected';
+      recipes[index].rejectedAt = new Date().toISOString();
+      recipes[index].rejectedBy = admin ? admin.name : 'Quản trị viên';
+      recipes[index].rejectionReason = reason || 'Công thức chưa đáp ứng đầy đủ tiêu chuẩn định lượng của CookMate.';
+      this.set(this.KEYS.USER_RECIPES, recipes);
+      return recipes[index];
+    }
+    return null;
+  },
+
+  getRecipeById: function (id, includeUnapproved) {
+    var all = this.getAllRecipesRaw();
+    var found = all.find(function (r) {
+      return r.id === id || r.id == id || String(r.id) === String(id);
+    });
+    if (!found) return null;
+
+    if (includeUnapproved || found.status === 'approved' || !found.status) {
+      return found;
+    }
+
+    var currentUser = this.getCurrentUser();
+    if (currentUser && (currentUser.role === 'admin' || currentUser.id === found.authorId)) {
+      return found;
+    }
+
+    return null;
   },
 
   getCategoryById: function (id) {
@@ -280,10 +436,21 @@ var CookMateStorage = {
   // ---------------------------------------------------------------
   // Get all data combined (static + user-created)
   // ---------------------------------------------------------------
-  getAllRecipes: function () {
+  getAllRecipesRaw: function () {
     var staticRecipes = (typeof RECIPES !== 'undefined') ? RECIPES.slice() : [];
     var userRecipes = this.getUserRecipes();
     return staticRecipes.concat(userRecipes);
+  },
+
+  getAllRecipes: function (includeAll) {
+    var raw = this.getAllRecipesRaw();
+    if (includeAll === true) {
+      return raw;
+    }
+    // Public recipes only: status is 'approved' or untagged static recipe
+    return raw.filter(function (r) {
+      return r.status === 'approved' || !r.status;
+    });
   },
 
   getAllUsers: function () {

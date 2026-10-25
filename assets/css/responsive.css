@@ -427,7 +427,8 @@
 
   /* Admin sidebar stays hidden */
   .admin-sidebar {
-    width: 280px;
+    width: var(--sidebar-width, 260px);
+    max-width: 85vw;
   }
 }
 
@@ -513,10 +514,11 @@
     grid-template-columns: 2fr 1fr;
   }
 
-  /* Footer 4 columns */
+  /* Footer 5 columns on Desktop */
   .site-footer__grid,
   .footer-grid {
-    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-columns: 1.6fr 1.1fr 1.1fr 1.1fr 1.3fr;
+    gap: 32px;
   }
 }
 

@@ -79,16 +79,30 @@
     var isKitchenMode = false;
 
     document.addEventListener('DOMContentLoaded', function() {
-      var recipeId = parseInt(getQueryParam('id'), 10);
-      if (!recipeId) {
+      var rawId = getQueryParam('id');
+      if (!rawId) {
         showNotFound();
         return;
       }
 
-      var allRecipes = CookMateStorage.getAllRecipes();
-      currentRecipe = allRecipes.find(function(r) { return r.id === recipeId; });
+      var numId = parseInt(rawId, 10);
+      var allRaw = CookMateStorage.getAllRecipesRaw ? CookMateStorage.getAllRecipesRaw() : CookMateStorage.getAllRecipes(true);
+      currentRecipe = allRaw.find(function(r) {
+        return r.id == rawId || r.id === numId || String(r.id) === String(rawId);
+      });
 
       if (!currentRecipe) {
+        showNotFound();
+        return;
+      }
+
+      var isApproved = currentRecipe.status === 'approved' || !currentRecipe.status;
+      var currentUser = CookMateStorage.getCurrentUser();
+      var isAuthor = currentUser && (currentUser.id === currentRecipe.authorId);
+      var isAdmin = currentUser && (currentUser.role === 'admin');
+
+      // Unapproved recipes are only accessible by Author or Admin
+      if (!isApproved && !isAuthor && !isAdmin) {
         showNotFound();
         return;
       }
@@ -122,7 +136,15 @@
       var author = CookMateStorage.getAllUsers().find(function(u) { return u.id === r.authorId; });
       var totalTime = (r.prepTime || 0) + (r.cookTime || 0);
 
+      var statusNoticeHtml = '';
+      if (r.status === 'pending') {
+        statusNoticeHtml = '<div class="alert alert-warning mb-6" style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:12px; padding:16px 20px; color:#B45309;"><div class="flex items-center gap-3"><i class="fa-solid fa-hourglass-half text-lg"></i><div><strong>Chế độ xem trước (Chờ duyệt):</strong> Công thức này đang chờ Quản trị viên duyệt và chưa hiển thị công khai.</div></div></div>';
+      } else if (r.status === 'rejected') {
+        statusNoticeHtml = '<div class="alert alert-danger mb-6" style="background:#FFF1F2; border:1px solid #FECDD3; border-radius:12px; padding:16px 20px; color:#9F1239;"><div class="flex items-center gap-3"><i class="fa-solid fa-triangle-exclamation text-lg"></i><div><strong>Công thức bị từ chối duyệt:</strong> ' + escapeHtml(r.rejectionReason || 'Chưa đạt tiêu chuẩn.') + '</div></div></div>';
+      }
+
       var html = `
+        ${statusNoticeHtml}
         <!-- 1. HERO / INTRO SECTION: 2 Cột Cân Đối -->
         <article class="detail-hero-card">
           <!-- Cột trái: Ảnh đại diện lớn sắc nét bo góc mềm mại -->

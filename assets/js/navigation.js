@@ -9,9 +9,31 @@ var Navigation = {
     this.renderHeader();
     this.renderFooter();
     this.setupMobileMenu();
+    this.setupHeaderSearch();
     this.updateAuthArea();
     this.highlightCurrentNav();
     updateFavoriteBadge();
+  },
+
+  // ---------------------------------------------------------------
+  // Guard access to create recipe for guests
+  // ---------------------------------------------------------------
+  guardCreateRecipe: function (e) {
+    if (typeof CookMateStorage !== 'undefined' && !CookMateStorage.isLoggedIn()) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (typeof CookMateUI !== 'undefined') {
+        CookMateUI.showToast('Vui lòng đăng nhập để bắt đầu đăng công thức món ăn của bạn!', 'info');
+      }
+      var base = getBasePath();
+      setTimeout(function () {
+        window.location.href = base + 'pages/auth/login.html?redirect=' + encodeURIComponent('pages/account/recipe-form.html');
+      }, 400);
+      return false;
+    }
+    return true;
   },
 
   // ---------------------------------------------------------------
@@ -35,23 +57,17 @@ var Navigation = {
           '<a href="' + base + 'index.html" class="nav-link" data-page="home">' +
             '<i class="fa-solid fa-house"></i> Trang chủ</a>' +
           '<a href="' + base + 'pages/recipes.html" class="nav-link" data-page="recipes">' +
-            '<i class="fa-solid fa-book-open"></i> Công thức</a>' +
-          '<a href="' + base + 'pages/categories.html" class="nav-link" data-page="categories">' +
-            '<i class="fa-solid fa-layer-group"></i> Danh mục</a>' +
-          '<a href="' + base + 'pages/new-recipes.html" class="nav-link" data-page="new-recipes">' +
-            '<i class="fa-solid fa-sparkles"></i> Mới nhất</a>' +
-          '<a href="' + base + 'pages/featured-recipes.html" class="nav-link" data-page="featured">' +
-            '<i class="fa-solid fa-fire"></i> Nổi bật</a>' +
-          '<a href="' + base + 'pages/holiday-recipes.html" class="nav-link" data-page="holiday">' +
-            '<i class="fa-solid fa-calendar-days"></i> Theo dịp lễ</a>' +
-          '<a href="' + base + 'pages/search.html" class="nav-link" data-page="search">' +
-            '<i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</a>' +
+            '<i class="fa-solid fa-compass"></i> Khám phá</a>' +
+          '<a href="' + base + 'pages/account/recipe-form.html" class="nav-link" data-page="recipe-form" onclick="return Navigation.guardCreateRecipe(event);">' +
+            '<i class="fa-solid fa-circle-plus"></i> Đăng công thức</a>' +
+          '<a href="' + base + 'pages/account/favorites.html" class="nav-link" data-page="favorites">' +
+            '<i class="fa-solid fa-heart"></i> Yêu thích</a>' +
         '</nav>' +
 
         '<div class="header-actions">' +
           '<div class="header-search">' +
             '<i class="fa-solid fa-magnifying-glass"></i>' +
-            '<input type="text" placeholder="Tìm món ăn..." id="headerSearchInput" aria-label="Tìm kiếm nhanh">' +
+            '<input type="text" placeholder="Tìm món, nguyên liệu..." id="headerSearchInput" aria-label="Tìm kiếm nhanh">' +
           '</div>' +
 
           '<a href="' + base + 'pages/account/favorites.html" class="btn-icon header-fav-btn" title="Yêu thích" aria-label="Món yêu thích">' +
@@ -116,14 +132,18 @@ var Navigation = {
             '</nav>' +
           '</div>' +
 
-          // Nhóm 2: Cá nhân
+          // Nhóm 2: Cá nhân & Đăng bài
           '<div class="mobile-nav__section">' +
-            '<div class="mobile-nav__section-title">Cá nhân</div>' +
+            '<div class="mobile-nav__section-title">Cá nhân & Đăng bài</div>' +
             '<nav class="mobile-nav__menu" aria-label="Cá nhân">' +
+              '<a href="' + base + 'pages/account/recipe-form.html" class="mobile-nav__link" data-page="recipe-form" onclick="return Navigation.guardCreateRecipe(event);">' +
+                '<i class="fa-solid fa-circle-plus"></i> <span>Đăng công thức mới</span></a>' +
               '<a href="' + base + 'pages/account/favorites.html" class="mobile-nav__link" data-page="favorites">' +
                 '<i class="fa-solid fa-heart"></i> <span>Món ăn yêu thích</span>' +
                 '<span class="mobile-nav__badge" id="mobileFavBadge"' + (favCount > 0 ? '' : ' style="display:none"') + '>' + favCount + '</span>' +
               '</a>' +
+              '<a href="' + base + 'pages/account/my-recipes.html" class="mobile-nav__link" data-page="my-recipes">' +
+                '<i class="fa-solid fa-book-bookmark"></i> <span>Công thức của tôi</span></a>' +
             '</nav>' +
           '</div>' +
 
@@ -142,7 +162,7 @@ var Navigation = {
   },
 
   // ---------------------------------------------------------------
-  // Footer HTML
+  // Footer HTML (Cấu trúc mới: 4 khu vực chuẩn + Minh họa Bát phở Hà Nội, loại bỏ 100% link tài khoản trùng Header)
   // ---------------------------------------------------------------
   getFooterHTML: function () {
     var base = getBasePath();
@@ -150,6 +170,7 @@ var Navigation = {
       '<div class="container">' +
         '<div class="footer-grid">' +
 
+          '<!-- Khu vực A: Thương hiệu CookMate -->' +
           '<div class="footer-brand">' +
             '<div class="logo">' +
               '<div class="logo-icon"><i class="fa-solid fa-utensils"></i></div>' +
@@ -158,40 +179,58 @@ var Navigation = {
               '</div>' +
             '</div>' +
             '<p class="footer-desc">' +
-              'CookMate là nền tảng chia sẻ công thức nấu ăn với tính năng tự động co giãn khẩu phần ' +
-              'và ước tính dinh dưỡng, giúp bạn nấu ăn ngon hơn mỗi ngày.' +
+              'CookMate là nền tảng chia sẻ và khám phá công thức nấu ăn với tính năng tự động co giãn khẩu phần ' +
+              'và ước tính dinh dưỡng, giúp bạn nấu ăn chuẩn định lượng, trọn vị mỗi ngày.' +
             '</p>' +
+            '<div class="footer-contact-info">' +
+              '<span class="footer-contact-item"><i class="fa-regular fa-envelope"></i> hotro@cookmate.vn</span>' +
+              '<span class="footer-contact-item"><i class="fa-solid fa-location-dot"></i> Hà Nội, Việt Nam</span>' +
+            '</div>' +
           '</div>' +
 
+          '<!-- Khu vực B: Khám phá công thức -->' +
           '<div class="footer-links">' +
             '<h4 class="footer-heading">Khám phá</h4>' +
-            '<a href="' + base + 'pages/recipes.html">Tất cả công thức</a>' +
+            '<a href="' + base + 'pages/recipes.html">Khám phá công thức</a>' +
             '<a href="' + base + 'pages/categories.html">Danh mục món ăn</a>' +
-            '<a href="' + base + 'pages/new-recipes.html">Công thức mới</a>' +
-            '<a href="' + base + 'pages/featured-recipes.html">Công thức nổi bật</a>' +
+            '<a href="' + base + 'pages/recipes.html?filter=featured">Công thức nổi bật</a>' +
             '<a href="' + base + 'pages/holiday-recipes.html">Món theo dịp lễ</a>' +
           '</div>' +
 
+          '<!-- Khu vực C: Về CookMate -->' +
           '<div class="footer-links">' +
-            '<h4 class="footer-heading">Tài khoản</h4>' +
-            '<a href="' + base + 'pages/auth/login.html">Đăng nhập</a>' +
-            '<a href="' + base + 'pages/auth/register.html">Đăng ký</a>' +
-            '<a href="' + base + 'pages/account/profile.html">Hồ sơ cá nhân</a>' +
-            '<a href="' + base + 'pages/account/my-recipes.html">Công thức của tôi</a>' +
-            '<a href="' + base + 'pages/account/favorites.html">Món yêu thích</a>' +
+            '<h4 class="footer-heading">Về CookMate</h4>' +
+            '<a href="' + base + 'pages/recipes.html?view=about">Giới thiệu nền tảng</a>' +
+            '<a href="' + base + 'pages/recipes.html?view=faq">Câu hỏi thường gặp</a>' +
+            '<a href="' + base + 'pages/recipes.html?view=feedback">Góp ý & Báo lỗi</a>' +
           '</div>' +
 
+          '<!-- Khu vực D: Thông tin -->' +
           '<div class="footer-links">' +
             '<h4 class="footer-heading">Thông tin</h4>' +
-            '<a href="#">Giới thiệu</a>' +
-            '<a href="#">Liên hệ</a>' +
-            '<a href="#">Điều khoản sử dụng</a>' +
-            '<a href="#">Chính sách bảo mật</a>' +
+            '<a href="' + base + 'pages/recipes.html?view=terms">Điều khoản sử dụng</a>' +
+            '<a href="' + base + 'pages/recipes.html?view=privacy">Chính sách bảo mật</a>' +
+            '<a href="' + base + 'pages/recipes.html?view=nutrition">Thông tin dinh dưỡng</a>' +
+          '</div>' +
+
+          '<!-- Khu vực E: Điểm nhấn Minh họa Bát phở Hà Nội (Brand Illustration) -->' +
+          '<div class="footer-brand-art">' +
+            '<div class="footer-pho-wrapper">' +
+              '<img src="' + base + 'assets/images/hanoi-pho-art.svg" alt="Minh họa Bát phở Hà Nội CookMate" class="footer-pho-img" loading="lazy">' +
+              '<div class="footer-pho-caption">' +
+                '<span class="footer-pho-title"><i class="fa-solid fa-bowl-rice"></i> Phở Hà Nội</span>' +
+                '<span class="footer-pho-subtitle">Tinh hoa ẩm thực Việt</span>' +
+              '</div>' +
+            '</div>' +
           '</div>' +
 
         '</div>' +
+
         '<div class="footer-bottom">' +
-          '<p>&copy; 2024 CookMate. Dự án website hỗ trợ nấu ăn — Giao diện demo frontend.</p>' +
+          '<p>&copy; 2024 CookMate. Dự án website hỗ trợ nấu ăn — Chuẩn định lượng, trọn dinh dưỡng.</p>' +
+          '<div class="footer-bottom-badges">' +
+            '<span class="footer-badge-tag"><i class="fa-solid fa-heart text-primary"></i> Lan tỏa đam mê bếp Việt</span>' +
+          '</div>' +
         '</div>' +
       '</div>';
   },
@@ -440,7 +479,7 @@ var Navigation = {
       input.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && input.value.trim()) {
           var base = getBasePath();
-          window.location.href = base + 'pages/search.html?q=' + encodeURIComponent(input.value.trim());
+          window.location.href = base + 'pages/recipes.html?q=' + encodeURIComponent(input.value.trim());
         }
       });
     }
@@ -448,12 +487,48 @@ var Navigation = {
 };
 
 // ===================================================================
-// Global logout handler
+// Global logout handler (With Preview Iframe Session Isolation)
 // ===================================================================
 function handleLogout() {
-  CookMateStorage.clearCurrentUser();
-  CookMateUI.showToast('Đã đăng xuất thành công', 'success');
+  var isInsideIframe = window.self !== window.top;
+
+  if (isInsideIframe) {
+    // Đăng xuất bên trong khung xem website preview: chỉ xóa session website con,
+    // TUYỆT ĐỐI không làm mất phiên Admin Shell bên ngoài
+    if (typeof CookMateStorage !== 'undefined') {
+      CookMateStorage.remove(CookMateStorage.KEYS.USER);
+    } else {
+      localStorage.removeItem('cookmate_current_user');
+    }
+    if (typeof CookMateUI !== 'undefined') {
+      CookMateUI.showToast('Đã đăng xuất khỏi phiên xem website', 'info');
+    }
+    setTimeout(function () {
+      window.location.href = getBasePath() + 'index.html';
+    }, 400);
+    return;
+  }
+
+  // Đăng xuất từ cửa sổ chính: xóa toàn bộ session
+  if (typeof CookMateStorage !== 'undefined') {
+    CookMateStorage.clearCurrentUser();
+    if (CookMateStorage.clearAdminSession) {
+      CookMateStorage.clearAdminSession();
+    }
+  } else {
+    localStorage.removeItem('cookmate_current_user');
+    localStorage.removeItem('cookmate_admin_session');
+  }
+
+  try {
+    sessionStorage.removeItem('cookmate_sidebar_closed');
+    sessionStorage.removeItem('cookmate_sidebar_scroll');
+  } catch (e) {}
+
+  if (typeof CookMateUI !== 'undefined') {
+    CookMateUI.showToast('Đã đăng xuất thành công', 'success');
+  }
   setTimeout(function () {
     window.location.href = getBasePath() + 'index.html';
-  }, 500);
+  }, 400);
 }

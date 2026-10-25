@@ -267,8 +267,38 @@ var CookMateAuthUI = (function () {
             triggerPho(true);
 
             setTimeout(function () {
+              // Điều hướng tự động theo vai trò tài khoản
+              var urlParams = new URLSearchParams(window.location.search);
+              var redirectUrl = urlParams.get('redirect');
+
+              if (user.role === 'admin') {
+                if (redirectUrl && (redirectUrl.includes('admin/') || redirectUrl.startsWith('pages/admin/'))) {
+                  if (redirectUrl.startsWith('pages/')) {
+                    window.location.href = '../../' + redirectUrl;
+                  } else {
+                    window.location.href = redirectUrl;
+                  }
+                  return;
+                }
+                window.location.href = '../../pages/admin/index.html';
+                return;
+              }
+
+              // Đối với thành viên (member): kiểm tra redirect URL hợp lệ
+              if (redirectUrl) {
+                // TUYỆT ĐỐI KHÔNG redirect Member vào khu vực Admin (ngăn ngừa lặp vô hạn)
+                if (!redirectUrl.includes('admin/') && !redirectUrl.includes('pages/admin/')) {
+                  if (redirectUrl.startsWith('pages/')) {
+                    window.location.href = '../../' + redirectUrl;
+                  } else if (redirectUrl.startsWith('./') || redirectUrl.startsWith('../')) {
+                    window.location.href = redirectUrl;
+                  }
+                  return;
+                }
+              }
+              // Mặc định Thành viên về trang chủ
               window.location.href = '../../index.html';
-            }, 800);
+            }, 300);
             return;
           }
         }
@@ -289,7 +319,7 @@ var CookMateAuthUI = (function () {
         if (typeof CookMateUI !== 'undefined') {
           CookMateUI.showToast('Email hoặc mật khẩu không đúng', 'error');
         }
-      }, 400);
+      }, 100);
     });
   }
 
@@ -489,9 +519,14 @@ var CookMateAuthUI = (function () {
    * Khởi tạo toàn bộ tương tác Auth
    */
   function init() {
-    // 1. Kiểm tra session hiện tại - Nếu đã đăng nhập, chuyển về trang chủ
+    // 1. Kiểm tra session hiện tại - Nếu đã đăng nhập, chuyển hướng theo vai trò
     if (typeof CookMateStorage !== 'undefined' && CookMateStorage.isLoggedIn()) {
-      window.location.href = '../../index.html';
+      var currentUser = CookMateStorage.getCurrentUser();
+      if (currentUser && currentUser.role === 'admin') {
+        window.location.href = '../../pages/admin/index.html';
+      } else {
+        window.location.href = '../../index.html';
+      }
       return;
     }
 

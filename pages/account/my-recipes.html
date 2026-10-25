@@ -16,23 +16,54 @@
   <link rel="stylesheet" href="../../assets/css/pages.css">
   <link rel="stylesheet" href="../../assets/css/responsive.css">
 </head>
-<body>
+<body data-page="my-recipes">
   <header class="site-header" id="siteHeader"></header>
 
   <main class="main-content">
     <div class="container">
+      
+      <!-- Page Header -->
       <div class="page-header">
         <div class="page-header-top">
-          <h1 class="page-title"><i class="fas fa-book-open"></i> Công thức của tôi</h1>
+          <div>
+            <h1 class="page-title"><i class="fas fa-book-bookmark text-primary"></i> Công thức của tôi</h1>
+            <p class="text-sm text-secondary mt-1">Quản lý các công thức bạn đã chia sẻ và theo dõi trạng thái kiểm duyệt.</p>
+          </div>
           <a href="recipe-form.html" class="btn btn-primary">
             <i class="fas fa-plus"></i> Đăng công thức mới
           </a>
         </div>
       </div>
 
+      <!-- Status Filter Tabs -->
+      <div class="my-recipes-tabs" role="tablist" aria-label="Bộ lọc trạng thái công thức">
+        <button type="button" class="my-recipes-tab-btn active" data-tab="all" role="tab" aria-selected="true">
+          <i class="fa-solid fa-list-check"></i>
+          <span>Tất cả</span>
+          <span class="my-recipes-tab-count" id="countAll">0</span>
+        </button>
+        <button type="button" class="my-recipes-tab-btn" data-tab="pending" role="tab" aria-selected="false">
+          <i class="fa-solid fa-clock"></i>
+          <span>Chờ duyệt</span>
+          <span class="my-recipes-tab-count" id="countPending">0</span>
+        </button>
+        <button type="button" class="my-recipes-tab-btn" data-tab="approved" role="tab" aria-selected="false">
+          <i class="fa-solid fa-circle-check"></i>
+          <span>Đã duyệt</span>
+          <span class="my-recipes-tab-count" id="countApproved">0</span>
+        </button>
+        <button type="button" class="my-recipes-tab-btn" data-tab="rejected" role="tab" aria-selected="false">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Bị từ chối</span>
+          <span class="my-recipes-tab-count" id="countRejected">0</span>
+        </button>
+      </div>
+
+      <!-- Recipes Grid Container -->
       <div class="my-recipes-list" id="myRecipesList">
         <!-- Rendered by JS -->
       </div>
+
     </div>
   </main>
 
@@ -40,26 +71,25 @@
   <div class="modal-overlay" id="deleteModal" style="display: none;">
     <div class="modal">
       <div class="modal-header">
-        <h3 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Xác nhận xóa</h3>
+        <h3 class="modal-title"><i class="fas fa-exclamation-triangle text-danger"></i> Xác nhận xóa công thức</h3>
         <button class="modal-close" id="deleteModalClose" aria-label="Đóng">
           <i class="fas fa-times"></i>
         </button>
       </div>
       <div class="modal-body">
-        <p>Bạn có chắc chắn muốn xóa công thức "<span id="deleteRecipeName"></span>"?</p>
-        <p class="text-secondary">Hành động này không thể hoàn tác.</p>
+        <p>Bạn có chắc chắn muốn xóa công thức "<strong id="deleteRecipeName"></strong>"?</p>
+        <p class="text-secondary text-sm mt-2">Hành động này không thể hoàn tác sau khi xác nhận.</p>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline" id="deleteCancelBtn">Hủy</button>
+        <button class="btn btn-outline" id="deleteCancelBtn">Hủy bỏ</button>
         <button class="btn btn-danger" id="deleteConfirmBtn">
-          <i class="fas fa-trash"></i> Xóa
+          <i class="fas fa-trash"></i> Xóa công thức
         </button>
       </div>
     </div>
   </div>
 
   <footer class="site-footer" id="siteFooter"></footer>
-
   <div id="toastContainer" class="toast-container"></div>
 
   <script src="../../assets/js/utils.js"></script>
@@ -71,34 +101,106 @@
   <script src="../../assets/js/components.js"></script>
   <script src="../../assets/js/navigation.js"></script>
   <script src="../../assets/js/app.js"></script>
+
   <script>
+    var currentTab = 'all';
     var deleteTargetId = null;
 
     document.addEventListener('DOMContentLoaded', function() {
       if (typeof CookMateStorage === 'undefined' || !CookMateStorage.isLoggedIn()) {
-        window.location.href = '../auth/login.html';
+        window.location.href = '../auth/login.html?redirect=' + encodeURIComponent('pages/account/my-recipes.html');
         return;
       }
 
-      renderMyRecipes();
+      Navigation.init();
+
+      // Read tab param from URL
+      var params = new URLSearchParams(window.location.search);
+      var tabParam = params.get('tab');
+      if (['all', 'pending', 'approved', 'rejected'].includes(tabParam)) {
+        currentTab = tabParam;
+      }
+
+      setupTabs();
       setupDeleteModal();
+      renderMyRecipes();
     });
+
+    function setupTabs() {
+      var tabBtns = document.querySelectorAll('.my-recipes-tab-btn');
+      tabBtns.forEach(function(btn) {
+        if (btn.getAttribute('data-tab') === currentTab) {
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+        } else {
+          btn.classList.remove('active');
+          btn.setAttribute('aria-selected', 'false');
+        }
+
+        btn.addEventListener('click', function() {
+          currentTab = btn.getAttribute('data-tab');
+          tabBtns.forEach(function(b) {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+
+          var newUrl = window.location.pathname + (currentTab !== 'all' ? '?tab=' + currentTab : '');
+          window.history.replaceState({}, '', newUrl);
+
+          renderMyRecipes();
+        });
+      });
+    }
 
     function renderMyRecipes() {
       var currentUser = CookMateStorage.getCurrentUser();
-      var allRecipes = CookMateStorage.getAllRecipes ? CookMateStorage.getAllRecipes() : [];
-      var myRecipes = allRecipes.filter(function(r) {
+      if (!currentUser) return;
+
+      // Use raw list to include pending and rejected
+      var allRecipes = CookMateStorage.getAllRecipesRaw ? CookMateStorage.getAllRecipesRaw() : CookMateStorage.getAllRecipes(true);
+      var myAll = allRecipes.filter(function(r) {
         return r.authorId === currentUser.id;
+      });
+
+      // Calculate counts
+      var countPending = myAll.filter(function(r) { return r.status === 'pending'; }).length;
+      var countApproved = myAll.filter(function(r) { return r.status === 'approved' || !r.status; }).length;
+      var countRejected = myAll.filter(function(r) { return r.status === 'rejected'; }).length;
+
+      document.getElementById('countAll').textContent = myAll.length;
+      document.getElementById('countPending').textContent = countPending;
+      document.getElementById('countApproved').textContent = countApproved;
+      document.getElementById('countRejected').textContent = countRejected;
+
+      // Filter by active tab
+      var displayRecipes = myAll.filter(function(r) {
+        var st = r.status || 'approved';
+        if (currentTab === 'pending') return st === 'pending';
+        if (currentTab === 'approved') return st === 'approved';
+        if (currentTab === 'rejected') return st === 'rejected';
+        return true;
       });
 
       var container = document.getElementById('myRecipesList');
 
-      if (myRecipes.length === 0) {
+      if (displayRecipes.length === 0) {
+        var emptyTitle = 'Không có công thức nào';
+        var emptyMsg = 'Bạn chưa có công thức nào trong mục này.';
+        if (currentTab === 'pending') {
+          emptyTitle = 'Không có công thức chờ duyệt';
+          emptyMsg = 'Tất cả công thức của bạn đã được duyệt hoặc chưa gửi bài mới.';
+        } else if (currentTab === 'rejected') {
+          emptyTitle = 'Tuyệt vời!';
+          emptyMsg = 'Bạn không có công thức nào bị từ chối.';
+        }
+
         container.innerHTML =
-          '<div class="empty-state">' +
-            '<div class="empty-state-icon"><i class="fas fa-book-open"></i></div>' +
-            '<h3 class="empty-state-title">Chưa có công thức nào</h3>' +
-            '<p class="empty-state-text">Bạn chưa đăng công thức nào. Hãy bắt đầu chia sẻ món ăn yêu thích của bạn!</p>' +
+          '<div class="empty-state" style="grid-column: 1 / -1; justify-self: center; margin: 40px auto; max-width: 520px; text-align: center;">' +
+            '<div class="empty-state-icon" style="font-size: 48px; color: var(--primary); margin-bottom: 16px;"><i class="fas fa-book-open"></i></div>' +
+            '<h3 class="empty-state-title" style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">' + emptyTitle + '</h3>' +
+            '<p class="empty-state-text text-secondary mb-4">' + emptyMsg + '</p>' +
             '<a href="recipe-form.html" class="btn btn-primary">' +
               '<i class="fas fa-plus"></i> Đăng công thức mới' +
             '</a>' +
@@ -107,37 +209,68 @@
       }
 
       var html = '<div class="recipe-grid">';
-      myRecipes.forEach(function(recipe) {
+      displayRecipes.forEach(function(recipe) {
         var recipeTitle = recipe.title || recipe.name || 'Không có tên';
         var imgSrc = recipe.image || recipe.imageUrl || '../../assets/images/placeholders/recipe-placeholder.svg';
         var difficulty = recipe.difficulty || 'Trung bình';
         var totalTime = ((recipe.prepTime || 0) + (recipe.cookTime || 0)) || '';
         var timeStr = totalTime ? totalTime + ' phút' : '';
+        var status = recipe.status || 'approved';
+
+        var statusBadgeHtml = '';
+        var extraBoxHtml = '';
+        var actionBtnsHtml = '';
+
+        if (status === 'pending') {
+          statusBadgeHtml = '<span class="badge badge-pending text-xs" style="position: absolute; top: 12px; right: 12px;"><i class="fa-solid fa-clock"></i> Chờ duyệt</span>';
+          extraBoxHtml = '<div class="alert alert-warning text-xs mt-3 mb-2" style="background:#FFFBEB; border:1px solid #FDE68A; padding:8px 12px; border-radius:8px; color:#B45309;"><i class="fa-solid fa-hourglass-half mr-1"></i> Đang chờ Quản trị viên CookMate phê duyệt.</div>';
+          actionBtnsHtml =
+            '<a href="../recipe-detail.html?id=' + recipe.id + '" class="btn btn-sm btn-ghost" title="Xem trước" target="_blank"><i class="fa-solid fa-eye"></i></a>' +
+            '<a href="recipe-form.html?id=' + recipe.id + '" class="btn btn-sm btn-secondary flex-1"><i class="fa-solid fa-pen-to-square"></i> Sửa</a>' +
+            '<button class="btn btn-sm btn-danger flex-1" onclick="confirmDelete(\'' + recipe.id + '\', \'' + escapeHtml(recipeTitle).replace(/'/g, "\\'") + '\')"><i class="fa-solid fa-trash"></i> Xóa</button>';
+        } else if (status === 'rejected') {
+          statusBadgeHtml = '<span class="badge badge-rejected text-xs" style="position: absolute; top: 12px; right: 12px;"><i class="fa-solid fa-circle-xmark"></i> Bị từ chối</span>';
+          extraBoxHtml =
+            '<div class="rejection-reason-box">' +
+              '<strong><i class="fa-solid fa-circle-exclamation"></i> Lý do từ chối:</strong>' +
+              '<p>' + escapeHtml(recipe.rejectionReason || 'Công thức chưa đáp ứng tiêu chuẩn định lượng hoặc hình ảnh của CookMate.') + '</p>' +
+            '</div>';
+          actionBtnsHtml =
+            '<a href="recipe-form.html?id=' + recipe.id + '" class="btn btn-sm btn-primary flex-1"><i class="fa-solid fa-rotate-right"></i> Sửa & Gửi lại</a>' +
+            '<button class="btn btn-sm btn-danger" onclick="confirmDelete(\'' + recipe.id + '\', \'' + escapeHtml(recipeTitle).replace(/'/g, "\\'") + '\')"><i class="fa-solid fa-trash"></i></button>';
+        } else {
+          statusBadgeHtml = '<span class="badge badge-approved text-xs" style="position: absolute; top: 12px; right: 12px;"><i class="fa-solid fa-circle-check"></i> Đã duyệt</span>';
+          actionBtnsHtml =
+            '<a href="../recipe-detail.html?id=' + recipe.id + '" class="btn btn-sm btn-ghost" title="Xem trang món ăn"><i class="fa-solid fa-arrow-up-right-from-square"></i></a>' +
+            '<a href="recipe-form.html?id=' + recipe.id + '" class="btn btn-sm btn-secondary flex-1"><i class="fa-solid fa-pen-to-square"></i> Sửa</a>' +
+            '<button class="btn btn-sm btn-danger flex-1" onclick="confirmDelete(\'' + recipe.id + '\', \'' + escapeHtml(recipeTitle).replace(/'/g, "\\'") + '\')"><i class="fa-solid fa-trash"></i> Xóa</button>';
+        }
 
         html +=
-          '<div class="recipe-card my-recipe-card">' +
-            '<div class="recipe-card__image">' +
-              '<a href="../recipe-detail.html?id=' + recipe.id + '">' +
-                '<img src="' + imgSrc + '" alt="' + escapeHtml(recipeTitle) + '" loading="lazy" onerror="handleImageError(this)">' +
-              '</a>' +
-              '<span class="badge badge-primary text-xs" style="position: absolute; top: 12px; left: 12px;">' + difficulty + '</span>' +
-            '</div>' +
-            '<div class="recipe-card__content">' +
-              '<h3 class="recipe-card__title">' +
-                '<a href="../recipe-detail.html?id=' + recipe.id + '">' + escapeHtml(recipeTitle) + '</a>' +
-              '</h3>' +
-              '<p class="recipe-card__desc">' + escapeHtml((recipe.description || '').substring(0, 80)) + '...</p>' +
-              '<div class="recipe-card__meta">' +
-                (timeStr ? '<span><i class="fa-regular fa-clock"></i> ' + timeStr + '</span>' : '') +
-                '<span><i class="fa-solid fa-users"></i> ' + (recipe.servings || 4) + ' người</span>' +
-              '</div>' +
-              '<div class="flex items-center gap-2 mt-4 pt-3 border-t border-light">' +
-                '<a href="recipe-form.html?id=' + recipe.id + '" class="btn btn-sm btn-secondary flex-1">' +
-                  '<i class="fa-solid fa-pen-to-square"></i> Sửa' +
+          '<div class="recipe-card my-recipe-card" style="display:flex; flex-direction:column; justify-content:space-between;">' +
+            '<div>' +
+              '<div class="recipe-card__image" style="position: relative;">' +
+                '<a href="../recipe-detail.html?id=' + recipe.id + '">' +
+                  '<img src="' + imgSrc + '" alt="' + escapeHtml(recipeTitle) + '" loading="lazy" onerror="handleImageError(this)">' +
                 '</a>' +
-                '<button class="btn btn-sm btn-danger flex-1" onclick="confirmDelete(\'' + recipe.id + '\', \'' + escapeHtml(recipeTitle).replace(/'/g, "\\'") + '\')">' +
-                  '<i class="fa-solid fa-trash"></i> Xóa' +
-                '</button>' +
+                '<span class="badge badge-primary text-xs" style="position: absolute; top: 12px; left: 12px;">' + escapeHtml(difficulty) + '</span>' +
+                statusBadgeHtml +
+              '</div>' +
+              '<div class="recipe-card__content">' +
+                '<h3 class="recipe-card__title">' +
+                  '<a href="../recipe-detail.html?id=' + recipe.id + '">' + escapeHtml(recipeTitle) + '</a>' +
+                '</h3>' +
+                '<p class="recipe-card__desc">' + escapeHtml((recipe.description || '').substring(0, 80)) + '...</p>' +
+                '<div class="recipe-card__meta">' +
+                  (timeStr ? '<span><i class="fa-regular fa-clock"></i> ' + timeStr + '</span>' : '') +
+                  '<span><i class="fa-solid fa-users"></i> ' + (recipe.servings || 4) + ' người</span>' +
+                '</div>' +
+                extraBoxHtml +
+              '</div>' +
+            '</div>' +
+            '<div class="p-4 pt-0">' +
+              '<div class="flex items-center gap-2 pt-3 border-t border-light">' +
+                actionBtnsHtml +
               '</div>' +
             '</div>' +
           '</div>';
@@ -168,15 +301,7 @@
       document.getElementById('deleteConfirmBtn').addEventListener('click', function() {
         if (!deleteTargetId) return;
 
-        if (CookMateStorage.deleteRecipe) {
-          CookMateStorage.deleteRecipe(deleteTargetId);
-        } else {
-          /* Fallback: remove from stored recipes */
-          var allRecipes = CookMateStorage.getAllRecipes();
-          var filtered = allRecipes.filter(function(r) { return r.id !== deleteTargetId; });
-          CookMateStorage.set('cookmate_recipes', filtered);
-        }
-
+        CookMateStorage.deleteRecipe(deleteTargetId);
         closeDeleteModal();
         renderMyRecipes();
 

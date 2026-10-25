@@ -193,7 +193,7 @@
   position: relative;
 }
 
-.section-header__title::after {
+.section-header__title.has-underline::after {
   content: '';
   display: block;
   width: 48px;

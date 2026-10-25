@@ -339,9 +339,192 @@ Trong quá trình rà soát độc lập, kiểm thử đa tầng và đối chi
 
 ---
 
-## 4. KẾT QUẢ KIỂM THỬ KỸ THUẬT TOÀN DIỆN
+## 4. TÁI CẤU TRÚC PHÂN VAI TRÒ USER/ADMIN, LUỒNG ĐĂNG NHẬP VÀ DUYỆT CÔNG THỨC (MASTER PROMPT V3)
 
-1. **Bộ kiểm thử Logic & Tương tác chuyên sâu (41 Assertions):**
+Đã hoàn thành xuất sắc 100% tái cấu trúc toàn diện kiến trúc trải nghiệm người dùng theo các nguyên tắc:
+
+### 1. Hệ thống đăng nhập chung duy nhất (`pages/auth/login.html`)
+- **Không có dropdown hay checkbox chọn vai trò:** Người dùng không tự chọn "Tôi là Admin" trên giao diện.
+- **Tự động nhận diện vai trò sau khi xác thực thành công:**
+  - `role: 'admin'` -> Tự động chuyển hướng vào Dashboard Quản trị (`pages/admin/index.html`).
+  - `role: 'member'` (Thành viên) -> Tự động chuyển hướng về Trang chủ (`index.html`) hoặc trang đích chuyển tiếp (`redirect` query param).
+- **Đăng ký tài khoản (`pages/auth/register.html`):** Luôn tạo tài khoản `role: 'member'`, không cho phép tự đăng ký Admin.
+- **Bảo vệ phiên đã đăng nhập:** Khi người dùng đã đăng nhập truy cập lại `login.html`, hệ thống tự động nhận diện và điều hướng đúng giao diện theo vai trò (Admin -> Admin Dashboard, Member -> Trang chủ).
+
+### 2. Quy trình kiểm duyệt công thức (Recipe Approval Workflow)
+- **Tách bạch trạng thái công thức (`status`):**
+  - `'approved'`: Đã phê duyệt, hiển thị công khai trên toàn bộ hệ sinh thái (Trang chủ, Khám phá, Tìm kiếm, Danh mục, Chi tiết món).
+  - `'pending'`: Chờ Admin duyệt. Chỉ có tác giả và Admin mới xem được. **Tuyệt đối không xuất hiện trên các trang công khai.**
+  - `'rejected'`: Bị Admin từ chối, kèm lý do chi tiết (`rejectionReason`).
+- **Luồng gửi bài của Thành viên (`pages/account/recipe-form.html`):**
+  - Thành viên gửi công thức -> Lưu với `status: 'pending'`.
+  - Thông báo Toast: *"Công thức của bạn đã được gửi và đang chờ Admin duyệt!"*.
+  - Điều hướng về `pages/account/my-recipes.html?tab=pending`.
+- **Luồng "Công thức của tôi" (`pages/account/my-recipes.html`):**
+  - Bổ sung 4 Tabs lọc trạng thái: **Tất cả**, **Chờ duyệt**, **Đã duyệt**, **Bị từ chối** (kèm badge đếm số lượng).
+  - Huy hiệu trạng thái trên từng thẻ card: `badge-pending`, `badge-approved`, `badge-rejected`.
+  - Khi bài bị từ chối: Hiển thị hộp thông tin màu đỏ cảnh báo lý do từ chối từ Admin và nút **"Sửa & Gửi lại"** (cho phép người dùng chỉnh sửa và tự động đưa bài về trạng thái `pending`).
+- **Màn hình Admin duyệt công thức (`pages/admin/approve-recipes.html`):**
+  - Hàng đợi danh sách công thức `pending` theo thời gian gửi.
+  - Modal **Xem trước chi tiết**: Hiển thị đầy đủ hình ảnh, nguyên liệu định lượng, các bước nấu, dinh dưỡng ước tính.
+  - Nút **"Duyệt & Xuất bản"**: Chuyển `status = 'approved'`, lưu ngày duyệt & người duyệt, lập tức công khai trên website.
+  - Nút **"Từ chối"**: Modal bắt buộc nhập lý do (hỗ trợ gợi ý lý do mẫu nhanh: thiếu định lượng, ảnh mờ, bước nấu sơ sài), lưu `rejectionReason` gửi đến người đăng.
+- **Màn hình Admin xuất bản trực tiếp (`pages/admin/recipe-form.html`):**
+  - Cho phép Admin thêm mới hoặc biên tập công thức và xuất bản công khai ngay (`status: 'approved'`), không cần qua hàng đợi.
+
+### 3. Trải nghiệm Khám phá thống nhất (Unified Explore Center)
+- **Menu chính User tinh gọn 5 mục chuẩn:**
+  1. **Trang chủ** (`index.html`)
+  2. **Khám phá** (`pages/recipes.html`)
+  3. **Đăng công thức** (`pages/account/recipe-form.html` — có click guard: khách bấm sẽ được hướng dẫn đăng nhập và redirect về form sau khi login)
+  4. **Yêu thích** (`pages/account/favorites.html`)
+  5. **Tài khoản** (Auth area dạng dropdown cá nhân hóa khi đăng nhập; nút Đăng nhập / Đăng ký khi là khách)
+- **Trang Khám phá (`pages/recipes.html`) đóng vai trò hạt nhân:**
+  - Ô tìm kiếm từ khóa món ăn hoặc nguyên liệu.
+  - Tabs chế độ nhanh: Tất cả, Mới nhất, Nổi bật, Đánh giá cao.
+  - Bộ lọc đa điều kiện: Danh mục, Dịp lễ, Độ khó, Thời gian nấu.
+  - Nút "Đặt lại bộ lọc" phục hồi trạng thái ban đầu.
+  - Nhận diện linh hoạt query parameters (`?q=`, `?cat=`, `?occasion=`, `?difficulty=`, `?tab=`, `?sort=`, `?featured=`) và đồng bộ URL tức thì.
+  - Empty state căn giữa hoàn hảo khi không tìm thấy kết quả.
+
+### 4. Bảo vệ quyền truy cập (Access Guarding)
+- Toàn bộ trang Admin (`pages/admin/*.html`) được bảo vệ bởi hàm `checkAdminAuth()`: Nếu khách hoặc tài khoản member truy cập trực tiếp, hệ thống lập tức chặn và điều hướng về trang đăng nhập với tham số `redirect`.
+- Khách bấm "Đăng công thức" trong Header hoặc Mobile Drawer được điều hướng về `login.html?redirect=pages/account/recipe-form.html`.
+
+### 5. Kết quả kiểm thử tự động toàn diện qua Chrome CDP (26/26 Tests Passed - 100%)
+File kịch bản kiểm thử: `scratch/test_role_approval_suite.js`.
+- `[PASS #1]` Form login là form chung duy nhất, KHÔNG có dropdown chọn vai trò "Tôi là Admin/User"
+- `[PASS #2]` Tài khoản Admin (`admin@cookmate.vn`) tự động chuyển hướng vào Dashboard Admin: `/pages/admin/index.html`
+- `[PASS #3]` Admin đã đăng nhập truy cập `login.html` tự động chuyển hướng về Admin Dashboard
+- `[PASS #4]` Tài khoản Member (`giang@cookmate.vn`) tự động chuyển hướng về Trang chủ
+- `[PASS #5]` Member đăng nhập với redirect param chuyển hướng đúng trang đích yêu cầu
+- `[PASS #6]` Khách chưa đăng nhập truy cập trang admin bị chặn và chuyển về login
+- `[PASS #7]` Thành viên role "member" truy cập duyệt công thức admin bị chặn (điều hướng an toàn)
+- `[PASS #8]` Khách nhấn "Đăng công thức" trong Header được chuyển đến login kèm redirect param
+- `[PASS #9]` Công thức do Member gửi được lưu với trạng thái `status = 'pending'`
+- `[PASS #10]` `CookMateStorage.getAllRecipes()` mặc định KHÔNG chứa bài `status = 'pending'`
+- `[PASS #11]` Trang Khám phá (`recipes.html`) KHÔNG hiển thị bài chưa duyệt
+- `[PASS #12]` Member thấy bài của mình tại `my-recipes.html` với badge "Chờ duyệt"
+- `[PASS #13]` Khách truy cập trực tiếp bài pending thấy thông báo "Không tìm thấy công thức"
+- `[PASS #14]` Admin thấy bài trong hàng đợi duyệt tại `approve-recipes.html`
+- `[PASS #15]` Admin từ chối bài: status chuyển thành "rejected" và lưu lý do từ chối
+- `[PASS #16]` Member thấy hộp lý do từ chối từ Admin tại `my-recipes.html`
+- `[PASS #17]` Sửa bài bị từ chối và gửi lại: status trở lại "pending", xóa bỏ lý do từ chối cũ
+- `[PASS #18]` Admin duyệt bài: status chuyển thành "approved"
+- `[PASS #19]` Công thức đã duyệt xuất hiện công khai ngay lập tức trên trang Khám phá (`recipes.html`)
+- `[PASS #20]` Admin đăng bài qua `admin/recipe-form.html`: Tự động xuất bản ngay (`status = 'approved'`), không vào hàng chờ duyệt
+- `[PASS #21]` Trang Quản lý Công thức (`admin/recipes.html`) có bộ lọc trạng thái và cột trạng thái chuẩn
+- `[PASS #22]` Header Main Nav tinh gọn 4 liên kết chính (Trang chủ, Khám phá, Đăng công thức, Yêu thích) + 1 Tài khoản ở Auth Area
+- `[PASS #23]` Khám phá nhận tham số `?cat=2` và tự động chọn danh mục
+- `[PASS #24]` Khám phá nhận tham số `?tab=newest` và kích hoạt tab Mới nhất
+- `[PASS #25]` Tìm kiếm từ khóa "phở" trả về các công thức phù hợp
+- `[PASS #26]` Nút "Đặt lại bộ lọc" khôi phục toàn bộ danh sách công thức (18 món)
+
+Ảnh chụp màn hình kiểm chứng lưu trữ tại `scratch/screenshots_role_approval/`:
+- `01_admin_dashboard.png`: Dashboard Quản trị viên sau khi Admin đăng nhập tự động.
+- `02_member_homepage.png`: Trang chủ sau khi Thành viên đăng nhập tự động.
+- `03_member_my_recipes_pending.png`: Thẻ bài viết với huy hiệu "Chờ duyệt" của thành viên.
+- `04_admin_approve_queue.png`: Hàng đợi duyệt công thức của Admin kèm các nút Duyệt / Từ chối / Xem chi tiết.
+- `05_member_my_recipes_rejected.png`: Hộp lý do từ chối màu đỏ hiển thị cho người đăng và nút "Sửa & Gửi lại".
+- `06_explore_recipe_approved.png`: Công thức sau khi được duyệt xuất hiện công khai ngay trên trung tâm Khám phá.
+- `07_admin_recipes_table_status.png`: Bảng quản lý công thức của Admin có cột trạng thái và bộ lọc trạng thái.
+
+---
+
+## 5. BÁO CÁO HOÀN THIỆN ADMIN SHELL, XEM WEBSITE TẠI CHỖ, SIDEBAR HAMBURGER VÀ FOOTER THƯƠNG HIỆU
+
+### A. Vị trí mới của nút "Xem website CookMate" ở đầu Sidebar Admin
+- **Hiện trạng trước sửa:** Nút nằm ở cuối sidebar thuộc nhóm Điều hướng, người dùng phải cuộn chuột xuống mới thấy.
+- **Sau khi cập nhật:**
+  - Nằm ngay phần đầu Sidebar (`.admin-sidebar__nav`), ngay sau Logo CookMate + nhãn ADMIN, trước nhóm menu "Hệ thống".
+  - Có icon quả cầu (`fa-solid fa-globe`), nhãn "Xem website CookMate" màu cam ấm với background tinh tế (`rgba(232, 93, 42, 0.16)`).
+  - Có thuộc tính `data-tooltip="Xem website CookMate"` để hiển thị tooltip bay khi Sidebar thu gọn.
+  - Phía dưới có đường phân cách nhẹ (`.admin-sidebar__divider`).
+  - Bản sao cũ ở cuối sidebar đã được loại bỏ 100%, bảo đảm không có liên kết trùng lặp.
+
+### B. Cơ chế Xem website CookMate tại chỗ (In-place Embedded Preview)
+- **Hành vi:** Khi Admin bấm nút "Xem website CookMate":
+  - Không chuyển hướng toàn bộ trang web ra ngoài hay thay thế Admin shell.
+  - Sidebar Admin bên trái luôn giữ nguyên 100% vị trí và tương tác.
+  - Không làm mất phiên Admin, không chuyển vai trò, không yêu cầu đăng nhập lại.
+  - Vùng nội dung bên phải (`.admin-main`) chuyển sang hiển thị khung xem trước `#adminWebsitePreview`:
+    - Thanh công cụ điều khiển phía trên gồm: Huy hiệu trạng thái "Xem website CookMate tại chỗ", nút "Trang chủ" (về trang chủ website), nút "Tải lại", nút "Tab riêng" (mở tab trình duyệt mới nếu cần), và nút "Quay lại Quản trị".
+    - Iframe chuyên dụng `#adminWebsitePreviewFrame` tải nguyên bản website CookMate (`../../index.html`), responsive linh hoạt theo độ rộng vùng nội dung bên phải.
+  - Khi Admin bấm "Quay lại Quản trị" hoặc chọn bất kỳ mục quản trị nào trên Sidebar (Duyệt công thức, Quản lý công thức, Danh mục...), khung xem trước tự động ẩn đi và khôi phục nội dung quản trị tương ứng.
+  - Hỗ trợ tham số URL `?view=website` tự động mở chế độ xem trước khi được chỉ định.
+  - Cơ chế phòng thủ Breakout: Tự động ngăn ngừa việc một trang admin bị nhúng lồng bên trong iframe xem trước.
+
+### C. Nút Hamburger và Chế độ Thu gọn Sidebar (Icon Rail trên Desktop & Drawer trên Mobile)
+- **Nút Hamburger (`#sidebarToggleBtn`):**
+  - Hiển thị trên thanh tiêu đề Admin Header ở mọi kích thước màn hình với thiết kế bo góc, viền mảnh và hiệu ứng hover đổi màu cam thương hiệu.
+- **Desktop ($\ge 1024px$):**
+  - Bấm Hamburger: Sidebar thu gọn thành dải Icon Rail hẹp (`72px`), vùng nội dung bên phải tự động mở rộng tương ứng.
+  - Các tiêu đề nhóm, chữ menu, logo text và badge được ẩn gọn gàng.
+  - Các icon quản trị và icon "Xem website CookMate" được căn giữa hoàn hảo, mục active vẫn sáng màu cam.
+  - Khi hover qua từng icon trong chế độ thu gọn, tooltip bay nổi (`data-tooltip`) với mũi tên chỉ báo xuất hiện mượt mà.
+  - Bấm lại Hamburger: Sidebar mở rộng về kích thước ban đầu (`260px`).
+- **Mobile/Tablet ($< 1024px$):**
+  - Sidebar chuyển thành Drawer trượt có lớp phủ tối (`#sidebarBackdrop`).
+  - Bấm Hamburger: Drawer trượt vào màn hình.
+  - Bấm nút X (`#sidebarCloseBtn`) hoặc bấm vào backdrop: Drawer đóng lại trơn tru.
+  - Hoàn toàn không có hiện tượng tràn ngang màn hình.
+
+### D. Cơ chế Duy trì Trạng thái Sidebar Chống Reset/Giật khi Điều hướng
+- **Giải pháp:**
+  - Micro-script tối ưu trong `<head>` của tất cả 9 trang admin đọc `sessionStorage.getItem('cookmate_sidebar_collapsed')`: Nếu là `'true'`, gán ngay class `sidebar-is-collapsed` lên thẻ `<html>` trước khi DOM kịp paint, triệt tiêu 100% hiện tượng giật/nhấp nháy giao diện khi chuyển trang.
+  - Module `assets/js/admin-shell.js` đồng bộ và duy trì:
+    - Trạng thái thu gọn/mở rộng qua `sessionStorage.cookmate_sidebar_collapsed`.
+    - Vị trí cuộn (`scrollTop`) của Sidebar qua `sessionStorage.cookmate_sidebar_scroll`.
+    - Đánh dấu chính xác mục active tương ứng với trang đang duyệt.
+
+### E. Thiết kế lại Footer Thương hiệu & Minh họa Bát phở Hà Nội (Brand Visual)
+- **Loại bỏ liên kết dư thừa:** Đã loại bỏ 100% các liên kết tài khoản và hành động bị trùng lặp với Header (Đăng nhập, Đăng ký, Hồ sơ cá nhân, Công thức của tôi, Món yêu thích, Đăng công thức).
+- **Cấu trúc 4 khu vực chuẩn + 1 Điểm nhấn thị giác:**
+  - **Khu vực A (Thương hiệu CookMate):** Logo có độ tương phản cao trên nền tối than (chữ "Cook" màu kem sáng `#FFF9F2`, chữ "Mate" màu cam thương hiệu `#E85D2A`), mô tả ngắn về chuẩn định lượng và trọn dinh dưỡng, thông tin email hỗ trợ `hotro@cookmate.vn` và địa chỉ Hà Nội.
+  - **Khu vực B (Khám phá):** Khám phá công thức, Danh mục món ăn, Công thức nổi bật, Công thức mới nhất, Món theo dịp lễ.
+  - **Khu vực C (Về CookMate):** Món nấu nhanh 15-30p, Món Healthy & Eat Clean, Món ngon 3 miền Bắc - Trung - Nam, Tra cứu theo nguyên liệu.
+  - **Khu vực D (Thông tin & Tiêu chuẩn):** Chuẩn định lượng khẩu phần, Ước tính calo & dinh dưỡng, Điều khoản sử dụng, Chính sách bảo mật.
+  - **Khu vực E (Điểm nhấn Minh họa Bát phở Hà Nội):** File vector SVG line-art chất lượng cao `assets/images/hanoi-pho-art.svg` với bát gốm sứ hoa văn truyền thống, đôi đũa gắp sợi phở mềm mại, làn hơi nóng bốc lên, hoa hồi thơm, lát chanh và hành hoa; đi kèm chú thích "Phở Hà Nội • Tinh hoa ẩm thực Việt".
+- **Responsive Footer:**
+  - Desktop: Bố cục lưới 5 cột cân đối, thanh lịch.
+  - Mobile: Tự động xếp dọc theo cột (flex-direction: column), khoảng cách phân tách rõ ràng, các liên kết xuống dòng độc lập, không bị dính liền ngang, hoàn toàn 0% tràn ngang.
+
+### F. Danh sách File Đã Tạo / Cập nhật
+1. `assets/images/hanoi-pho-art.svg`: *Tạo mới* — Vector line-art Bát phở Hà Nội truyền thống chất lượng cao.
+2. `assets/js/admin-shell.js`: *Tạo mới* — Module điều khiển toàn diện Admin Shell (vị trí nút xem website, in-place preview, hamburger toggle, lưu/khôi phục trạng thái sidebar, breakout defense).
+3. `assets/css/admin.css`: *Cập nhật* — Bổ sung CSS cho nút Hamburger desktop, Icon Rail thu gọn (~72px), tooltips, nút xem website ở đầu sidebar, và khung xem trước tại chỗ (.admin-website-preview).
+4. `assets/css/components.css`: *Cập nhật* — Tái cấu trúc lưới footer 5 cột, định dạng màu logo tương phản cao và khung minh họa Bát phở Hà Nội.
+5. `assets/css/responsive.css`: *Cập nhật* — Điều chỉnh responsive footer trên desktop và mobile.
+6. `assets/js/navigation.js`: *Cập nhật* — Hàm `getFooterHTML()` mới loại bỏ 100% link tài khoản trùng lặp và nhúng minh họa Bát phở Hà Nội.
+7. Cả 9 trang Admin (`pages/admin/`): `index.html`, `approve-recipes.html`, `recipe-form.html`, `recipes.html`, `categories.html`, `ingredients.html`, `accounts.html`, `comments.html`, `statistics.html` — Đã cập nhật nút Xem website lên đầu sidebar, xóa bản sao cũ, nhúng `admin-shell.js` và script khôi phục sớm trạng thái thu gọn.
+8. `scratch/test_admin_shell_suite.js`: *Tạo mới* — Bộ kiểm thử tự động toàn diện qua Chrome DevTools Protocol.
+
+### G. Kết quả Kiểm thử Tự động Thực tế
+Chạy toàn bộ 50 kịch bản kiểm thử trình duyệt thực tế qua Chrome CDP:
+- **KẾT QUẢ: 50 PASSED / 0 FAILED (100% Thành công)**
+  - Group 1 (Cấu trúc Sidebar & Vị trí nút Xem website): **7/7 PASSED**
+  - Group 2 (Hamburger Desktop & Icon Rail thu gọn): **7/7 PASSED**
+  - Group 3 (Xem website CookMate tại chỗ & Iframe Toolbar): **10/10 PASSED**
+  - Group 4 (Duy trì trạng thái thu gọn & vị trí cuộn khi chuyển trang Admin): **8/8 PASSED**
+  - Group 5 (Mobile Drawer & Kiểm tra tràn ngang 360px, 390px, 430px): **6/6 PASSED**
+  - Group 6 (Thiết kế lại Footer & Minh họa Bát phở Hà Nội): **9/9 PASSED**
+  - Group 7 (Bảo toàn phân quyền User/Admin & Access Guard): **3/3 PASSED**
+- Đồng thời chạy hồi quy bộ kiểm thử 21 Use Cases (`test_role_approval_suite.js`): **26/26 PASSED (100%)**.
+
+Ảnh chụp màn hình kiểm chứng lưu trữ tại `scratch/screenshots_admin_shell/`:
+- `01_admin_loaded.png`: Giao diện Admin với nút "Xem website CookMate" ở đầu Sidebar.
+- `02_sidebar_collapsed_desktop.png`: Sidebar thu gọn thành Icon Rail hẹp 72px trên Desktop.
+- `03_sidebar_expanded_desktop.png`: Sidebar mở rộng trở lại kích thước 260px sau khi nhấn Hamburger.
+- `04_inplace_website_preview.png`: Website CookMate hiển thị trực tiếp trong vùng nội dung bên phải, Sidebar Admin cố định bên trái.
+- `05_restored_admin_content.png`: Đóng xem trước, khôi phục nội dung quản trị Dashboard nguyên vẹn.
+- `06_approve_recipes_collapsed_persisted.png`: Chuyển sang Duyệt công thức duy trì trạng thái thu gọn không bị reset.
+- `07_mobile_drawer_open.png`: Drawer trượt vào mượt mà trên Mobile (390px) kèm backdrop overlay.
+- `08_footer_desktop_pho_visual.png`: Footer mới trên Desktop với 4 nhóm thông tin và minh họa Bát phở Hà Nội.
+- `09_footer_mobile_vertical.png`: Footer xếp dọc chuẩn chỉnh trên Mobile, không có thanh cuộn ngang (0% overflow).
+
+---
+
+## 6. HƯỚNG DẪN DÀNH CHO AI HOẶC KỸ SƯ TIẾP QUẢN
    - Đạt 41/41 Passed (100%), bao gồm: Dữ liệu tĩnh, CRUD Storage, Co giãn khẩu phần, Định lượng phân số, Bộ máy tìm kiếm đa điều kiện, Kiểm tra tính hợp lệ của biểu mẫu (Validation), Sinh mã HTML Component.
 2. **Cú pháp JavaScript (`node -c`):**
    - 100% tất cả 9 file JS (`utils.js`, `storage.js`, `components.js`, `navigation.js`, `app.js`, `categories.js`, `ingredients.js`, `users.js`, `recipes.js`) không có bất kỳ lỗi cú pháp nào.
@@ -364,7 +547,237 @@ Trong quá trình rà soát độc lập, kiểm thử đa tầng và đối chi
 
 ---
 
-## 5. HƯỚNG DẪN DÀNH CHO AI HOẶC KỸ SƯ TIẾP QUẢN
+## 6. HOÀN THIỆN ADMIN SHELL: XÓA 2 THANH PREVIEW DƯ THỪA, HAMBURGER VÀ ĐIỀU HƯỚNG MƯỢT
+
+Dựa trên phản hồi và video kiểm tra thực tế, toàn bộ hệ thống Admin Shell đã được nâng cấp toàn diện để giải quyết triệt để 3 nhóm vấn đề cốt lõi:
+
+### A. Lỗi A — Xóa hoàn toàn 2 thanh preview dư thừa khi xem website CookMate
+- **Thực trạng trước đó:** Khi Admin nhấn "Xem website CookMate", phía trên website User xuất hiện 2 thanh thừa:
+  1. Thanh tiêu đề Admin Header ("Xem website CookMate", nhãn "Trực tiếp", các nút hành động).
+  2. Thanh công cụ xem trước `.admin-preview-toolbar` ("Chế độ xem trước website CookMate" kèm các nút Trang chủ, Tải lại, Tab riêng, Quay lại Quản trị).
+  Hai thanh này che khuất tầm nhìn và làm sai lệch trải nghiệm thực của website User.
+- **Giải pháp xử lý:**
+  1. Loại bỏ 100% thanh `.admin-preview-toolbar` và các nút điều khiển dư thừa khỏi HTML và CSS.
+  2. Khi kích hoạt chế độ xem website, tự động ẩn thanh `.admin-header` (`display: none !important;`) và ẩn `.admin-content`.
+  3. Khung xem trước `#adminWebsitePreview` nhận chiều cao trọn vẹn `100vh` và tải trực tiếp `../../index.html` qua iframe `#adminWebsitePreviewFrame`.
+  4. Vùng bên phải bắt đầu trực tiếp từ **Header User**, qua nội dung, đến **Footer User**; hoàn toàn không có khoảng trống hay thanh dư thừa.
+  5. Sidebar Admin bên trái luôn cố định (`position: sticky; top: 0; height: 100vh;`), nút "Xem website CookMate" ở đầu Sidebar được đánh dấu `.active`.
+
+### B. Lỗi B — Nút Hamburger duy nhất đóng/mở Sidebar Admin (X $\leftrightarrow$ 3 gạch) & Ẩn gọn 100%
+- **Thực trạng trước đó:** Chưa có cơ chế đóng/mở sidebar chuẩn; khi thu gọn chỉ co về dạng icon rail 72px gây chật chội; có sự xuất hiện cùng lúc của 2 nút hoặc icon 3 gạch ngay cả khi sidebar đang mở.
+- **Giải pháp xử lý:**
+  1. Thiết lập **duy nhất một nút điều khiển `#sidebarToggleBtn`** cho toàn bộ Admin:
+     - Khi Sidebar **MỞ**: Nút nằm ở góc phải `.admin-sidebar__header`, hiển thị **dấu X** (`fa-solid fa-xmark`), `aria-expanded="true"`.
+     - Khi Sidebar **ĐÓNG**: Nút chuyển ra đầu `.admin-header` (hoặc nổi ở góc trái nếu đang xem website), hiển thị **ba gạch** (`fa-solid fa-bars`), `aria-expanded="false"`.
+  2. Khi đóng sidebar: Thanh menu bên trái ẩn gọn hoàn toàn (`width: 0 !important; visibility: hidden; opacity: 0;`), **không còn dải icon 72px**. Vùng nội dung bên phải tự động mở rộng `100%` toàn màn hình.
+  3. Nút hamburger luôn nhìn thấy và bấm được ở cả hai trạng thái.
+  4. Trạng thái đóng/mở được lưu trữ và khôi phục chính xác qua `sessionStorage` (`cookmate_sidebar_closed = "true" | "false"`). Script chèn sớm tại `<head>` ngăn ngừa hoàn toàn hiện tượng layout shift/flicker khi tải trang.
+  5. Hỗ trợ Mobile Drawer trượt mượt mà kèm backdrop overlay ở các kích thước dưới 1024px.
+
+### C. Lỗi C — Điều hướng Admin Shell SPA mượt mà không reload toàn bộ trang
+- **Thực trạng trước đó:** Khi Admin chuyển qua lại giữa các trang quản trị (Tổng quan, Duyệt công thức, Nguyên liệu, Danh mục...), toàn bộ trang bị reload khiến sidebar nhấp nháy, cuộn bị reset và gây cảm giác khựng.
+- **Giải pháp xử lý:**
+  1. Xây dựng bộ điều hướng nội bộ SPA liên tục trong `assets/js/admin-shell.js` thông qua `loadPageContent(url)`.
+  2. Tự động bắt sự kiện click trên các liên kết Admin, fetch HTML trang đích và tráo đổi in-place:
+     - Cập nhật `document.title`.
+     - Cập nhật tiêu đề Admin Header và các nút Actions (`.admin-header__title`, `.admin-header__actions`).
+     - Cập nhật vùng nội dung chính `.admin-content`.
+     - Cập nhật modal động (`#adminDynamicModals`).
+     - Cập nhật liên kết `.active` trên sidebar và badge số lượng công thức chờ duyệt.
+  3. Đồng bộ lịch sử trình duyệt qua History API (`history.pushState`), hỗ trợ đầy đủ các nút Back / Forward (`popstate`).
+  4. Bộ shim `executePageScripts()` tự động bắt sự kiện `DOMContentLoaded` để kích hoạt ngay các hàm khởi tạo giao diện con (bảng duyệt, thống kê, danh mục...) mà không cần chờ tải lại trang.
+  5. Vị trí cuộn của Sidebar được bảo toàn 100% trong suốt quá trình chuyển mục.
+  6. Cơ chế fallback an toàn: Tự động chuyển hướng `window.location.href` nếu chạy trên môi trường không hỗ trợ `fetch` (như giao thức `file://` hạn chế).
+
+### D. Kết quả Kiểm thử Tự động Chuyên sâu (Chrome CDP)
+Chạy bộ kiểm thử tự động `scratch/test_seamless_admin_shell.js` trên Google Chrome Headless thật:
+- **KẾT QUẢ: 49/49 PASSED (100% Thành công, 0 Failed)**
+  - Group 1: Thiết lập & Đăng nhập Admin thành công (**1/1 PASSED**).
+  - Group 2: Nút Hamburger duy nhất, chuyển đổi X $\leftrightarrow$ 3 gạch, Sidebar ẩn gọn 0px, content mở rộng 100% (**16/16 PASSED**).
+  - Group 3: Xem website CookMate tại chỗ không thanh dư thừa, iframe 100vh bắt đầu từ Header User, sidebar cố định (**9/9 PASSED**).
+  - Group 4: SPA In-place View Swapping mượt mà không reload qua Duyệt công thức $\leftrightarrow$ Danh mục $\leftrightarrow$ Nguyên liệu, hỗ trợ Back/Forward (**13/13 PASSED**).
+  - Group 5: Mobile Responsive Drawer 375px mở/đóng mượt với backdrop (**7/7 PASSED**).
+  - Group 6: Bảo vệ phân quyền User/Admin và toàn vẹn Header/Footer (**3/3 PASSED**).
+
+Ảnh chụp màn hình kiểm chứng lưu tại `scratch/screenshots_admin_shell/`:
+- `01_preview_no_bars.png`: Website CookMate hiển thị trực tiếp từ Header User, 0 thanh preview thừa, iframe 100vh.
+- `02_sidebar_closed_full_content.png`: Sidebar đóng hoàn toàn 0px, nút 3 gạch ở Admin Header, nội dung mở rộng full 100%.
+- `03_sidebar_reopened.png`: Sidebar mở lại 260px, nút trở về dấu X trong sidebar header.
+- `04_mobile_drawer_toggle.png`: Drawer mở mượt mà trên Mobile (375px) với backdrop overlay.
+- `05_spa_navigation_smooth.png`: Điều hướng in-place mượt mà không reload, URL và nội dung cập nhật chuẩn xác.
+
+---
+
+## 7. COOKMATE — MASTER UI/UX REFINEMENT (TỔNG KẾT HOÀN THIỆN TOÀN DIỆN)
+
+Đợt nâng cấp Master Refinement đã giải quyết triệt để 6 nhóm vấn đề trọng tâm phát hiện trong quá trình kiểm thử thực tế trên Laptop, Desktop và Điện thoại di động:
+
+### A. Hoàn thiện Admin Shell, Hamburger Duy Nhất và Điều Hướng SPA
+1. **Nút "Xem website CookMate":** Đặt trang trọng ở đầu Sidebar bên trái (`.admin-sidebar__nav`), ngay dưới Logo CookMate ADMIN, có icon quả cầu cam và hiệu ứng hover tinh tế.
+2. **Loại bỏ 100% hai thanh preview thừa:**
+   - Xóa bỏ hoàn toàn thanh công cụ `.admin-preview-toolbar` và thanh tiêu đề phụ `.admin-preview-header`.
+   - Khi xem website, tự động ẩn `.admin-header` (`display: none !important;`). Khung xem trước `#adminWebsitePreview` nhận chiều cao trọn vẹn `100vh`, nhúng website User trực tiếp bắt đầu từ Header User, nội dung, đến Footer User.
+3. **Nút Hamburger duy nhất (`#sidebarToggleBtn`):**
+   - Khi Sidebar **MỞ**: Nằm ở góc phải header sidebar, hiển thị **dấu X** (`fa-solid fa-xmark`).
+   - Khi Sidebar **ĐÓNG**: Nằm ở đầu `.admin-header` (hoặc nổi góc trái nếu đang xem website), hiển thị **ba gạch** (`fa-solid fa-bars`).
+   - Đóng sidebar: Thu gọn hoàn toàn `width: 0`, nội dung mở rộng full `100%`.
+4. **Điều hướng SPA không reload:** Tráo đổi nội dung in-place mượt mà (`assets/js/admin-shell.js`), bảo toàn vị trí cuộn và trạng thái Sidebar qua `sessionStorage`.
+
+### B. Chuẩn Hóa Footer CookMate & Bát Phở Hà Nội Line-Art
+1. **Màu sắc & Nhận diện:** Nền tối sang trọng (`#1A1715` / `#292524`), chữ màu sáng kem, điểm nhấn cam đất ấm `#E85D2A`. Chữ "Cook" trong logo footer có độ tương phản cao, nổi bật trên nền tối.
+2. **Loại bỏ 100% liên kết tài khoản thừa:** Đã xóa toàn bộ các link Đăng nhập, Đăng ký, Hồ sơ cá nhân, Công thức của tôi, Yêu thích, Đăng công thức và nút CTA ra khỏi Footer (tránh trùng lặp với Header).
+3. **4 Khu vực nội dung chuẩn hóa:**
+   - *CookMate:* Logo thương hiệu, slogan, hotline, email và mạng xã hội.
+   - *Khám phá:* Công thức nấu ăn, Danh mục món, Món nổi bật, Thực đơn Dịp lễ.
+   - *Về CookMate:* Giới thiệu dự án, Câu hỏi thường gặp (FAQ), Góp ý & Báo lỗi.
+   - *Thông tin:* Điều khoản sử dụng, Chính sách bảo mật, Tư vấn dinh dưỡng.
+4. **Minh họa Bát phở Hà Nội:** Khối line-art nghệ thuật vector SVG (`assets/images/hanoi-pho-art.svg`) đặt ở bên phải, trên mobile tự động xếp chồng dọc cân đối.
+
+### C. Nâng Cấp Tiêu Đề Section Trang Chủ & Bộ Lọc Tương Tác
+1. **Phân cấp Header Section chuẩn:**
+   - Huy hiệu icon cam nằm trong nền cam nhạt bo tròn 10px (`.section-header__icon`).
+   - Tiêu đề cấp 2 rõ ràng (`.section-header__title`).
+   - Dòng mô tả phụ định hướng (`.section-header__subtitle`).
+   - Nút "Xem tất cả" cân đối, nằm trọn trong container (không bị văng sát mép phải desktop, mobile xuống dòng tự nhiên).
+2. **Khoảng cách nhịp thở:** Giữa các section cách nhau 48–56px trên desktop, 32–40px trên mobile.
+3. **Segmented Control Tabs tương tác thật:** Các nút "Tất cả", "Nổi bật nhất", "Mới chia sẻ" chuyển thành nhóm segmented tabs hình viên thuốc nền xám nhạt, pill active màu trắng bóng đổ mượt, click lọc tức thì danh sách công thức.
+4. **Section Thực đơn Dịp lễ:** Khoảng cách trên thoáng đãng, các chip dịp lễ bo tròn `.occasion-chip` (🌸 Tết, 🌕 Rằm, 🎄 Giáng sinh, 👨‍👩‍👧‍👦 Tiệc gia đình) tự xuống dòng linh hoạt và cách thẻ món ăn 24px.
+
+### D. Tái Cấu Trúc Form Đăng Công Thức Thành 5 Nhóm Nghiệp Vụ Chuyên Nghiệp
+Cả hai trang `pages/account/recipe-form.html` (Thành viên) và `pages/admin/recipe-form.html` (Quản trị viên) được đồng bộ thành 5 thẻ section độc lập:
+1. **Section 1 — Thông tin cơ bản:** Tên món ăn, Mô tả ngắn, Danh mục, Dịp lễ, Độ khó, Thời gian chuẩn bị & Thời gian nấu.
+2. **Section 2 — Hình ảnh & Khẩu phần:**
+   - Ô dán liên kết ảnh trực tiếp kèm thẻ xem trước ảnh thực tế sắc nét (`.recipe-image-preview-card`).
+   - Ô nhập số khẩu phần gốc kèm hộp giải thích cơ chế co giãn định lượng tự động độc quyền của CookMate.
+3. **Section 3 — Định lượng nguyên liệu:**
+   - Hàng tiêu đề cột rõ ràng: *Tên nguyên liệu*, *Số lượng*, *Đơn vị đo*, *Xóa*.
+   - Các dòng nguyên liệu thẳng hàng, ô nhập co giãn tự nhiên, nút xóa màu đỏ nhạt, nút "Thêm nguyên liệu" đặt sát cạnh.
+4. **Section 4 — Các bước chế biến:**
+   - Thẻ bước chế biến (`.step-card`) có huy hiệu viên thuốc nổi bật "Bước 1", "Bước 2"...
+   - Vùng nhập hướng dẫn rộng rãi, nút xóa bước, nút "Thêm bước", cơ chế tự động đánh số lại khi xóa bước.
+5. **Section 5 — Kiểm tra & Gửi duyệt:**
+   - Hộp thông báo quy trình kiểm duyệt: Thông báo rõ ràng bài viết của Thành viên sẽ vào hàng đợi duyệt (`status: 'pending'`), bài viết của Admin được xuất bản công khai ngay (`status: 'approved'`).
+   - Nút gửi chính + Nút quay lại/hủy bỏ.
+   - Cơ chế chống click đúp (`disabled = true`, hiển thị icon spinner khi đang lưu).
+
+### E. Loại Bỏ Hoàn Toàn Các Vùng Cuộn Lồng Thừa
+- Không còn `max-height` hay `overflow-y: scroll` gò bó bên trong danh sách nguyên liệu và các bước nấu.
+- Toàn bộ nội dung form co giãn tự nhiên, người dùng cuộn toàn trang liền mạch và êm ái.
+
+### F. Kiểm Thử Tự Động Toàn Diện (Chrome CDP: 46/46 Tests Passed - 100%)
+File kịch bản kiểm thử: `scratch/test_master_refinement.js`.
+- **Phần A — Admin Shell, Hamburger, Preview, SPA Navigation:** 16/16 PASSED
+  - Nút xem website ở đầu sidebar; Toggle duy nhất X $\leftrightarrow$ 3 gạch; Sidebar ẩn gọn 0px; Khung website chiếm 100vh không thanh thừa; SPA in-place switching không reload.
+- **Phần B — Footer CookMate & Bát Phở Hà Nội:** 4/4 PASSED
+  - Nền tối, chữ sáng, logo Cook tương phản cao; 0% liên kết tài khoản thừa; 4 nhóm thông tin chuẩn; Minh họa Bát phở SVG sắc nét.
+- **Phần C — Tiêu đề Section Trang Chủ & Tabs:** 6/6 PASSED
+  - Header section có Icon Badge + Title + Subtitle; Nút Xem tất cả cân đối; Segmented control tabs hoạt động tức thì; Occasion chips co giãn linh hoạt.
+- **Phần D & E — Form 5 Sections & Không cuộn lồng:** 12/12 PASSED
+  - Form User & Form Admin đủ 5 Sections; Khẩu phần gốc & Preview ảnh; Thêm/xóa nguyên liệu & bước; Đánh số lại Bước 1, 2, 3; Không cuộn lồng cục bộ; Notice phân quyền chuẩn xác.
+- **Phần F — Responsive Không Tràn Ngang Trên 8 Viewports:** 8/8 PASSED
+  - 360x800 (Galaxy S20) — `hasHorizontalScroll: false`
+  - 390x844 (iPhone 12/13/14) — `hasHorizontalScroll: false`
+  - 430x932 (iPhone 15 Pro Max) — `hasHorizontalScroll: false`
+  - 768x1024 (iPad Portrait) — `hasHorizontalScroll: false`
+  - 1024x768 (iPad Landscape) — `hasHorizontalScroll: false`
+  - 1366x768 (Laptop HD) — `hasHorizontalScroll: false`
+  - 1440x900 (MacBook Pro) — `hasHorizontalScroll: false`
+  - 1920x1080 (Desktop FHD) — `hasHorizontalScroll: false`
+
+Ảnh chụp màn hình kiểm chứng lưu trữ tại `scratch/screenshots_master/`:
+- `admin_website_preview_seamless.png`: Website User hiển thị trực tiếp từ Header User, 0 thanh preview thừa.
+- `admin_spa_nav_recipes.png`: Điều hướng in-place mượt mà không reload toàn trang.
+- `footer_desktop_verified.png`: Footer nền tối, 4 nhóm liên kết chuẩn, minh họa Bát phở Hà Nội.
+- `home_sections_and_tabs.png`: Tiêu đề section có icon badge, segmented control tabs, occasion chips.
+- `recipe_form_5_sections.png`: Form đăng công thức Member 5 sections chuyên nghiệp.
+- `admin_recipe_form_5_sections.png`: Form đăng công thức Admin 5 sections kèm quyền xuất bản ngay.
+- `responsive_360x800.png`, `responsive_768x1024.png`, `responsive_1366x768.png`: Responsive mượt mà, 0% tràn ngang.
+
+---
+
+## 8. BÁO CÁO FIX ADMIN ACCESS GUARD, SESSION ISOLATION VÀ SIDEBAR OVERFLOW
+
+**Giai đoạn:** Nâng cấp bảo vệ phân quyền, cô lập phiên đăng nhập và triệt tiêu tràn ngang Sidebar Quản trị.  
+**Ngày cập nhật:** 2026-10-25  
+**Trạng thái kiểm thử:** 100% ĐẠT (42/42 bài test tự động qua Chrome CDP thành công rực rỡ).
+
+---
+
+### A. Vấn Đề Thực Tế & Phân Tích Nguyên Nhân Gốc Rễ
+
+1. **Vấn đề A1 — Lộ giao diện Admin khi khách hoặc Member truy cập trái phép (FOUC):**
+   - *Nguyên nhân:* Trước đây hàm `checkAdminAuth()` được gọi trong sự kiện `DOMContentLoaded` ở đáy các file HTML quản trị (`pages/admin/*.html`). Trình duyệt phân tích xong toàn bộ DOM và bắt đầu render giao diện (sidebar, tiêu đề, bảng danh sách công thức/tài khoản) trước khi JavaScript kiểm tra phân quyền $\rightarrow$ Khách hoặc Member nhìn thấy thoáng qua giao diện quản trị trong vài trăm mili-giây trước khi bị redirect.
+   - *Khắc phục:* Viết file độc lập [`assets/js/admin-guard.js`](file:///d:/cookmate/assets/js/admin-guard.js) và nhúng đồng bộ ngay đầu thẻ `<head>` của toàn bộ 9 trang quản trị. Script chạy trước khi `<body>` được dựng. Nếu không có phiên Admin hợp lệ, lập tức đặt `document.documentElement.style.display = 'none'` (0 pixel nào của trang quản trị được render) và gọi `window.location.replace` ngay lập tức.
+
+2. **Vấn đề A2 — Vòng lặp chuyển hướng vô hạn (Redirect Loop) đối với Thành viên (Member):**
+   - *Nguyên nhân:* Khi khách cố truy cập trang Admin, bị đẩy sang `login.html?redirect=pages/admin/index.html`. Nếu người dùng đăng nhập bằng tài khoản Member thường (`giang@cookmate.vn`), file `auth-ui.js` trước đây chỉ đọc query parameter `redirect` và điều hướng người dùng quay lại `pages/admin/index.html`. Trang admin thấy role là `member` liền từ chối và đẩy lại `login.html` $\rightarrow$ tạo thành vòng lặp vô hạn.
+   - *Khắc phục:* Bổ sung kiểm tra trong [`assets/js/auth-ui.js`](file:///d:/cookmate/assets/js/auth-ui.js): Nếu tài khoản đăng nhập thành công là Member (`role: 'member'`) mà `redirectUrl` trỏ vào thư mục quản trị (`pages/admin/`), hệ thống hủy bỏ tham số redirect độc hại và điều hướng an toàn về trang chủ User (`../../index.html`).
+
+3. **Vấn đề A3 — Xung đột phiên Admin Shell và Website preview bên phải:**
+   - *Nguyên nhân:* Khi Admin bấm "Xem website CookMate", website người dùng được nhúng trong iframe. Trước đây, việc đăng xuất hoặc thao tác phiên trong iframe cùng đọc/ghi một khóa `cookmate_current_user` trong `localStorage`, dẫn đến rủi ro mất phiên Admin Shell bên ngoài.
+   - *Khắc phục:* Tách biệt phiên đăng nhập bằng khóa độc lập `cookmate_admin_session` (`KEYS.ADMIN_SESSION`) trong [`assets/js/storage.js`](file:///d:/cookmate/assets/js/storage.js). Trong [`assets/js/navigation.js`](file:///d:/cookmate/assets/js/navigation.js), hàm `handleLogout` kiểm tra ngữ cảnh `isInsideIframe = window.self !== window.top`: khi đăng xuất trong iframe website preview, chỉ xóa session preview con (`KEYS.USER`), tuyệt đối bảo lưu phiên Admin Shell bên ngoài. Khi đăng xuất từ Admin Shell bên ngoài, xóa sạch cả `KEYS.USER` và `KEYS.ADMIN_SESSION`.
+
+4. **Vấn đề A4 — Lỗ hổng khôi phục trang qua bfcache (Back/Forward Cache):**
+   - *Nguyên nhân:* Khi Admin đăng xuất và bị chuyển về trang chủ, việc nhấn nút Back trên trình duyệt có thể kích hoạt bfcache tải lại trang từ bộ nhớ RAM mà không chạy lại toàn bộ script khởi tạo.
+   - *Khắc phục:* Đăng ký sự kiện `window.addEventListener('pageshow', function(event) { if (event.persisted) checkAdminAuth(); })` trong `admin-guard.js`, chặn đứng việc khôi phục trang quản trị từ bộ nhớ đệm sau khi đã đăng xuất.
+
+5. **Vấn đề B1 — Thanh cuộn ngang khó coi ở đáy Sidebar Admin:**
+   - *Nguyên nhân kỹ thuật tận gốc:* Phần tử `.admin-sidebar__header` có `padding: 24px` + Logo (114px) + Huy hiệu Quản trị (50px) + Toggle button (34px) + 2 khoảng cách gap (24px) $\rightarrow$ Tổng chiều rộng nội dung tối thiểu là 270px > chiều rộng cố định của sidebar là 260px. Hơn nữa, khi thanh cuộn dọc xuất hiện, chiều rộng khả dụng bên trong giảm xuống 243px - 250px, gây tràn bề ngang và kích hoạt thanh cuộn ngang `scrollWidth (270px) > clientWidth (243px)`.
+   - *Khắc phục triệt để:*
+     - Tinh chỉnh `.admin-sidebar__header`: Giảm `padding` xuống `16px 14px`, `gap` xuống `8px` $\rightarrow$ Tổng chiều rộng co gọn về ~223px, luôn nằm an toàn trong khung 243px - 260px.
+     - Thiết lập `box-sizing: border-box`, `overflow-x: hidden !important; overflow-y: auto;` trên `.admin-sidebar`.
+     - Thêm `text-overflow: ellipsis; white-space: nowrap; min-width: 0;` trên các nhãn menu `.admin-sidebar__link span`.
+     - Bổ sung `flex: 1 0 auto; min-height: min-content;` trên `.admin-sidebar__nav` để bảo toàn chiều cao cuộn thực tế (`scrollHeight: 841px`), giúp cuộn mượt mà xuống tận nút Đăng xuất và Footer mà không bị co cụm nội dung.
+
+6. **Vấn đề B2 — Tinh chỉnh thanh cuộn dọc Sidebar thanh thoát và hiện đại:**
+   - Tùy biến thanh cuộn WebKit dọc mỏng nhẹ chỉ `5px` (`width: 5px; height: 0px !important;`), track nền trong suốt, thumb màu trung tính kính mờ `rgba(255, 255, 255, 0.18)` bo tròn viên thuốc mềm mại, khi hover chuyển sang `rgba(255, 255, 255, 0.32)`.
+
+---
+
+### B. Danh Sách File Đã Cập Nhật & Tạo Mới
+
+1. [`assets/js/admin-guard.js`](file:///d:/cookmate/assets/js/admin-guard.js) *(Tạo mới)*: Script bảo vệ sớm chặn đứng FOUC, xử lý redirect khách/member và chống bfcache.
+2. [`assets/js/storage.js`](file:///d:/cookmate/assets/js/storage.js) *(Cập nhật)*: Thêm `KEYS.ADMIN_SESSION`, các hàm quản lý phiên Admin độc lập.
+3. [`assets/js/auth-ui.js`](file:///d:/cookmate/assets/js/auth-ui.js) *(Cập nhật)*: Xử lý redirect sau đăng nhập an toàn, chặn vòng lặp của Member.
+4. [`assets/js/navigation.js`](file:///d:/cookmate/assets/js/navigation.js) *(Cập nhật)*: Tách biệt logic đăng xuất giữa Iframe Preview và Admin Shell ngoài.
+5. [`assets/js/admin-shell.js`](file:///d:/cookmate/assets/js/admin-shell.js) *(Cập nhật)*: Tích hợp `checkAdminAuth()` trong chu trình SPA.
+6. [`assets/css/admin.css`](file:///d:/cookmate/assets/css/admin.css) *(Cập nhật)*: Triệt tiêu tràn ngang sidebar, tinh chỉnh header sidebar và slim scrollbar 5px.
+7. [`assets/css/responsive.css`](file:///d:/cookmate/assets/css/responsive.css) *(Cập nhật)*: Chuẩn hóa chiều rộng drawer sidebar trên mobile/tablet.
+8. Toàn bộ 9 file HTML quản trị trong `pages/admin/` *(Cập nhật)*: Tích hợp `<script src="../../assets/js/admin-guard.js"></script>` trong `<head>`:
+   - `pages/admin/index.html`
+   - `pages/admin/approve-recipes.html`
+   - `pages/admin/recipes.html`
+   - `pages/admin/recipe-form.html`
+   - `pages/admin/categories.html`
+   - `pages/admin/ingredients.html`
+   - `pages/admin/accounts.html`
+   - `pages/admin/comments.html`
+   - `pages/admin/statistics.html`
+
+---
+
+### C. Kết Quả Kiểm Thử Toàn Diện (Chrome CDP: 42/42 Tests Passed - 100%)
+
+File kịch bản kiểm thử: [`scratch/test_admin_access_and_scrollbar.js`](file:///d:/cookmate/scratch/test_admin_access_and_scrollbar.js).
+
+| Nhóm Kiểm Thử | Nội Dung Kiểm Thử | Kết Quả Thực Tế | Trạng Thái |
+| :--- | :--- | :--- | :---: |
+| **TEST GROUP A** | Khách chưa đăng nhập mở trực tiếp URL Admin (`index.html`, `approve-recipes.html`, `recipes.html`, `ingredients.html`) | Bị chặn tức thì (0 pixel FOUC), chuyển hướng sang `login.html?redirect=...` bảo lưu URL đích | **5/5 PASSED** |
+| **TEST GROUP B** | Thành viên (Member) mở trực tiếp URL Admin (`index.html`, `approve-recipes.html`, `accounts.html`) | Bị từ chối quyền, chuyển hướng an toàn về `index.html`, không ép login, không lặp redirect | **5/5 PASSED** |
+| **TEST GROUP C** | Quản trị viên (Admin) truy cập hợp lệ, chuyển trang SPA và Đăng xuất | Truy cập bình thường, chuyển trang mượt mà; đăng xuất xóa sạch cả 2 khóa phiên, bfcache không khôi phục trang | **5/5 PASSED** |
+| **TEST GROUP D** | Tách biệt phiên giữa Admin Shell và Website preview bên phải | Đăng xuất trong preview iframe không làm mất phiên Admin Shell ngoài; Đăng xuất ngoài shell xóa sạch toàn bộ quyền | **4/4 PASSED** |
+| **TEST GROUP E** | Thanh cuộn Sidebar: `scrollWidth = clientWidth`, 0 phần tử tràn ngang, cuộn dọc 341px | `scrollWidth: 250px, clientWidth: 250px`, không thanh cuộn ngang, cuộn êm đến mục cuối cùng, đóng/mở mượt mà | **7/7 PASSED** |
+| **TEST GROUP F** | Kiểm thử Sidebar và chống tràn ngang trên 8 kích thước màn hình chuẩn | 0% tràn ngang toàn trang, Sidebar `scrollWidth === clientWidth` trên cả 8 viewports: 360px, 390px, 430px, 768px, 1024px, 1366px, 1440px, 1920px | **16/16 PASSED** |
+
+Ảnh chụp màn hình kiểm chứng lưu trữ tại `scratch/screenshots_access_guard/`:
+- `01_guest_blocked_redirect_login.png`: Khách bị chặn tức thì, chuyển hướng sang login với tham số redirect.
+- `02_member_retained_user_page.png`: Member truy cập URL Admin được chuyển về trang chủ User an toàn, giữ nguyên phiên cá nhân.
+- `03_sidebar_desktop_clean_scrollbar.png`: Sidebar Desktop với thanh cuộn dọc slim 5px hiện đại, 0 thanh cuộn ngang.
+- `vp_360x800_verified.png`, `vp_768x1024_verified.png`, `vp_1366x768_verified.png`: Kiểm chứng không tràn ngang và giao diện hoàn mỹ trên mobile, tablet, laptop.
+
+---
+
+## 9. HƯỚNG DẪN DÀNH CHO AI HOẶC KỸ SƯ TIẾP QUẢN
 
 Nếu cần phát triển Backend Flask trong giai đoạn tiếp theo:
 1. Chuyển các file `.html` trong `index.html` và `pages/` vào thư mục `templates/`.

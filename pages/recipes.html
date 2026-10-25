@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tất cả Công thức | CookMate</title>
+  <title>Khám phá Công thức nấu ăn | CookMate</title>
+  <meta name="description" content="Khám phá hàng trăm công thức món ăn Việt Nam chuẩn định lượng, trọn dinh dưỡng từ CookMate.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -16,48 +17,121 @@
   <link rel="stylesheet" href="../assets/css/pages.css">
   <link rel="stylesheet" href="../assets/css/responsive.css">
 </head>
-<body>
+<body data-page="recipes">
   <header class="site-header" id="siteHeader"></header>
 
-  <main>
-    <section class="section" aria-labelledby="allRecipesHeading">
-      <div class="container">
-        <!-- Page Header -->
-        <div class="page-header">
-          <div class="page-header-text">
-            <h1 class="page-title" id="allRecipesHeading">
-              <i class="fa-solid fa-book-open" aria-hidden="true"></i>
-              Tất cả Công thức nấu ăn
-            </h1>
-            <p class="page-subtitle">Tổng cộng <strong id="recipeCount">0</strong> công thức</p>
+  <main class="explore-hub">
+    <div class="container">
+      
+      <!-- Explore Header -->
+      <div class="explore-header">
+        <h1 class="page-title">
+          <i class="fa-solid fa-compass text-primary"></i> Khám phá Công thức nấu ăn
+        </h1>
+        <p class="page-subtitle">
+          Tìm kiếm công thức chuẩn định lượng từng gam nguyên liệu, tính toán dinh dưỡng chi tiết và chia sẻ từ cộng đồng CookMate.
+        </p>
+      </div>
+
+      <!-- Unified Explore Control Box -->
+      <div class="explore-box" role="search" aria-label="Bộ lọc và tìm kiếm công thức">
+        
+        <!-- Search Input Row -->
+        <div class="explore-search-row">
+          <div class="explore-search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="exploreSearchInput" class="explore-search-input" placeholder="Tìm theo tên món ăn hoặc nguyên liệu (VD: Phở bò, Thịt kho, Gừng, Nước mắm...)" aria-label="Tìm kiếm món ăn">
+          </div>
+          <button type="button" class="btn btn-primary" id="exploreSearchBtn" aria-label="Thực hiện tìm kiếm">
+            <i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm
+          </button>
+        </div>
+
+        <!-- Tabs Mode (Tất cả, Mới nhất, Nổi bật, Đánh giá cao) -->
+        <div class="explore-tabs" role="tablist" aria-label="Chế độ hiển thị">
+          <button type="button" class="explore-tab-btn active" data-tab="all" role="tab" aria-selected="true">
+            <i class="fa-solid fa-border-all"></i> Tất cả công thức
+          </button>
+          <button type="button" class="explore-tab-btn" data-tab="newest" role="tab" aria-selected="false">
+            <i class="fa-regular fa-clock"></i> Mới nhất
+          </button>
+          <button type="button" class="explore-tab-btn" data-tab="featured" role="tab" aria-selected="false">
+            <i class="fa-solid fa-fire"></i> Nổi bật
+          </button>
+          <button type="button" class="explore-tab-btn" data-tab="rating" role="tab" aria-selected="false">
+            <i class="fa-solid fa-star"></i> Đánh giá cao
+          </button>
+        </div>
+
+        <!-- Filter Dropdowns Row -->
+        <div class="explore-filters-row">
+          <div>
+            <label for="filterCategory" class="sr-only">Danh mục</label>
+            <select id="filterCategory" class="explore-filter-select" aria-label="Lọc theo danh mục">
+              <option value="">-- Tất cả danh mục --</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="filterOccasion" class="sr-only">Dịp lễ</label>
+            <select id="filterOccasion" class="explore-filter-select" aria-label="Lọc theo dịp lễ">
+              <option value="">-- Tất cả dịp lễ --</option>
+              <option value="tet">Tết cổ truyền</option>
+              <option value="ram">Rằm & Lễ Vu Lan</option>
+              <option value="gioto">Giỗ tổ Hùng Vương</option>
+              <option value="trungthu">Tết Trung thu</option>
+              <option value="giangsinh">Giáng sinh</option>
+              <option value="tiecgiadinh">Tiệc gia đình & Cuối tuần</option>
+              <option value="hangngay">Bữa cơm hàng ngày</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="filterDifficulty" class="sr-only">Độ khó</label>
+            <select id="filterDifficulty" class="explore-filter-select" aria-label="Lọc theo độ khó">
+              <option value="">-- Tất cả độ khó --</option>
+              <option value="Dễ">Dễ nấu</option>
+              <option value="Trung bình">Trung bình</option>
+              <option value="Khó">Khó / Cầu kỳ</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="filterTime" class="sr-only">Thời gian nấu</label>
+            <select id="filterTime" class="explore-filter-select" aria-label="Lọc theo thời gian nấu">
+              <option value="">-- Thời gian nấu --</option>
+              <option value="under30">Dưới 30 phút</option>
+              <option value="30to60">30 - 60 phút</option>
+              <option value="over60">Trên 60 phút</option>
+            </select>
+          </div>
+
+          <div>
+            <button type="button" class="explore-reset-btn w-full" id="btnResetFilters" title="Đặt lại tất cả bộ lọc">
+              <i class="fa-solid fa-rotate-left"></i> Đặt lại bộ lọc
+            </button>
           </div>
         </div>
 
-        <!-- Sort Bar -->
-        <div class="sort-bar" role="toolbar" aria-label="Sắp xếp công thức">
-          <span class="sort-label"><i class="fa-solid fa-arrow-down-wide-short" aria-hidden="true"></i> Sắp xếp:</span>
-          <button class="sort-btn active" data-sort="newest" onclick="sortRecipes('newest')" aria-pressed="true">
-            <i class="fa-regular fa-clock" aria-hidden="true"></i> Mới nhất
-          </button>
-          <button class="sort-btn" data-sort="popular" onclick="sortRecipes('popular')" aria-pressed="false">
-            <i class="fa-solid fa-fire" aria-hidden="true"></i> Phổ biến nhất
-          </button>
-          <button class="sort-btn" data-sort="rating" onclick="sortRecipes('rating')" aria-pressed="false">
-            <i class="fa-solid fa-star" aria-hidden="true"></i> Đánh giá cao
-          </button>
-        </div>
-
-        <!-- Recipe Grid -->
-        <div class="recipe-grid" id="allRecipeGrid" role="list" aria-label="Danh sách công thức">
-          <!-- Populated by JS -->
-        </div>
-
-        <!-- Pagination -->
-        <nav class="pagination" id="recipePagination" role="navigation" aria-label="Phân trang">
-          <!-- Populated by JS -->
-        </nav>
       </div>
-    </section>
+
+      <!-- Results Summary Bar -->
+      <div class="explore-results-summary">
+        <span>Tìm thấy <strong id="exploreCount" class="text-primary font-bold">0</strong> công thức phù hợp</span>
+        <span id="exploreFilterNotice" class="text-xs text-secondary"></span>
+      </div>
+
+      <!-- Recipe Card Grid -->
+      <div class="recipe-grid" id="exploreRecipeGrid" role="region" aria-label="Danh sách kết quả công thức">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Pagination -->
+      <nav class="pagination" id="explorePagination" role="navigation" aria-label="Phân trang kết quả">
+        <!-- Rendered by JS -->
+      </nav>
+
+    </div>
   </main>
 
   <footer class="site-footer" id="siteFooter"></footer>
@@ -73,66 +147,382 @@
   <script src="../assets/js/app.js"></script>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    (function() {
+      'use strict';
+
       var ITEMS_PER_PAGE = 9;
-      var currentPage = 1;
-      var currentSort = 'newest';
+      var state = {
+        keyword: '',
+        tab: 'all', // all, newest, featured, rating
+        categoryId: '',
+        occasion: '',
+        difficulty: '',
+        timeRange: '',
+        currentPage: 1
+      };
 
-      function renderRecipes() {
-        var grid = document.getElementById('allRecipeGrid');
-        var pagination = document.getElementById('recipePagination');
-        var countEl = document.getElementById('recipeCount');
-        if (!grid) return;
+      document.addEventListener('DOMContentLoaded', function() {
+        Navigation.init();
+        initCategoryDropdown();
+        parseUrlQueryParams();
+        bindEvents();
+        applyFiltersAndRender();
+      });
 
-        var recipes = CookMateStorage.getAllRecipes();
+      function initCategoryDropdown() {
+        var select = document.getElementById('filterCategory');
+        if (!select) return;
+        var categories = CookMateStorage.getAllCategories ? CookMateStorage.getAllCategories() : [];
+        categories.forEach(function(cat) {
+          var opt = document.createElement('option');
+          opt.value = cat.id;
+          opt.textContent = cat.name;
+          select.appendChild(opt);
+        });
+      }
 
-        // Sort
-        if (currentSort === 'newest') {
-          recipes.sort(function(a, b) { return new Date(b.createdAt) - new Date(a.createdAt); });
-        } else if (currentSort === 'popular') {
-          recipes.sort(function(a, b) { return (b.views || 0) - (a.views || 0); });
-        } else if (currentSort === 'rating') {
-          recipes.sort(function(a, b) { return (b.rating || 0) - (a.rating || 0); });
+      function parseUrlQueryParams() {
+        var params = new URLSearchParams(window.location.search);
+
+        // Keyword
+        if (params.has('q')) {
+          state.keyword = params.get('q').trim();
+          var input = document.getElementById('exploreSearchInput');
+          if (input) input.value = state.keyword;
         }
 
-        if (countEl) countEl.textContent = recipes.length;
+        // Tab or sort
+        var tabParam = params.get('tab') || params.get('sort');
+        if (tabParam) {
+          if (['newest', 'featured', 'rating', 'all', 'popular'].includes(tabParam)) {
+            state.tab = tabParam === 'popular' ? 'rating' : tabParam;
+          }
+        }
+        if (params.get('featured') === '1') {
+          state.tab = 'featured';
+        }
 
-        var totalPages = Math.ceil(recipes.length / ITEMS_PER_PAGE);
-        var start = (currentPage - 1) * ITEMS_PER_PAGE;
-        var pageRecipes = recipes.slice(start, start + ITEMS_PER_PAGE);
+        // Category
+        var catParam = params.get('cat') || params.get('category');
+        if (catParam) {
+          state.categoryId = catParam;
+          var catSelect = document.getElementById('filterCategory');
+          if (catSelect) {
+            // Find option matching id or name
+            var found = Array.from(catSelect.options).find(function(opt) {
+              return opt.value == catParam || opt.textContent.toLowerCase().includes(catParam.toLowerCase());
+            });
+            if (found) catSelect.value = found.value;
+          }
+        }
 
-        grid.innerHTML = pageRecipes.length > 0
-          ? pageRecipes.map(function(r) { return CookMateUI.createRecipeCard(r); }).join('')
-          : CookMateUI.createEmptyState('fa-book-open', 'Chưa có công thức nào', 'Hãy quay lại sau');
+        // Occasion
+        var occParam = params.get('occasion');
+        if (occParam) {
+          state.occasion = occParam.toLowerCase();
+          var occSelect = document.getElementById('filterOccasion');
+          if (occSelect) {
+            var foundOcc = Array.from(occSelect.options).find(function(opt) {
+              return opt.value.toLowerCase() === occParam.toLowerCase() ||
+                     opt.textContent.toLowerCase().includes(occParam.toLowerCase());
+            });
+            if (foundOcc) occSelect.value = foundOcc.value;
+          }
+        }
 
-        if (pagination) {
-          pagination.innerHTML = CookMateUI.createPagination(currentPage, totalPages, 'goToPage');
+        // Difficulty
+        var diffParam = params.get('difficulty');
+        if (diffParam) {
+          state.difficulty = diffParam;
+          var diffSelect = document.getElementById('filterDifficulty');
+          if (diffSelect) diffSelect.value = diffParam;
+        }
+
+        // Page
+        if (params.has('page')) {
+          var p = parseInt(params.get('page'), 10);
+          if (p > 0) state.currentPage = p;
+        }
+
+        updateTabButtonsUI();
+      }
+
+      function updateUrl() {
+        var params = new URLSearchParams();
+        if (state.keyword) params.set('q', state.keyword);
+        if (state.tab !== 'all') params.set('tab', state.tab);
+        if (state.categoryId) params.set('cat', state.categoryId);
+        if (state.occasion) params.set('occasion', state.occasion);
+        if (state.difficulty) params.set('difficulty', state.difficulty);
+        if (state.timeRange) params.set('time', state.timeRange);
+        if (state.currentPage > 1) params.set('page', state.currentPage);
+
+        var queryString = params.toString();
+        var newUrl = window.location.pathname + (queryString ? '?' + queryString : '');
+        window.history.replaceState({}, '', newUrl);
+      }
+
+      function updateTabButtonsUI() {
+        document.querySelectorAll('.explore-tab-btn').forEach(function(btn) {
+          var t = btn.getAttribute('data-tab');
+          if (t === state.tab) {
+            btn.classList.add('active');
+            btn.setAttribute('aria-selected', 'true');
+          } else {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-selected', 'false');
+          }
+        });
+      }
+
+      function bindEvents() {
+        // Search input
+        var searchInput = document.getElementById('exploreSearchInput');
+        var searchBtn = document.getElementById('exploreSearchBtn');
+
+        if (searchBtn && searchInput) {
+          searchBtn.addEventListener('click', function() {
+            state.keyword = searchInput.value.trim();
+            state.currentPage = 1;
+            updateUrl();
+            applyFiltersAndRender();
+          });
+
+          searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+              state.keyword = searchInput.value.trim();
+              state.currentPage = 1;
+              updateUrl();
+              applyFiltersAndRender();
+            }
+          });
+        }
+
+        // Tabs
+        document.querySelectorAll('.explore-tab-btn').forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            state.tab = btn.getAttribute('data-tab');
+            state.currentPage = 1;
+            updateTabButtonsUI();
+            updateUrl();
+            applyFiltersAndRender();
+          });
+        });
+
+        // Filter Selects
+        var catSelect = document.getElementById('filterCategory');
+        if (catSelect) {
+          catSelect.addEventListener('change', function() {
+            state.categoryId = catSelect.value;
+            state.currentPage = 1;
+            updateUrl();
+            applyFiltersAndRender();
+          });
+        }
+
+        var occSelect = document.getElementById('filterOccasion');
+        if (occSelect) {
+          occSelect.addEventListener('change', function() {
+            state.occasion = occSelect.value;
+            state.currentPage = 1;
+            updateUrl();
+            applyFiltersAndRender();
+          });
+        }
+
+        var diffSelect = document.getElementById('filterDifficulty');
+        if (diffSelect) {
+          diffSelect.addEventListener('change', function() {
+            state.difficulty = diffSelect.value;
+            state.currentPage = 1;
+            updateUrl();
+            applyFiltersAndRender();
+          });
+        }
+
+        var timeSelect = document.getElementById('filterTime');
+        if (timeSelect) {
+          timeSelect.addEventListener('change', function() {
+            state.timeRange = timeSelect.value;
+            state.currentPage = 1;
+            updateUrl();
+            applyFiltersAndRender();
+          });
+        }
+
+        // Reset Button
+        var resetBtn = document.getElementById('btnResetFilters');
+        if (resetBtn) {
+          resetBtn.addEventListener('click', resetAllFilters);
         }
       }
 
-      window.goToPage = function(page) {
-        currentPage = page;
-        renderRecipes();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.resetAllFilters = function() {
+        state.keyword = '';
+        state.tab = 'all';
+        state.categoryId = '';
+        state.occasion = '';
+        state.difficulty = '';
+        state.timeRange = '';
+        state.currentPage = 1;
+
+        var input = document.getElementById('exploreSearchInput');
+        if (input) input.value = '';
+
+        var catSelect = document.getElementById('filterCategory');
+        if (catSelect) catSelect.value = '';
+
+        var occSelect = document.getElementById('filterOccasion');
+        if (occSelect) occSelect.value = '';
+
+        var diffSelect = document.getElementById('filterDifficulty');
+        if (diffSelect) diffSelect.value = '';
+
+        var timeSelect = document.getElementById('filterTime');
+        if (timeSelect) timeSelect.value = '';
+
+        updateTabButtonsUI();
+        updateUrl();
+        applyFiltersAndRender();
       };
 
-      window.sortRecipes = function(sort) {
-        currentSort = sort;
-        currentPage = 1;
-        document.querySelectorAll('.sort-btn').forEach(function(b) {
-          b.classList.remove('active');
-          b.setAttribute('aria-pressed', 'false');
-        });
-        var activeBtn = document.querySelector('[data-sort="' + sort + '"]');
-        if (activeBtn) {
-          activeBtn.classList.add('active');
-          activeBtn.setAttribute('aria-pressed', 'true');
+      function applyFiltersAndRender() {
+        // IMPORTANT: CookMateStorage.getAllRecipes() defaults to APPROVED recipes only!
+        var allApproved = CookMateStorage.getAllRecipes();
+        var results = allApproved.slice();
+
+        // 1. Keyword search (Title + ingredients + description)
+        if (state.keyword) {
+          var kw = state.keyword.toLowerCase();
+          results = results.filter(function(r) {
+            var titleMatch = r.title && r.title.toLowerCase().includes(kw);
+            var descMatch = r.description && r.description.toLowerCase().includes(kw);
+            var ingMatch = false;
+            if (Array.isArray(r.ingredients)) {
+              ingMatch = r.ingredients.some(function(ing) {
+                var ingName = typeof ing === 'string' ? ing : (ing.name || '');
+                return ingName.toLowerCase().includes(kw);
+              });
+            }
+            return titleMatch || descMatch || ingMatch;
+          });
         }
-        renderRecipes();
+
+        // 2. Category Filter
+        if (state.categoryId) {
+          var targetCat = state.categoryId;
+          results = results.filter(function(r) {
+            return r.categoryId == targetCat || r.category == targetCat;
+          });
+        }
+
+        // 3. Occasion Filter
+        if (state.occasion) {
+          var occKw = state.occasion.toLowerCase();
+          results = results.filter(function(r) {
+            if (!r.occasion) return false;
+            var rOcc = r.occasion.toLowerCase();
+            if (occKw === 'tet') return rOcc.includes('tết');
+            if (occKw === 'ram') return rOcc.includes('rằm') || rOcc.includes('vu lan');
+            if (occKw === 'gioto') return rOcc.includes('giỗ tổ') || rOcc.includes('hùng vương');
+            if (occKw === 'trungthu') return rOcc.includes('trung thu');
+            if (occKw === 'giangsinh') return rOcc.includes('giáng sinh') || rOcc.includes('noel');
+            if (occKw === 'tiecgiadinh') return rOcc.includes('tiệc') || rOcc.includes('gia đình') || rOcc.includes('cuối tuần');
+            if (occKw === 'hangngay') return rOcc.includes('hàng ngày') || rOcc.includes('thường nhật') || !r.occasion;
+            return rOcc.includes(occKw);
+          });
+        }
+
+        // 4. Difficulty Filter
+        if (state.difficulty) {
+          results = results.filter(function(r) {
+            return (r.difficulty || '').toLowerCase() === state.difficulty.toLowerCase();
+          });
+        }
+
+        // 5. Cooking Time Filter
+        if (state.timeRange) {
+          results = results.filter(function(r) {
+            var totalTime = (r.prepTime || 0) + (r.cookTime || 0);
+            if (state.timeRange === 'under30') return totalTime > 0 && totalTime <= 30;
+            if (state.timeRange === '30to60') return totalTime > 30 && totalTime <= 60;
+            if (state.timeRange === 'over60') return totalTime > 60;
+            return true;
+          });
+        }
+
+        // 6. Tab / Mode Sorting
+        if (state.tab === 'newest') {
+          results.sort(function(a, b) {
+            return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+          });
+        } else if (state.tab === 'featured') {
+          results = results.filter(function(r) {
+            return r.isFeatured === true;
+          });
+          results.sort(function(a, b) {
+            return (b.views || 0) - (a.views || 0);
+          });
+        } else if (state.tab === 'rating') {
+          results.sort(function(a, b) {
+            return (b.rating || 0) - (a.rating || 0);
+          });
+        } else {
+          // Tab 'all' - default sort by recent creation date / ID
+          results.sort(function(a, b) {
+            var timeA = new Date(a.createdAt || 0).getTime() || 0;
+            var timeB = new Date(b.createdAt || 0).getTime() || 0;
+            if (timeA !== timeB) return timeB - timeA;
+            var idA = parseInt(a.id, 10) || 0;
+            var idB = parseInt(b.id, 10) || 0;
+            return idB - idA;
+          });
+        }
+
+        // Update count
+        var countEl = document.getElementById('exploreCount');
+        if (countEl) countEl.textContent = results.length;
+
+        // Render Cards with Pagination
+        var grid = document.getElementById('exploreRecipeGrid');
+        var pagination = document.getElementById('explorePagination');
+        if (!grid) return;
+
+        if (results.length === 0) {
+          grid.innerHTML = CookMateUI.createEmptyState(
+            'fa-utensils',
+            'Không tìm thấy công thức nào',
+            'Thử điều chỉnh từ khóa tìm kiếm hoặc các tiêu chí bộ lọc để xem thêm gợi ý món ngon.',
+            'Đặt lại bộ lọc',
+            'resetAllFilters()'
+          );
+          if (pagination) pagination.innerHTML = '';
+          return;
+        }
+
+        var totalPages = Math.ceil(results.length / ITEMS_PER_PAGE);
+        if (state.currentPage > totalPages) state.currentPage = 1;
+
+        var startIndex = (state.currentPage - 1) * ITEMS_PER_PAGE;
+        var pagedItems = results.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+        grid.innerHTML = pagedItems.map(function(recipe) {
+          return CookMateUI.createRecipeCard(recipe);
+        }).join('');
+
+        if (pagination) {
+          pagination.innerHTML = CookMateUI.createPagination(state.currentPage, totalPages, 'goToExplorePage');
+        }
+      }
+
+      window.goToExplorePage = function(page) {
+        state.currentPage = page;
+        updateUrl();
+        applyFiltersAndRender();
+        window.scrollTo({ top: 120, behavior: 'smooth' });
       };
 
-      renderRecipes();
-    });
+    })();
   </script>
 </body>
 </html>

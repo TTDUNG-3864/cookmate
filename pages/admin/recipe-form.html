@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thêm Công thức | CookMate Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="../../assets/css/variables.css">
+  <link rel="stylesheet" href="../../assets/css/reset.css">
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/layout.css">
+  <link rel="stylesheet" href="../../assets/css/components.css">
+  <link rel="stylesheet" href="../../assets/css/pages.css">
+  <link rel="stylesheet" href="../../assets/css/admin.css">
+  <link rel="stylesheet" href="../../assets/css/responsive.css">
+  <script src="../../assets/js/admin-guard.js"></script>
+  <script>
+    (function() {
+      var isClosed = sessionStorage.getItem('cookmate_sidebar_closed') === 'true' ||
+                     sessionStorage.getItem('cookmate_sidebar_collapsed') === 'true';
+      if (isClosed && window.innerWidth >= 1024) {
+        document.documentElement.classList.add('sidebar-is-closed');
+      }
+    })();
+  </script>
+</head>
+<body data-admin-page="recipe-form">
+
+  <div class="admin-layout">
+    
+    <!-- Sidebar -->
+    <aside class="admin-sidebar" id="adminSidebar">
+      <div class="admin-sidebar__header">
+        <a href="index.html" class="admin-sidebar__logo">
+          <i class="fa-solid fa-utensils"></i>
+          <span>CookMate</span>
+        </a>
+        <span class="admin-sidebar__badge">Admin</span>
+        <button class="admin-sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Đóng menu sidebar" title="Đóng menu sidebar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <nav class="admin-sidebar__nav">
+        <!-- Nút Xem website CookMate ở đầu Sidebar -->
+        <div class="admin-sidebar__top-action">
+          <a href="../../index.html" class="admin-sidebar__link admin-sidebar__link--website" id="btnViewWebsite" data-tooltip="Xem website CookMate" title="Xem website CookMate">
+            <i class="fa-solid fa-globe"></i>
+            <span>Xem website CookMate</span>
+          </a>
+        </div>
+        <div class="admin-sidebar__divider"></div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Hệ thống</div>
+          <a href="index.html" class="admin-sidebar__link" data-tooltip="Tổng quan" title="Tổng quan">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Tổng quan</span>
+          </a>
+          <a href="statistics.html" class="admin-sidebar__link" data-tooltip="Thống kê & Báo cáo" title="Thống kê & Báo cáo">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Thống kê & Báo cáo</span>
+          </a>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Kiểm duyệt & Biên tập</div>
+          <a href="approve-recipes.html" class="admin-sidebar__link" data-tooltip="Duyệt công thức" title="Duyệt công thức">
+            <i class="fa-solid fa-clipboard-check"></i>
+            <span>Duyệt công thức</span>
+            <span class="badge badge-warning text-xs ml-auto" id="sidebarPendingBadge" style="display:none">0</span>
+          </a>
+          <a href="recipe-form.html" class="admin-sidebar__link active" data-tooltip="Thêm công thức" title="Thêm công thức">
+            <i class="fa-solid fa-circle-plus"></i>
+            <span>Thêm công thức</span>
+          </a>
+          <a href="recipes.html" class="admin-sidebar__link" data-tooltip="Quản lý Công thức" title="Quản lý Công thức">
+            <i class="fa-solid fa-book-open"></i>
+            <span>Quản lý Công thức</span>
+          </a>
+          <a href="categories.html" class="admin-sidebar__link" data-tooltip="Quản lý Danh mục" title="Quản lý Danh mục">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>Quản lý Danh mục</span>
+          </a>
+          <a href="ingredients.html" class="admin-sidebar__link" data-tooltip="Quản lý Nguyên liệu" title="Quản lý Nguyên liệu">
+            <i class="fa-solid fa-carrot"></i>
+            <span>Quản lý Nguyên liệu</span>
+          </a>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Người dùng & Tương tác</div>
+          <a href="accounts.html" class="admin-sidebar__link" data-tooltip="Quản lý Tài khoản" title="Quản lý Tài khoản">
+            <i class="fa-solid fa-users"></i>
+            <span>Quản lý Tài khoản</span>
+          </a>
+          <a href="comments.html" class="admin-sidebar__link" data-tooltip="Quản lý Bình luận" title="Quản lý Bình luận">
+            <i class="fa-solid fa-comments"></i>
+            <span>Quản lý Bình luận</span>
+          </a>
+        </div>
+
+        <div class="admin-sidebar__section">
+          <div class="admin-sidebar__section-title">Tài khoản & Phiên</div>
+          <button type="button" class="admin-sidebar__link text-danger w-full text-left" onclick="handleLogout()" data-tooltip="Đăng xuất" title="Đăng xuất" style="background:none; border:none; cursor:pointer;">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Đăng xuất</span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="admin-sidebar__footer">
+        <div class="admin-sidebar__user">
+          <div class="user-avatar" id="adminUserAvatar">A</div>
+          <div>
+            <div class="admin-sidebar__user-name" id="adminUserName">Admin</div>
+            <div class="admin-sidebar__user-role">Quản trị viên</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div class="admin-sidebar__backdrop" id="sidebarBackdrop"></div>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <h1 class="admin-header__title" id="pageHeaderTitle">Thêm công thức mới</h1>
+        <div class="admin-header__actions">
+          <a href="recipes.html" class="btn btn-ghost btn-sm">
+            <i class="fa-solid fa-arrow-left"></i> Danh sách công thức
+          </a>
+        </div>
+      </header>
+
+      <div class="admin-content" style="max-width: 900px;">
+        
+        <div class="mb-6">
+          <div class="alert alert-info" style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:10px; padding:12px 16px; color:#1E40AF;">
+            <i class="fa-solid fa-shield-halved mr-2"></i>
+            <strong>Quyền Quản trị viên:</strong> Công thức tạo tại đây sẽ được xuất bản công khai ngay lập tức (trạng thái <strong>Đã duyệt</strong>).
+          </div>
+        </div>
+
+        <form id="adminRecipeForm" class="recipe-form" novalidate>
+          
+          <!-- SECTION 1: THÔNG TIN CƠ BẢN -->
+          <div class="admin-card form-section recipe-form__section mb-6">
+            <div class="admin-card__header form-section-header">
+              <div class="form-section-icon"><i class="fa-solid fa-utensils"></i></div>
+              <div>
+                <h3 class="admin-card__title form-section-title">1. Thông tin cơ bản</h3>
+                <p class="form-section-desc">Tên món ăn, phân loại danh mục, dịp lễ và mức độ chế biến</p>
+              </div>
+            </div>
+            <div class="admin-card__body">
+              <div class="form-group mb-4">
+                <label for="adminRecipeName" class="form-label font-bold">Tên món ăn <span class="required text-danger">*</span></label>
+                <input type="text" id="adminRecipeName" class="form-input" placeholder="VD: Nem rán Hà Nội truyền thống" required>
+                <div class="form-error" id="nameError" style="display:none; color:#DC2626; font-size:12px; margin-top:4px;">Vui lòng nhập tên món ăn</div>
+              </div>
+
+              <div class="form-group mb-4">
+                <label for="adminRecipeDesc" class="form-label font-bold">Mô tả ngắn</label>
+                <textarea id="adminRecipeDesc" class="form-input form-textarea" rows="3" placeholder="Mô tả hương vị, điểm đặc biệt của món ăn..."></textarea>
+              </div>
+
+              <div class="form-grid-2 mb-4">
+                <div class="form-group">
+                  <label for="adminRecipeCategory" class="form-label font-bold">Danh mục <span class="required text-danger">*</span></label>
+                  <select id="adminRecipeCategory" class="form-input form-select" required>
+                    <option value="">-- Chọn danh mục --</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="adminRecipeOccasion" class="form-label font-bold">Dịp lễ phù hợp</label>
+                  <select id="adminRecipeOccasion" class="form-input form-select">
+                    <option value="">Không có dịp lễ đặc biệt</option>
+                    <option value="tet">Tết cổ truyền</option>
+                    <option value="ram">Rằm & Lễ Vu Lan</option>
+                    <option value="gioto">Giỗ tổ Hùng Vương</option>
+                    <option value="trungthu">Tết Trung thu</option>
+                    <option value="giangsinh">Giáng sinh</option>
+                    <option value="tiecgiadinh">Tiệc gia đình & Cuối tuần</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-grid-3">
+                <div class="form-group">
+                  <label for="adminDifficulty" class="form-label font-bold">Độ khó</label>
+                  <select id="adminDifficulty" class="form-input form-select">
+                    <option value="Dễ">Dễ</option>
+                    <option value="Trung bình" selected>Trung bình</option>
+                    <option value="Khó">Khó</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="adminPrepTime" class="form-label font-bold">Chuẩn bị (phút)</label>
+                  <input type="number" id="adminPrepTime" class="form-input" min="0" value="15">
+                </div>
+                <div class="form-group">
+                  <label for="adminCookTime" class="form-label font-bold">Thời gian nấu (phút)</label>
+                  <input type="number" id="adminCookTime" class="form-input" min="0" value="30">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 2: HÌNH ẢNH & KHẨU PHẦN -->
+          <div class="admin-card form-section recipe-form__section mb-6">
+            <div class="admin-card__header form-section-header">
+              <div class="form-section-icon"><i class="fa-solid fa-image"></i></div>
+              <div>
+                <h3 class="admin-card__title form-section-title">2. Hình ảnh & Khẩu phần</h3>
+                <p class="form-section-desc">Hình ảnh minh họa rõ nét và số khẩu phần ăn gốc</p>
+              </div>
+            </div>
+            <div class="admin-card__body">
+              <div class="form-grid-2">
+                <div>
+                  <div class="form-group mb-2">
+                    <label for="adminRecipeImage" class="form-label font-bold">URL Hình ảnh</label>
+                    <input type="text" id="adminRecipeImage" class="form-input" placeholder="https://images.unsplash.com/photo-...">
+                    <div class="text-xs text-secondary mt-1">Dán URL ảnh món ăn sắc nét (Unsplash, Imgur, CDN...)</div>
+                  </div>
+                  <div class="recipe-image-preview-card" id="imagePreview" style="display:none;">
+                    <img id="imagePreviewImg" src="" alt="Xem trước ảnh" onerror="this.parentElement.style.display='none'">
+                  </div>
+                </div>
+
+                <div>
+                  <div class="form-group">
+                    <label for="adminServings" class="form-label font-bold">Khẩu phần gốc (người ăn) <span class="required text-danger">*</span></label>
+                    <input type="number" id="adminServings" class="form-input" min="1" value="4">
+                    <div class="alert alert-info mt-3" style="background:#FFF9F2; border:1px solid rgba(232,93,42,0.2); border-radius:10px; padding:12px; color:#9A3412; font-size:13px;">
+                      <i class="fa-solid fa-calculator text-primary mr-1"></i>
+                      <strong>Cơ chế co giãn tự động:</strong> Khẩu phần này được dùng để hệ thống tự động co giãn định lượng nguyên liệu và tính toán dinh dưỡng khi người nấu thay đổi khẩu phần trên website.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 3: ĐỊNH LƯỢNG NGUYÊN LIỆU -->
+          <div class="admin-card form-section recipe-form__section mb-6">
+            <div class="admin-card__header form-section-header flex-between">
+              <div class="flex items-center gap-3">
+                <div class="form-section-icon"><i class="fa-solid fa-basket-shopping"></i></div>
+                <div>
+                  <h3 class="admin-card__title form-section-title">3. Định lượng nguyên liệu <span class="required text-danger">*</span></h3>
+                  <p class="form-section-desc">Liệt kê tên nguyên liệu, số lượng và đơn vị đo chuẩn</p>
+                </div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline" id="addIngBtn">
+                <i class="fa-solid fa-plus"></i> Thêm nguyên liệu
+              </button>
+            </div>
+            <div class="admin-card__body">
+              <div class="ingredients-header-row">
+                <div style="flex: 2;">Tên nguyên liệu</div>
+                <div style="flex: 1;">Số lượng</div>
+                <div style="flex: 1;">Đơn vị đo</div>
+                <div style="width: 38px; text-align: center;">Xóa</div>
+              </div>
+              <div id="adminIngList" class="space-y-3">
+                <!-- Dynamic rows -->
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 4: CÁC BƯỚC CHẾ BIẾN -->
+          <div class="admin-card form-section recipe-form__section mb-6">
+            <div class="admin-card__header form-section-header flex-between">
+              <div class="flex items-center gap-3">
+                <div class="form-section-icon"><i class="fa-solid fa-list-ol"></i></div>
+                <div>
+                  <h3 class="admin-card__title form-section-title">4. Các bước chế biến <span class="required text-danger">*</span></h3>
+                  <p class="form-section-desc">Quy trình thực hiện chi tiết theo từng bước</p>
+                </div>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline" id="addStepBtn">
+                <i class="fa-solid fa-plus"></i> Thêm bước
+              </button>
+            </div>
+            <div class="admin-card__body">
+              <div id="adminStepList" class="space-y-3">
+                <!-- Dynamic rows -->
+              </div>
+            </div>
+          </div>
+
+          <!-- SECTION 5: KIỂM TRA & XUẤT BẢN QUẢN TRỊ -->
+          <div class="admin-card form-section recipe-form__section mb-10">
+            <div class="admin-card__header form-section-header">
+              <div class="form-section-icon"><i class="fa-solid fa-circle-check"></i></div>
+              <div>
+                <h3 class="admin-card__title form-section-title">5. Kiểm tra & Xuất bản quản trị</h3>
+                <p class="form-section-desc">Rà soát và xuất bản công thức trực tiếp lên website CookMate</p>
+              </div>
+            </div>
+            <div class="admin-card__body">
+              <div class="recipe-submit-notice recipe-submit-notice--admin mb-6">
+                <div class="recipe-submit-notice__icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="recipe-submit-notice__content">
+                  <strong>Quyền Quản trị viên (Admin):</strong>
+                  <p>Công thức tạo tại đây sẽ được xuất bản công khai ngay lập tức lên website CookMate (trạng thái <strong>Đã duyệt</strong>) mà không cần qua hàng đợi chờ duyệt.</p>
+                </div>
+              </div>
+
+              <div class="form-submit-actions">
+                <button type="submit" class="btn btn-primary btn-lg" id="saveRecipeBtn">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> <span>Xuất bản công thức ngay</span>
+                </button>
+                <a href="recipes.html" class="btn btn-ghost btn-lg">
+                  <i class="fa-solid fa-arrow-left"></i> <span>Hủy bỏ & Quay lại</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </form>
+
+      </div>
+    </main>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="../../assets/js/utils.js"></script>
+  <script src="../../assets/js/data/categories.js"></script>
+  <script src="../../assets/js/data/ingredients.js"></script>
+  <script src="../../assets/js/data/users.js"></script>
+  <script src="../../assets/js/data/recipes.js"></script>
+  <script src="../../assets/js/storage.js"></script>
+  <script src="../../assets/js/components.js"></script>
+  <script src="../../assets/js/navigation.js"></script>
+  <script src="../../assets/js/app.js"></script>
+  <script src="../../assets/js/admin-shell.js"></script>
+
+  <script>
+    var isEdit = false;
+    var editId = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!checkAdminAuth()) return;
+
+      setupSidebar();
+      initCategories();
+      setupImagePreview();
+
+      var params = new URLSearchParams(window.location.search);
+      var idParam = params.get('id');
+
+      if (idParam) {
+        isEdit = true;
+        editId = idParam;
+        document.getElementById('pageHeaderTitle').textContent = 'Chỉnh sửa công thức (Admin)';
+        document.getElementById('saveRecipeBtn').innerHTML = '<i class="fa-solid fa-save"></i> Cập nhật & Xuất bản';
+        loadRecipeData(idParam);
+      } else {
+        addIngRow();
+        addIngRow();
+        addStepRow();
+        addStepRow();
+      }
+
+      document.getElementById('addIngBtn').addEventListener('click', function() { addIngRow(); });
+      document.getElementById('addStepBtn').addEventListener('click', function() { addStepRow(); });
+      document.getElementById('adminRecipeForm').addEventListener('submit', handleFormSubmit);
+
+      updatePendingBadge();
+    });
+
+    function checkAdminAuth() {
+      if (typeof CookMateStorage === 'undefined' || !CookMateStorage.isLoggedIn()) {
+        window.location.href = '../auth/login.html?redirect=' + encodeURIComponent('pages/admin/recipe-form.html');
+        return false;
+      }
+      var user = CookMateStorage.getCurrentUser();
+      if (!user || user.role !== 'admin') {
+        window.location.href = '../auth/login.html?redirect=' + encodeURIComponent('pages/admin/recipe-form.html');
+        return false;
+      }
+      var nameEl = document.getElementById('adminUserName');
+      var avatarEl = document.getElementById('adminUserAvatar');
+      if (nameEl) nameEl.textContent = user.name;
+      if (avatarEl) avatarEl.textContent = user.name.charAt(0).toUpperCase();
+      return true;
+    }
+
+    function setupSidebar() {
+      // Quản lý đồng bộ bởi AdminShell (assets/js/admin-shell.js)
+    }
+
+    function updatePendingBadge() {
+      var sideBadge = document.getElementById('sidebarPendingBadge');
+      if (sideBadge && CookMateStorage.getPendingRecipes) {
+        var count = CookMateStorage.getPendingRecipes().length;
+        sideBadge.textContent = count;
+        sideBadge.style.display = count > 0 ? 'inline-flex' : 'none';
+      }
+    }
+
+    function initCategories() {
+      var select = document.getElementById('adminRecipeCategory');
+      var cats = CookMateStorage.getAllCategories();
+      cats.forEach(function(c) {
+        var opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = c.name;
+        select.appendChild(opt);
+      });
+    }
+
+    function setupImagePreview() {
+      var input = document.getElementById('adminRecipeImage');
+      var preview = document.getElementById('imagePreview');
+      var img = document.getElementById('imagePreviewImg');
+
+      input.addEventListener('input', function() {
+        if (input.value.trim()) {
+          img.src = input.value.trim();
+          preview.style.display = 'block';
+        } else {
+          preview.style.display = 'none';
+        }
+      });
+    }
+
+    function addIngRow(name, amount, unit) {
+      var list = document.getElementById('adminIngList');
+      var row = document.createElement('div');
+      row.className = 'ingredient-row dynamic-row';
+      row.innerHTML = `
+        <div class="dynamic-row-fields">
+          <input type="text" class="form-input flex-1 ing-name ingredient-name" placeholder="Tên nguyên liệu" value="${escapeHtml(name || '')}">
+          <input type="number" class="form-input ing-amt ingredient-amount" placeholder="Số lượng" min="0" step="any" value="${amount || ''}">
+          <input type="text" class="form-input ing-unit ingredient-unit" placeholder="Đơn vị (g, ml...)" value="${escapeHtml(unit || '')}">
+        </div>
+        <button type="button" class="dynamic-row-delete" onclick="removeAdminIngRow(this)" title="Xóa">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      `;
+      list.appendChild(row);
+    }
+
+    function removeAdminIngRow(btn) {
+      var row = btn.closest('.ingredient-row');
+      var list = document.getElementById('adminIngList');
+      if (list.querySelectorAll('.ingredient-row').length <= 1) {
+        if (typeof CookMateUI !== 'undefined') {
+          CookMateUI.showToast('Cần ít nhất 1 nguyên liệu', 'warning');
+        }
+        return;
+      }
+      row.remove();
+    }
+
+    function addStepRow(desc) {
+      var list = document.getElementById('adminStepList');
+      var stepNum = list.querySelectorAll('.step-card').length + 1;
+      var row = document.createElement('div');
+      row.className = 'step-card';
+      row.innerHTML = `
+        <div class="step-card__header">
+          <span class="step-card__badge"><i class="fa-solid fa-list-check"></i> Bước ${stepNum}</span>
+          <button type="button" class="dynamic-row-delete" onclick="removeAdminStepRow(this)" title="Xóa bước">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+        <div class="step-card__body">
+          <textarea class="form-input form-textarea step-desc" rows="3" placeholder="Mô tả chi tiết cách sơ chế, thời gian nấu, mức lửa và mẹo thực hiện bước này...">${escapeHtml(desc || '')}</textarea>
+        </div>
+      `;
+      list.appendChild(row);
+    }
+
+    function removeAdminStepRow(btn) {
+      var card = btn.closest('.step-card');
+      var list = document.getElementById('adminStepList');
+      if (list.querySelectorAll('.step-card').length <= 1) {
+        if (typeof CookMateUI !== 'undefined') {
+          CookMateUI.showToast('Cần ít nhất 1 bước chế biến', 'warning');
+        }
+        return;
+      }
+      card.remove();
+      renumberAdminSteps();
+    }
+
+    function renumberAdminSteps() {
+      var cards = document.querySelectorAll('#adminStepList .step-card');
+      cards.forEach(function(card, idx) {
+        var badge = card.querySelector('.step-card__badge');
+        if (badge) badge.innerHTML = '<i class="fa-solid fa-list-check"></i> Bước ' + (idx + 1);
+      });
+    }
+
+    function loadRecipeData(id) {
+      var recipe = CookMateStorage.getRecipeById(id, true);
+      if (!recipe) {
+        CookMateUI.showToast('Không tìm thấy công thức', 'error');
+        return;
+      }
+
+      document.getElementById('adminRecipeName').value = recipe.title || recipe.name || '';
+      document.getElementById('adminRecipeDesc').value = recipe.description || '';
+      document.getElementById('adminRecipeCategory').value = recipe.categoryId || recipe.category || '';
+      document.getElementById('adminRecipeOccasion').value = recipe.occasion || '';
+      document.getElementById('adminRecipeImage').value = recipe.image || recipe.imageUrl || '';
+      document.getElementById('adminPrepTime').value = recipe.prepTime || 15;
+      document.getElementById('adminCookTime').value = recipe.cookTime || 30;
+      document.getElementById('adminDifficulty').value = recipe.difficulty || 'Trung bình';
+      document.getElementById('adminServings').value = recipe.servings || 4;
+
+      if (recipe.image || recipe.imageUrl) {
+        document.getElementById('imagePreviewImg').src = recipe.image || recipe.imageUrl;
+        document.getElementById('imagePreview').style.display = 'block';
+      }
+
+      var ingList = document.getElementById('adminIngList');
+      ingList.innerHTML = '';
+      if (Array.isArray(recipe.ingredients) && recipe.ingredients.length > 0) {
+        recipe.ingredients.forEach(function(ing) {
+          if (typeof ing === 'string') addIngRow(ing, '', '');
+          else addIngRow(ing.name, ing.amount, ing.unit);
+        });
+      } else {
+        addIngRow();
+      }
+
+      var stepList = document.getElementById('adminStepList');
+      stepList.innerHTML = '';
+      if (Array.isArray(recipe.steps) && recipe.steps.length > 0) {
+        recipe.steps.forEach(function(s) {
+          if (typeof s === 'string') addStepRow(s);
+          else addStepRow(s.description);
+        });
+      } else {
+        addStepRow();
+      }
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+
+      var nameInput = document.getElementById('adminRecipeName');
+      var name = nameInput ? nameInput.value.trim() : '';
+      var nameErr = document.getElementById('nameError');
+
+      if (!name) {
+        if (nameErr) nameErr.style.display = 'block';
+        if (nameInput) nameInput.focus();
+        return;
+      }
+      if (nameErr) nameErr.style.display = 'none';
+
+      var desc = document.getElementById('adminRecipeDesc').value.trim();
+      var catId = document.getElementById('adminRecipeCategory').value;
+      var occasion = document.getElementById('adminRecipeOccasion').value;
+      var image = document.getElementById('adminRecipeImage').value.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=80';
+      var prepTime = parseInt(document.getElementById('adminPrepTime').value, 10) || 15;
+      var cookTime = parseInt(document.getElementById('adminCookTime').value, 10) || 30;
+      var difficulty = document.getElementById('adminDifficulty').value || 'Trung bình';
+      var servings = parseInt(document.getElementById('adminServings').value, 10) || 4;
+
+      // Collect ingredients
+      var ingredients = [];
+      document.querySelectorAll('#adminIngList .ingredient-row, #adminIngList .ing-item-row').forEach(function(row) {
+        var nameEl = row.querySelector('.ingredient-name') || row.querySelector('.ing-name');
+        var amtEl = row.querySelector('.ingredient-amount') || row.querySelector('.ing-amt');
+        var unitEl = row.querySelector('.ingredient-unit') || row.querySelector('.ing-unit');
+        var n = nameEl ? nameEl.value.trim() : '';
+        var a = amtEl ? (parseFloat(amtEl.value) || 0) : 0;
+        var u = unitEl ? unitEl.value.trim() : '';
+        if (n) {
+          ingredients.push({ name: n, amount: a, unit: u });
+        }
+      });
+
+      // Collect steps
+      var steps = [];
+      document.querySelectorAll('#adminStepList .step-card, #adminStepList .step-item-row').forEach(function(row, idx) {
+        var dEl = row.querySelector('.step-desc');
+        var d = dEl ? dEl.value.trim() : '';
+        if (d) {
+          steps.push({ step: idx + 1, description: d });
+        }
+      });
+
+      var currentUser = CookMateStorage.getCurrentUser();
+
+      // Anti-double-click prevention
+      var submitBtn = document.getElementById('saveRecipeBtn');
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xuất bản...';
+      }
+
+      var data = {
+        title: name,
+        slug: typeof slugify === 'function' ? slugify(name) : name.toLowerCase().replace(/\\s+/g, '-'),
+        description: desc,
+        categoryId: parseInt(catId, 10) || catId,
+        category: catId,
+        occasion: occasion || null,
+        image: image,
+        imageUrl: image,
+        prepTime: prepTime,
+        cookTime: cookTime,
+        difficulty: difficulty,
+        servings: servings,
+        ingredients: ingredients,
+        steps: steps,
+        authorId: currentUser.id,
+        authorName: currentUser.name,
+        status: 'approved',
+        approvedAt: new Date().toISOString(),
+        approvedBy: currentUser.name,
+        rejectionReason: null,
+        views: 120,
+        rating: 5.0,
+        isNew: true
+      };
+
+      if (isEdit && editId) {
+        CookMateStorage.updateRecipe(editId, data, currentUser);
+        CookMateUI.showToast('Đã cập nhật công thức thành công!', 'success');
+      } else {
+        CookMateStorage.addRecipe(data, currentUser);
+        CookMateUI.showToast('Đã thêm và xuất bản công thức công khai ngay!', 'success');
+      }
+
+      setTimeout(function() {
+        window.location.href = 'recipes.html';
+      }, 800);
+    }
+  </script>
+</body>
+</html>

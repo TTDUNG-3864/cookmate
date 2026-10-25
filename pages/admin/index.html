@@ -16,6 +16,16 @@
   <link rel="stylesheet" href="../../assets/css/pages.css">
   <link rel="stylesheet" href="../../assets/css/admin.css">
   <link rel="stylesheet" href="../../assets/css/responsive.css">
+  <script src="../../assets/js/admin-guard.js"></script>
+  <script>
+    (function() {
+      var isClosed = sessionStorage.getItem('cookmate_sidebar_closed') === 'true' ||
+                     sessionStorage.getItem('cookmate_sidebar_collapsed') === 'true';
+      if (isClosed && window.innerWidth >= 1024) {
+        document.documentElement.classList.add('sidebar-is-closed');
+      }
+    })();
+  </script>
 </head>
 <body data-admin-page="dashboard">
 
@@ -29,35 +39,53 @@
           <span>CookMate</span>
         </a>
         <span class="admin-sidebar__badge">Admin</span>
-        <button class="admin-sidebar__close" id="sidebarCloseBtn" aria-label="Đóng menu">
+        <button class="admin-sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Đóng menu sidebar" title="Đóng menu sidebar">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
       <nav class="admin-sidebar__nav">
+        <!-- Nút Xem website CookMate ở đầu Sidebar -->
+        <div class="admin-sidebar__top-action">
+          <a href="../../index.html" class="admin-sidebar__link admin-sidebar__link--website" id="btnViewWebsite" data-tooltip="Xem website CookMate" title="Xem website CookMate">
+            <i class="fa-solid fa-globe"></i>
+            <span>Xem website CookMate</span>
+          </a>
+        </div>
+        <div class="admin-sidebar__divider"></div>
+
         <div class="admin-sidebar__section">
           <div class="admin-sidebar__section-title">Hệ thống</div>
-          <a href="index.html" class="admin-sidebar__link active">
+          <a href="index.html" class="admin-sidebar__link active" data-tooltip="Tổng quan" title="Tổng quan">
             <i class="fa-solid fa-chart-pie"></i>
             <span>Tổng quan</span>
           </a>
-          <a href="statistics.html" class="admin-sidebar__link">
+          <a href="statistics.html" class="admin-sidebar__link" data-tooltip="Thống kê & Báo cáo" title="Thống kê & Báo cáo">
             <i class="fa-solid fa-chart-line"></i>
             <span>Thống kê & Báo cáo</span>
           </a>
         </div>
 
         <div class="admin-sidebar__section">
-          <div class="admin-sidebar__section-title">Nội dung ẩm thực</div>
-          <a href="recipes.html" class="admin-sidebar__link">
+          <div class="admin-sidebar__section-title">Kiểm duyệt & Biên tập</div>
+          <a href="approve-recipes.html" class="admin-sidebar__link" data-tooltip="Duyệt công thức" title="Duyệt công thức">
+            <i class="fa-solid fa-clipboard-check"></i>
+            <span>Duyệt công thức</span>
+            <span class="badge badge-warning text-xs ml-auto" id="sidebarPendingBadge" style="display:none">0</span>
+          </a>
+          <a href="recipe-form.html" class="admin-sidebar__link" data-tooltip="Thêm công thức" title="Thêm công thức">
+            <i class="fa-solid fa-circle-plus"></i>
+            <span>Thêm công thức</span>
+          </a>
+          <a href="recipes.html" class="admin-sidebar__link" data-tooltip="Quản lý Công thức" title="Quản lý Công thức">
             <i class="fa-solid fa-book-open"></i>
             <span>Quản lý Công thức</span>
           </a>
-          <a href="categories.html" class="admin-sidebar__link">
+          <a href="categories.html" class="admin-sidebar__link" data-tooltip="Quản lý Danh mục" title="Quản lý Danh mục">
             <i class="fa-solid fa-layer-group"></i>
             <span>Quản lý Danh mục</span>
           </a>
-          <a href="ingredients.html" class="admin-sidebar__link">
+          <a href="ingredients.html" class="admin-sidebar__link" data-tooltip="Quản lý Nguyên liệu" title="Quản lý Nguyên liệu">
             <i class="fa-solid fa-carrot"></i>
             <span>Quản lý Nguyên liệu</span>
           </a>
@@ -65,22 +93,22 @@
 
         <div class="admin-sidebar__section">
           <div class="admin-sidebar__section-title">Người dùng & Tương tác</div>
-          <a href="accounts.html" class="admin-sidebar__link">
+          <a href="accounts.html" class="admin-sidebar__link" data-tooltip="Quản lý Tài khoản" title="Quản lý Tài khoản">
             <i class="fa-solid fa-users"></i>
             <span>Quản lý Tài khoản</span>
           </a>
-          <a href="comments.html" class="admin-sidebar__link">
+          <a href="comments.html" class="admin-sidebar__link" data-tooltip="Quản lý Bình luận" title="Quản lý Bình luận">
             <i class="fa-solid fa-comments"></i>
             <span>Quản lý Bình luận</span>
           </a>
         </div>
 
         <div class="admin-sidebar__section">
-          <div class="admin-sidebar__section-title">Điều hướng</div>
-          <a href="../../index.html" class="admin-sidebar__link">
-            <i class="fa-solid fa-house"></i>
-            <span>Về trang chủ CookMate</span>
-          </a>
+          <div class="admin-sidebar__section-title">Tài khoản & Phiên</div>
+          <button type="button" class="admin-sidebar__link text-danger w-full text-left" onclick="handleLogout()" data-tooltip="Đăng xuất" title="Đăng xuất" style="background:none; border:none; cursor:pointer;">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Đăng xuất</span>
+          </button>
         </div>
       </nav>
 
@@ -102,13 +130,10 @@
       
       <!-- Admin Header -->
       <header class="admin-header">
-        <button class="admin-header__toggle" id="sidebarToggleBtn" aria-label="Mở menu">
-          <i class="fa-solid fa-bars"></i>
-        </button>
         <h1 class="admin-header__title">Bảng điều khiển Quản trị</h1>
         <div class="admin-header__actions">
-          <a href="../account/recipe-form.html" class="btn btn-primary btn-sm">
-            <i class="fa-solid fa-plus"></i> Đăng món mới
+          <a href="recipe-form.html" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-plus"></i> Đăng món mới (Admin)
           </a>
           <button class="btn btn-ghost btn-sm" onclick="handleLogout()" title="Đăng xuất">
             <i class="fa-solid fa-right-from-bracket"></i>
@@ -119,31 +144,31 @@
       <!-- Content Area -->
       <div class="admin-content">
         
-        <!-- Auth Warning Banner if not logged as admin -->
-        <div id="adminAuthBanner" class="alert alert-warning mb-6" style="display:none;">
-          <div class="flex-between">
-            <span><i class="fa-solid fa-triangle-exclamation mr-1"></i> Bạn đang xem ở chế độ Khách. Để thao tác quản trị đầy đủ, hãy chuyển sang tài khoản Admin.</span>
-            <button class="btn btn-sm btn-primary ml-4" onclick="quickLoginAdmin()">
-              <i class="fa-solid fa-key"></i> Kích hoạt quyền Admin (Đạt)
-            </button>
-          </div>
-        </div>
-
         <div class="mb-6">
           <h2 class="admin-content__title">Tổng quan hệ thống</h2>
-          <p class="admin-content__subtitle">Thống kê dữ liệu thực tế từ hệ sinh thái công thức CookMate.</p>
+          <p class="admin-content__subtitle">Thống kê dữ liệu thực tế và hàng đợi kiểm duyệt CookMate.</p>
         </div>
 
         <!-- 4 Stat Cards -->
         <div class="dashboard-stats">
           
           <div class="stat-card">
-            <div class="stat-card__icon" style="background-color: var(--primary-light); color: white;">
+            <div class="stat-card__icon" style="background-color: var(--primary); color: white;">
               <i class="fa-solid fa-book-open"></i>
             </div>
             <div class="stat-card__content">
-              <span class="stat-card__label">Tổng công thức</span>
+              <span class="stat-card__label">Công thức công khai</span>
               <span class="stat-card__value" id="statRecipes">0</span>
+            </div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-card__icon" style="background-color: #D97706; color: white;">
+              <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+            <div class="stat-card__content">
+              <span class="stat-card__label">Đang chờ duyệt</span>
+              <span class="stat-card__value text-warning" id="statPending">0</span>
             </div>
           </div>
 
@@ -154,16 +179,6 @@
             <div class="stat-card__content">
               <span class="stat-card__label">Danh mục món</span>
               <span class="stat-card__value" id="statCategories">0</span>
-            </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-card__icon" style="background-color: #EAB308; color: white;">
-              <i class="fa-solid fa-carrot"></i>
-            </div>
-            <div class="stat-card__content">
-              <span class="stat-card__label">Nguyên liệu chuẩn</span>
-              <span class="stat-card__value" id="statIngredients">0</span>
             </div>
           </div>
 
@@ -179,6 +194,36 @@
 
         </div>
 
+        <!-- Pending Approval Queue Box -->
+        <div class="admin-card mb-6" id="dashboardPendingCard">
+          <div class="admin-card__header flex-between">
+            <h3 class="admin-card__title">
+              <i class="fa-solid fa-clipboard-check text-warning mr-2"></i> Công thức cần duyệt gần đây
+            </h3>
+            <a href="approve-recipes.html" class="btn btn-ghost btn-sm text-xs font-bold text-primary">
+              Đi đến hàng đợi duyệt <i class="fa-solid fa-arrow-right ml-1"></i>
+            </a>
+          </div>
+          <div class="admin-card__body admin-card__body--flush">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Ảnh</th>
+                    <th>Tên món ăn</th>
+                    <th>Người gửi</th>
+                    <th>Thời gian</th>
+                    <th class="text-right">Thao tác nhanh</th>
+                  </tr>
+                </thead>
+                <tbody id="dashboardPendingTable">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <!-- 2 Columns Grid: Recent Recipes & Recent Comments -->
         <div class="grid grid-2 gap-6">
           
@@ -186,7 +231,7 @@
           <div class="admin-card">
             <div class="admin-card__header">
               <h3 class="admin-card__title">
-                <i class="fa-solid fa-clock-rotate-left text-primary mr-1"></i> Công thức mới cập nhật
+                <i class="fa-solid fa-clock-rotate-left text-primary mr-1"></i> Công thức mới xuất bản
               </h3>
               <a href="recipes.html" class="btn btn-ghost btn-sm text-xs">Xem tất cả</a>
             </div>
@@ -230,6 +275,8 @@
 
   </div>
 
+  <div id="toastContainer" class="toast-container"></div>
+
   <script src="../../assets/js/utils.js"></script>
   <script src="../../assets/js/data/categories.js"></script>
   <script src="../../assets/js/data/ingredients.js"></script>
@@ -239,82 +286,94 @@
   <script src="../../assets/js/components.js"></script>
   <script src="../../assets/js/navigation.js"></script>
   <script src="../../assets/js/app.js"></script>
+  <script src="../../assets/js/admin-shell.js"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      checkAdminStatus();
+      if (!checkAdminAuth()) return;
       setupSidebar();
       renderStats();
+      renderDashboardPendingQueue();
       renderRecentRecipes();
       renderRecentComments();
     });
 
-    function checkAdminStatus() {
+    function checkAdminAuth() {
+      if (typeof CookMateStorage === 'undefined' || !CookMateStorage.isLoggedIn()) {
+        window.location.href = '../auth/login.html?redirect=' + encodeURIComponent('pages/admin/index.html');
+        return false;
+      }
       var user = CookMateStorage.getCurrentUser();
-      var banner = document.getElementById('adminAuthBanner');
+      if (!user || user.role !== 'admin') {
+        window.location.href = '../auth/login.html?redirect=' + encodeURIComponent('pages/admin/index.html');
+        return false;
+      }
+
       var nameEl = document.getElementById('adminUserName');
       var avatarEl = document.getElementById('adminUserAvatar');
-
-      if (!user || user.role !== 'admin') {
-        if (banner) banner.style.display = 'block';
-        if (nameEl) nameEl.textContent = 'Khách (Demo)';
-      } else {
-        if (banner) banner.style.display = 'none';
-        if (nameEl) nameEl.textContent = user.name;
-        if (avatarEl) avatarEl.textContent = user.name.charAt(0).toUpperCase();
-      }
-    }
-
-    function quickLoginAdmin() {
-      var adminUser = USERS.find(function(u) { return u.role === 'admin'; }) || {
-        id: 1,
-        name: 'Nguyễn Như Đạt',
-        email: 'dat@cookmate.vn',
-        role: 'admin'
-      };
-      CookMateStorage.setCurrentUser(adminUser);
-      CookMateUI.showToast('Đã chuyển sang tài khoản Quản trị viên (' + adminUser.name + ')', 'success');
-      checkAdminStatus();
+      if (nameEl) nameEl.textContent = user.name;
+      if (avatarEl) avatarEl.textContent = user.name.charAt(0).toUpperCase();
+      return true;
     }
 
     function setupSidebar() {
-      var toggleBtn = document.getElementById('sidebarToggleBtn');
-      var closeBtn = document.getElementById('sidebarCloseBtn');
-      var sidebar = document.getElementById('adminSidebar');
-      var backdrop = document.getElementById('sidebarBackdrop');
-
-      function openSidebar() {
-        if (sidebar) sidebar.classList.add('active');
-        if (backdrop) backdrop.classList.add('active');
-      }
-
-      function closeSidebar() {
-        if (sidebar) sidebar.classList.remove('active');
-        if (backdrop) backdrop.classList.remove('active');
-      }
-
-      if (toggleBtn) toggleBtn.addEventListener('click', openSidebar);
-      if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-      if (backdrop) backdrop.addEventListener('click', closeSidebar);
+      // Quản lý đồng bộ bởi AdminShell (assets/js/admin-shell.js)
     }
 
     function renderStats() {
-      var recipes = CookMateStorage.getAllRecipes();
+      var approvedRecipes = CookMateStorage.getAllRecipes(false);
+      var pendingRecipes = CookMateStorage.getPendingRecipes ? CookMateStorage.getPendingRecipes() : [];
       var categories = CookMateStorage.getAllCategories();
-      var ingredients = CookMateStorage.getAllIngredients();
       var users = CookMateStorage.getAllUsers();
 
-      document.getElementById('statRecipes').textContent = recipes.length;
+      document.getElementById('statRecipes').textContent = approvedRecipes.length;
+      document.getElementById('statPending').textContent = pendingRecipes.length;
       document.getElementById('statCategories').textContent = categories.length;
-      document.getElementById('statIngredients').textContent = ingredients.length;
       document.getElementById('statUsers').textContent = users.length;
+
+      var sideBadge = document.getElementById('sidebarPendingBadge');
+      if (sideBadge) {
+        sideBadge.textContent = pendingRecipes.length;
+        sideBadge.style.display = pendingRecipes.length > 0 ? 'inline-flex' : 'none';
+      }
+    }
+
+    function renderDashboardPendingQueue() {
+      var tbody = document.getElementById('dashboardPendingTable');
+      if (!tbody) return;
+
+      var pending = CookMateStorage.getPendingRecipes ? CookMateStorage.getPendingRecipes() : [];
+      if (pending.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-6 text-secondary text-sm"><i class="fa-solid fa-circle-check text-success mr-1"></i> Không có công thức nào đang chờ duyệt. Mọi nội dung đã được xử lý!</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = pending.slice(0, 5).map(function(r) {
+        return `
+          <tr>
+            <td>
+              <img src="${r.image || r.imageUrl || '../../assets/images/placeholders/recipe-placeholder.svg'}" alt="" style="width: 40px; height: 40px; border-radius: 8px; object-fit: cover;" onerror="handleImageError(this)">
+            </td>
+            <td>
+              <div class="font-bold text-sm text-primary">${escapeHtml(r.title || r.name)}</div>
+            </td>
+            <td class="text-xs text-secondary">${escapeHtml(r.authorName || 'Thành viên')}</td>
+            <td class="text-xs text-secondary">${typeof timeAgo === 'function' ? timeAgo(r.createdAt) : 'Mới gửi'}</td>
+            <td class="text-right">
+              <a href="approve-recipes.html" class="btn btn-sm btn-outline text-xs">
+                Xem & Duyệt <i class="fa-solid fa-arrow-right ml-1"></i>
+              </a>
+            </td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function renderRecentRecipes() {
       var tbody = document.getElementById('recentRecipesTable');
       if (!tbody) return;
 
-      var recipes = CookMateStorage.getAllRecipes();
+      var recipes = CookMateStorage.getAllRecipes(false);
       var sorted = recipes.slice().sort(function(a, b) {
         return new Date(b.createdAt) - new Date(a.createdAt);
       }).slice(0, 5);
@@ -360,7 +419,7 @@
         return;
       }
 
-      var recipes = CookMateStorage.getAllRecipes();
+      var recipes = CookMateStorage.getAllRecipesRaw ? CookMateStorage.getAllRecipesRaw() : CookMateStorage.getAllRecipes(true);
 
       container.innerHTML = sorted.map(function(c) {
         var recipe = recipes.find(function(r) { return r.id === c.recipeId; });

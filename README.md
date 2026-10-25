@@ -38,7 +38,9 @@ D:\cookmate\
 │   │   └── recipe-form.html                 # UC12 - Đăng / Chỉnh sửa công thức (động)
 │   │
 │   └── admin/
-│       ├── index.html                       # UC21 - Tổng quan quản trị (Dashboard KPI)
+│       ├── index.html                       # UC21 - Tổng quan quản trị (Dashboard KPI & Hàng đợi duyệt)
+│       ├── approve-recipes.html             # Duyệt công thức thành viên (Xem trước chi tiết, Duyệt, Từ chối)
+│       ├── recipe-form.html                 # Thêm / Chỉnh sửa công thức Quản trị (Xuất bản công khai ngay)
 │       ├── recipes.html                     # UC16 - Quản lý công thức (CRUD)
 │       ├── categories.html                  # UC17 - Quản lý danh mục (CRUD)
 │       ├── ingredients.html                 # UC18 - Quản lý nguyên liệu (CRUD dinh dưỡng)
@@ -62,6 +64,7 @@ D:\cookmate\
     │   ├── storage.js                       # Quản lý localStorage (phiên đăng nhập, yêu thích, CRUD demo)
     │   ├── components.js                    # UI render (Toast, modal, confirm, recipe card, pagination)
     │   ├── navigation.js                    # Render Header, Footer, Menu mobile, Auth status
+│   │   ├── admin-shell.js                   # Điều khiển Admin Shell, xem website tại chỗ, hamburger & icon rail
     │   ├── app.js                           # Khởi tạo ứng dụng DOMContentLoaded
     │   │
     │   └── data/
